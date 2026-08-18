@@ -1,7 +1,17 @@
 import Link from "next/link";
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../data/translations";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+
+  const { language } = useLanguage();
+  const text = translations[language].footer;
+
+  const reservationEmail =
+    `mailto:info@caldoverde.es?subject=${encodeURIComponent(
+      text.reservationSubject
+    )}`;
 
   return (
     <footer className="site-footer" id="contactos">
@@ -15,17 +25,16 @@ export default function Footer() {
               />
             </Link>
 
-            <p>
-              Cozinha portuguesa preparada com respeito pela tradição,
-              pelos ingredientes e pelos sabores de Portugal.
-            </p>
+            <p>{text.description}</p>
           </div>
 
           <div className="footer-column">
-            <h2>Contactos</h2>
+            <h2>{text.contactTitle}</h2>
 
             <div className="footer-contact-item">
-              <span className="footer-label">Email</span>
+              <span className="footer-label">
+                {text.emailLabel}
+              </span>
 
               <a href="mailto:info@caldoverde.es">
                 info@caldoverde.es
@@ -33,34 +42,42 @@ export default function Footer() {
             </div>
 
             <div className="footer-contact-item">
-              <span className="footer-label">Telefone</span>
-              <span>Telefone a colocar</span>
+              <span className="footer-label">
+                {text.phoneLabel}
+              </span>
+
+              <span>{text.phonePending}</span>
             </div>
 
             <div className="footer-contact-item">
-              <span className="footer-label">Morada</span>
-              <address>Morada a colocar</address>
+              <span className="footer-label">
+                {text.addressLabel}
+              </span>
+
+              <address>{text.addressPending}</address>
             </div>
           </div>
 
           <div className="footer-column" id="reservas">
-            <h2>Horário e reservas</h2>
+            <h2>{text.reservationsTitle}</h2>
 
             <div className="footer-contact-item">
-              <span className="footer-label">Horário</span>
-              <span>Horário a colocar</span>
+              <span className="footer-label">
+                {text.hoursLabel}
+              </span>
+
+              <span>{text.hoursPending}</span>
             </div>
 
             <p className="footer-reservation-text">
-              Para informações ou pedidos de reserva, contacte-nos por
-              email.
+              {text.reservationText}
             </p>
 
             <a
               className="footer-reservation-button"
-              href="mailto:info@caldoverde.es?subject=Pedido%20de%20reserva"
+              href={reservationEmail}
             >
-              Pedir uma reserva
+              {text.reservationButton}
             </a>
           </div>
         </div>
@@ -69,12 +86,12 @@ export default function Footer() {
       <div className="footer-bottom">
         <div className="footer-bottom-container">
           <p>
-            © {currentYear} Restaurante Caldo Verde. Todos os direitos
-            reservados.
+            © {currentYear} Restaurante Caldo Verde.{" "}
+            {text.rightsReserved}
           </p>
 
           <a href="/politica-de-privacidade">
-            Política de privacidade
+            {text.privacyPolicy}
           </a>
         </div>
       </div>

@@ -1192,3 +1192,51 @@ img {
     text-align: center;
   }
 }
+
+/* Seletor de idioma */
+
+.language-switcher {
+  margin-left: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.language-button {
+  width: 36px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  background-color: transparent;
+  border: 1px solid #dedede;
+  cursor: pointer;
+
+  font-size: 18px;
+  line-height: 1;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.language-button:hover,
+.language-button.is-active {
+  background-color: #f6f3ed;
+  border-color: var(--color-accent);
+}
+
+@media (max-width: 900px) {
+  .language-switcher {
+    margin: 12px 0 4px;
+    padding: 8px 0 14px;
+  }
+
+  .language-button {
+    width: 44px;
+    height: 38px;
+  }
+}

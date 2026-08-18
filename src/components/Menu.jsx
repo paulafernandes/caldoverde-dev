@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
 import menuCategories from "../data/menuCategories";
+import translations from "../data/translations";
 
 export default function Menu() {
   const [activeCategoryId, setActiveCategoryId] = useState(
     menuCategories[0].id
   );
+
+  const { language } = useLanguage();
+  const text = translations[language].menu;
 
   const activeCategory = menuCategories.find(
     (category) => category.id === activeCategoryId
@@ -14,17 +19,21 @@ export default function Menu() {
     <section className="menu-section" id="ementa">
       <div className="menu-container">
         <div className="menu-heading">
-          <p className="menu-subtitle">A nossa ementa</p>
-          <h2>Descubra os sabores de Portugal</h2>
+          <p className="menu-subtitle">
+            {text.subtitle}
+          </p>
+
+          <h2>{text.title}</h2>
         </div>
 
         <div
           className="menu-tabs"
           role="tablist"
-          aria-label="Categorias da ementa"
+          aria-label={text.categoriesLabel}
         >
           {menuCategories.map((category) => {
-            const isActive = category.id === activeCategoryId;
+            const isActive =
+              category.id === activeCategoryId;
 
             return (
               <button
@@ -37,9 +46,11 @@ export default function Menu() {
                 }`}
                 aria-selected={isActive}
                 aria-controls={`panel-${category.id}`}
-                onClick={() => setActiveCategoryId(category.id)}
+                onClick={() =>
+                  setActiveCategoryId(category.id)
+                }
               >
-                {category.label}
+                {category.label[language]}
               </button>
             );
           })}
@@ -59,19 +70,22 @@ export default function Menu() {
             />
 
             <div className="menu-panel-image-overlay">
-              <span>A nossa seleção</span>
-              <h3>{activeCategory.title}</h3>
+              <span>{text.selection}</span>
+              <h3>{activeCategory.title[language]}</h3>
             </div>
           </div>
 
           <div className="menu-list">
-            <h3>{activeCategory.title}</h3>
+            <h3>{activeCategory.title[language]}</h3>
 
             <ul>
               {activeCategory.items.map((item) => (
-                <li key={item.id} className="menu-dish">
+                <li
+                  key={item.id}
+                  className="menu-dish"
+                >
                   <div className="menu-dish-heading">
-                    <h4>{item.name}</h4>
+                    <h4>{item.name[language]}</h4>
 
                     <span
                       className="menu-dish-separator"
@@ -79,11 +93,11 @@ export default function Menu() {
                     />
 
                     <span className="menu-dish-price">
-                      {item.price}
+                      {item.price ?? text.pricePending}
                     </span>
                   </div>
 
-                  <p>{item.description}</p>
+                  <p>{item.description[language]}</p>
                 </li>
               ))}
             </ul>

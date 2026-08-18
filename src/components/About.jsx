@@ -1,31 +1,32 @@
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../data/translations";
+
 export default function About() {
+  const { language } = useLanguage();
+  const text = translations[language].about;
+
   return (
     <section className="about-section" id="restaurante">
       <div className="about-container">
         <div className="about-content">
           <p className="about-subtitle">
-            O Restaurante
+            {text.subtitle}
           </p>
 
-          <h2>
-            Uma viagem pelos sabores de Portugal
-          </h2>
+          <h2>{text.title}</h2>
 
           <p className="about-description">
-            No Caldo Verde celebramos a cozinha portuguesa através de
-            receitas tradicionais, ingredientes cuidadosamente selecionados
-            e sabores que nos fazem recordar Portugal.
+            {text.description}
           </p>
 
           <ul className="about-features">
-            <li>Receitas tradicionais</li>
-            <li>Produtos selecionados</li>
-            <li>Sabores portugueses</li>
-            <li>Ambiente acolhedor</li>
+            {text.features.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
           </ul>
 
           <a className="about-button" href="#ementa">
-            Conhecer a ementa
+            {text.button}
             <span aria-hidden="true">↗</span>
           </a>
         </div>
@@ -34,7 +35,7 @@ export default function About() {
           <img
             className="about-image-main"
             src="/assets/images/bg/h3-intro-big.png"
-            alt="Apresentação do Restaurante Caldo Verde"
+            alt={text.imageAlt}
           />
 
           <img

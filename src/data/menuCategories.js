@@ -1,131 +1,360 @@
 const menuCategories = [
   {
     id: "pequeno-almoco",
-    label: "Pequeno-almoço",
-    title: "Pequeno-almoço",
+
+    label: {
+      pt: "Pequeno-almoço",
+      es: "Desayuno",
+      en: "Breakfast",
+    },
+
+    title: {
+      pt: "Pequeno-almoço",
+      es: "Desayuno",
+      en: "Breakfast",
+    },
+
     image: "/assets/images/menu/menu2-left-img-01.png",
+
     items: [
       {
         id: 1,
-        name: "Torrada com manteiga",
-        description: "Pão torrado acompanhado com manteiga.",
-        price: "A definir",
+
+        name: {
+          pt: "Torrada com manteiga",
+          es: "Tostada con mantequilla",
+          en: "Toast with butter",
+        },
+
+        description: {
+          pt: "Pão torrado acompanhado com manteiga.",
+          es: "Pan tostado acompañado de mantequilla.",
+          en: "Toasted bread served with butter.",
+        },
+
+        price: null,
       },
       {
         id: 2,
-        name: "Croissant misto",
-        description: "Croissant com queijo e fiambre.",
-        price: "A definir",
+
+        name: {
+          pt: "Croissant misto",
+          es: "Croissant mixto",
+          en: "Ham and cheese croissant",
+        },
+
+        description: {
+          pt: "Croissant com queijo e fiambre.",
+          es: "Croissant con queso y jamón cocido.",
+          en: "Croissant with ham and cheese.",
+        },
+
+        price: null,
       },
       {
         id: 3,
-        name: "Café com leite",
-        description: "Café preparado com leite quente.",
-        price: "A definir",
+
+        name: {
+          pt: "Café com leite",
+          es: "Café con leche",
+          en: "Coffee with milk",
+        },
+
+        description: {
+          pt: "Café preparado com leite quente.",
+          es: "Café preparado con leche caliente.",
+          en: "Coffee prepared with hot milk.",
+        },
+
+        price: null,
       },
     ],
   },
+
   {
     id: "prato-do-dia",
-    label: "Prato do dia",
-    title: "Pratos do dia",
+
+    label: {
+      pt: "Prato do dia",
+      es: "Plato del día",
+      en: "Daily specials",
+    },
+
+    title: {
+      pt: "Pratos do dia",
+      es: "Platos del día",
+      en: "Daily specials",
+    },
+
     image: "/assets/images/menu/menu2-left-img-01.png",
+
     items: [
       {
         id: 1,
-        name: "Bacalhau à Brás",
-        description: "Bacalhau, batata, cebola, ovo e azeitonas.",
-        price: "A definir",
+
+        name: {
+          pt: "Bacalhau à Brás",
+          es: "Bacalao à Brás",
+          en: "Bacalhau à Brás",
+        },
+
+        description: {
+          pt: "Bacalhau, batata, cebola, ovo e azeitonas.",
+          es: "Bacalao, patata, cebolla, huevo y aceitunas.",
+          en: "Salt cod, potato, onion, egg and olives.",
+        },
+
+        price: null,
       },
       {
         id: 2,
-        name: "Arroz de pato",
-        description: "Arroz de forno com pato e chouriço.",
-        price: "A definir",
+
+        name: {
+          pt: "Arroz de pato",
+          es: "Arroz de pato",
+          en: "Duck rice",
+        },
+
+        description: {
+          pt: "Arroz de forno com pato e chouriço.",
+          es: "Arroz al horno con pato y chorizo portugués.",
+          en: "Oven-baked rice with duck and Portuguese chouriço.",
+        },
+
+        price: null,
       },
       {
         id: 3,
-        name: "Bifanas à portuguesa",
-        description: "Carne de porco preparada com molho tradicional.",
-        price: "A definir",
+
+        name: {
+          pt: "Bifanas à portuguesa",
+          es: "Bifanas a la portuguesa",
+          en: "Portuguese-style bifanas",
+        },
+
+        description: {
+          pt: "Carne de porco preparada com molho tradicional.",
+          es: "Carne de cerdo preparada con salsa tradicional.",
+          en: "Pork prepared with a traditional Portuguese sauce.",
+        },
+
+        price: null,
       },
     ],
   },
+
   {
     id: "petiscos",
-    label: "Petiscos para partilhar",
-    title: "Petiscos para partilhar",
+
+    label: {
+      pt: "Petiscos para partilhar",
+      es: "Entrantes para compartir",
+      en: "Small plates to share",
+    },
+
+    title: {
+      pt: "Petiscos para partilhar",
+      es: "Entrantes para compartir",
+      en: "Small plates to share",
+    },
+
     image: "/assets/images/menu/menu2-left-img-01.png",
+
     items: [
       {
         id: 1,
-        name: "Chouriço assado",
-        description: "Chouriço português assado.",
-        price: "A definir",
+
+        name: {
+          pt: "Chouriço assado",
+          es: "Chorizo portugués asado",
+          en: "Grilled Portuguese chouriço",
+        },
+
+        description: {
+          pt: "Chouriço português assado.",
+          es: "Chorizo portugués preparado a la parrilla.",
+          en: "Traditional grilled Portuguese chouriço.",
+        },
+
+        price: null,
       },
       {
         id: 2,
-        name: "Pastéis de bacalhau",
-        description: "Pastéis tradicionais de bacalhau e batata.",
-        price: "A definir",
+
+        name: {
+          pt: "Pastéis de bacalhau",
+          es: "Buñuelos de bacalao",
+          en: "Salt cod fritters",
+        },
+
+        description: {
+          pt: "Pastéis tradicionais de bacalhau e batata.",
+          es: "Buñuelos tradicionales de bacalao y patata.",
+          en: "Traditional fritters made with salt cod and potato.",
+        },
+
+        price: null,
       },
       {
         id: 3,
-        name: "Pica-pau",
-        description: "Carne temperada acompanhada com pickles.",
-        price: "A definir",
+
+        name: {
+          pt: "Pica-pau",
+          es: "Pica-pau",
+          en: "Pica-pau",
+        },
+
+        description: {
+          pt: "Carne temperada acompanhada com pickles.",
+          es: "Carne condimentada acompañada de encurtidos.",
+          en: "Seasoned meat served with pickles.",
+        },
+
+        price: null,
       },
     ],
   },
+
   {
     id: "sobremesas",
-    label: "Sobremesas",
-    title: "Sobremesas",
+
+    label: {
+      pt: "Sobremesas",
+      es: "Postres",
+      en: "Desserts",
+    },
+
+    title: {
+      pt: "Sobremesas",
+      es: "Postres",
+      en: "Desserts",
+    },
+
     image: "/assets/images/menu/menu2-left-img-01.png",
+
     items: [
       {
         id: 1,
-        name: "Pastel de nata",
-        description: "Massa folhada com creme de nata.",
-        price: "A definir",
+
+        name: {
+          pt: "Pastel de nata",
+          es: "Pastel de nata",
+          en: "Pastel de nata",
+        },
+
+        description: {
+          pt: "Massa folhada com creme de nata.",
+          es: "Hojaldre relleno de crema.",
+          en: "Portuguese puff pastry filled with custard.",
+        },
+
+        price: null,
       },
       {
         id: 2,
-        name: "Arroz-doce",
-        description: "Sobremesa tradicional aromatizada com canela.",
-        price: "A definir",
+
+        name: {
+          pt: "Arroz-doce",
+          es: "Arroz con leche",
+          en: "Portuguese rice pudding",
+        },
+
+        description: {
+          pt: "Sobremesa tradicional aromatizada com canela.",
+          es: "Postre tradicional aromatizado con canela.",
+          en: "Traditional rice pudding flavoured with cinnamon.",
+        },
+
+        price: null,
       },
       {
         id: 3,
-        name: "Baba de camelo",
-        description: "Mousse portuguesa de leite condensado.",
-        price: "A definir",
+
+        name: {
+          pt: "Baba de camelo",
+          es: "Baba de camelo",
+          en: "Baba de camelo",
+        },
+
+        description: {
+          pt: "Mousse portuguesa de leite condensado.",
+          es: "Mousse portuguesa de leche condensada.",
+          en: "Portuguese condensed milk mousse.",
+        },
+
+        price: null,
       },
     ],
   },
+
   {
     id: "bebidas",
-    label: "Bebidas",
-    title: "Bebidas",
+
+    label: {
+      pt: "Bebidas",
+      es: "Bebidas",
+      en: "Drinks",
+    },
+
+    title: {
+      pt: "Bebidas",
+      es: "Bebidas",
+      en: "Drinks",
+    },
+
     image: "/assets/images/menu/menu2-left-img-01.png",
+
     items: [
       {
         id: 1,
-        name: "Água",
-        description: "Água mineral com ou sem gás.",
-        price: "A definir",
+
+        name: {
+          pt: "Água",
+          es: "Agua",
+          en: "Water",
+        },
+
+        description: {
+          pt: "Água mineral com ou sem gás.",
+          es: "Agua mineral con o sin gas.",
+          en: "Still or sparkling mineral water.",
+        },
+
+        price: null,
       },
       {
         id: 2,
-        name: "Refrigerantes",
-        description: "Seleção de refrigerantes.",
-        price: "A definir",
+
+        name: {
+          pt: "Refrigerantes",
+          es: "Refrescos",
+          en: "Soft drinks",
+        },
+
+        description: {
+          pt: "Seleção de refrigerantes.",
+          es: "Selección de refrescos.",
+          en: "Selection of soft drinks.",
+        },
+
+        price: null,
       },
       {
         id: 3,
-        name: "Vinho da casa",
-        description: "Vinho português selecionado pelo restaurante.",
-        price: "A definir",
+
+        name: {
+          pt: "Vinho da casa",
+          es: "Vino de la casa",
+          en: "House wine",
+        },
+
+        description: {
+          pt: "Vinho português selecionado pelo restaurante.",
+          es: "Vino portugués seleccionado por el restaurante.",
+          en: "Portuguese wine selected by the restaurant.",
+        },
+
+        price: null,
       },
     ],
   },

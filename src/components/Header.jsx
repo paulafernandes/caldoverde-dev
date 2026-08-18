@@ -1,32 +1,64 @@
 import Link from "next/link";
 import { useState } from "react";
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../data/translations";
+
+const languageOptions = [
+  {
+    code: "pt",
+    flag: "🇵🇹",
+    label: "Português",
+  },
+  {
+    code: "es",
+    flag: "🇪🇸",
+    label: "Español",
+  },
+  {
+    code: "en",
+    flag: "🇬🇧",
+    label: "English",
+  },
+];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const { language, changeLanguage } = useLanguage();
+  const text = translations[language].header;
+
   function closeMenu() {
     setIsMenuOpen(false);
+  }
+
+  function selectLanguage(languageCode) {
+    changeLanguage(languageCode);
+    closeMenu();
   }
 
   return (
     <>
       <div className="top-bar">
         <div className="top-bar-container">
-          <p>Bem-vindo ao Restaurante Caldo Verde!</p>
+          <p>{text.welcome}</p>
 
           <div className="top-bar-contact">
             <a href="mailto:info@caldoverde.es">
               info@caldoverde.es
             </a>
 
-            <span>Morada a colocar</span>
+            <span>{text.address}</span>
           </div>
         </div>
       </div>
 
       <header className="site-header">
         <div className="header-container">
-          <Link href="/" className="header-logo" onClick={closeMenu}>
+          <Link
+            href="/"
+            className="header-logo"
+            onClick={closeMenu}
+          >
             <img
               src="/assets/images/logo_completo.png"
               alt="Restaurante Caldo Verde"
@@ -41,7 +73,11 @@ export default function Header() {
             aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={isMenuOpen}
             aria-controls="main-navigation"
-            onClick={() => setIsMenuOpen((previousValue) => !previousValue)}
+            onClick={() =>
+              setIsMenuOpen(
+                (previousValue) => !previousValue
+              )
+            }
           >
             <span />
             <span />
@@ -56,32 +92,60 @@ export default function Header() {
             aria-label="Navegação principal"
           >
             <a href="#inicio" onClick={closeMenu}>
-              Início
+              {text.home}
             </a>
 
             <a href="#restaurante" onClick={closeMenu}>
-              O Restaurante
+              {text.about}
             </a>
 
             <a href="#ementa" onClick={closeMenu}>
-              Ementa
+              {text.menu}
             </a>
 
             <a href="#contactos" onClick={closeMenu}>
-              Contactos
+              {text.contact}
             </a>
+
+            <div
+              className="language-switcher"
+              role="group"
+              aria-label={text.languageLabel}
+            >
+              {languageOptions.map((option) => (
+                <button
+                  key={option.code}
+                  type="button"
+                  className={`language-button ${
+                    language === option.code
+                      ? "is-active"
+                      : ""
+                  }`}
+                  aria-label={option.label}
+                  aria-pressed={language === option.code}
+                  title={option.label}
+                  onClick={() =>
+                    selectLanguage(option.code)
+                  }
+                >
+                  <span aria-hidden="true">
+                    {option.flag}
+                  </span>
+                </button>
+              ))}
+            </div>
 
             <a
               className="mobile-reservation-link"
               href="#reservas"
               onClick={closeMenu}
             >
-              Reservar
+              {text.reservation}
             </a>
           </nav>
 
           <a className="reservation-button" href="#reservas">
-            Reservar
+            {text.reservation}
           </a>
         </div>
       </header>

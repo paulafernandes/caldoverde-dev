@@ -1,4 +1,10 @@
+import { useLanguage } from "../context/LanguageContext";
+import translations from "../data/translations";
+
 export default function Banner() {
+  const { language } = useLanguage();
+  const text = translations[language].banner;
+
   return (
     <section className="hero-banner" id="inicio">
       <video
@@ -20,15 +26,13 @@ export default function Banner() {
 
       <div className="hero-content">
         <p className="hero-subtitle">
-          Bem-vindo ao Restaurante Caldo Verde
+          {text.subtitle}
         </p>
 
-        <h1>
-          Encontre o melhor sabor da cozinha portuguesa
-        </h1>
+        <h1>{text.title}</h1>
 
         <a className="hero-button" href="#restaurante">
-          Descobrir mais
+          {text.button}
           <span aria-hidden="true">↗</span>
         </a>
       </div>
