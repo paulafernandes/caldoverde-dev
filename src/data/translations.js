@@ -57,6 +57,12 @@ const translations = {
             rightsReserved: "Todos os direitos reservados.",
             privacyPolicy: "Política de privacidade",
         },
+        seo: {
+            title: "Caldo Verde | Restaurante português",
+            description:
+                "Descubra os sabores tradicionais de Portugal no Restaurante Caldo Verde.",
+            locale: "pt_PT",
+        },
     },
 
     es: {
@@ -117,6 +123,12 @@ const translations = {
             rightsReserved: "Todos los derechos reservados.",
             privacyPolicy: "Política de privacidad",
         },
+        seo: {
+            title: "Caldo Verde | Restaurante portugués",
+            description:
+                "Descubre los sabores tradicionales de Portugal en el Restaurante Caldo Verde.",
+            locale: "es_ES",
+        },
     },
 
     en: {
@@ -176,6 +188,12 @@ const translations = {
             reservationSubject: "Reservation request",
             rightsReserved: "All rights reserved.",
             privacyPolicy: "Privacy policy",
+        },
+        seo: {
+            title: "Caldo Verde | Portuguese restaurant",
+            description:
+                "Discover traditional Portuguese flavours at Caldo Verde Restaurant.",
+            locale: "en_GB",
         },
     },
 
