@@ -34,15 +34,14 @@ export default function About() {
         <div className="about-images">
           <img
             className="about-image-main"
-            src="/assets/images/bg/h3-intro-big.png"
-            alt={text.imageAlt}
+            src="/assets/images/bg/douro-about-526x548.png"
+            alt="Paisagem das vinhas do Douro"
           />
 
           <img
             className="about-image-secondary"
-            src="/assets/images/bg/h3-intro-sm.png"
-            alt=""
-            aria-hidden="true"
+            src="/assets/images/bg/alentejo-about-306x244.png"
+            alt="Paisagem rural do Alentejo"
           />
         </div>
       </div>

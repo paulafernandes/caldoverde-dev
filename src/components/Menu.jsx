@@ -41,9 +41,8 @@ export default function Menu() {
                 id={`tab-${category.id}`}
                 type="button"
                 role="tab"
-                className={`menu-tab-button ${
-                  isActive ? "is-active" : ""
-                }`}
+                className={`menu-tab-button ${isActive ? "is-active" : ""
+                  }`}
                 aria-selected={isActive}
                 aria-controls={`panel-${category.id}`}
                 onClick={() =>
@@ -68,11 +67,6 @@ export default function Menu() {
               alt=""
               aria-hidden="true"
             />
-
-            <div className="menu-panel-image-overlay">
-              <span>{text.selection}</span>
-              <h3>{activeCategory.title[language]}</h3>
-            </div>
           </div>
 
           <div className="menu-list">

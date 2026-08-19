@@ -14,7 +14,7 @@ const menuCategories = [
       en: "Breakfast",
     },
 
-    image: "/assets/images/menu/menu2-left-img-01.png",
+    image: "/assets/images/menu/menu-pequeno-almoco-580x580.png",
 
     items: [
       {
@@ -86,7 +86,7 @@ const menuCategories = [
       en: "Daily specials",
     },
 
-    image: "/assets/images/menu/menu2-left-img-01.png",
+    image: "/assets/images/menu/bifanas_a_portuguesa.png",
 
     items: [
       {
@@ -158,7 +158,7 @@ const menuCategories = [
       en: "Small plates to share",
     },
 
-    image: "/assets/images/menu/menu2-left-img-01.png",
+    image: "/assets/images/menu/amejoas_bulhao_pato.png",
 
     items: [
       {
@@ -230,7 +230,7 @@ const menuCategories = [
       en: "Desserts",
     },
 
-    image: "/assets/images/menu/menu2-left-img-01.png",
+    image: "/assets/images/menu/menu-sobremesas-sortido-portugues-580x580.png",
 
     items: [
       {
@@ -302,7 +302,7 @@ const menuCategories = [
       en: "Drinks",
     },
 
-    image: "/assets/images/menu/menu2-left-img-01.png",
+    image: "/assets/images/menu/menu_bebidas_portuguesas.png",
 
     items: [
       {

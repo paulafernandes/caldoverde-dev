@@ -67,9 +67,8 @@ export default function Header() {
 
           <button
             type="button"
-            className={`mobile-menu-button ${
-              isMenuOpen ? "is-active" : ""
-            }`}
+            className={`mobile-menu-button ${isMenuOpen ? "is-active" : ""
+              }`}
             aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={isMenuOpen}
             aria-controls="main-navigation"
@@ -86,15 +85,17 @@ export default function Header() {
 
           <nav
             id="main-navigation"
-            className={`main-navigation ${
-              isMenuOpen ? "is-open" : ""
-            }`}
+            className={`main-navigation ${isMenuOpen ? "is-open" : ""
+              }`}
             aria-label="Navegação principal"
           >
-            <a href="#inicio" onClick={closeMenu}>
+            <a
+              className="is-active"
+              href="#inicio"
+              onClick={closeMenu}
+            >
               {text.home}
             </a>
-
             <a href="#restaurante" onClick={closeMenu}>
               {text.about}
             </a>
@@ -116,11 +117,10 @@ export default function Header() {
                 <button
                   key={option.code}
                   type="button"
-                  className={`language-button ${
-                    language === option.code
+                  className={`language-button ${language === option.code
                       ? "is-active"
                       : ""
-                  }`}
+                    }`}
                   aria-label={option.label}
                   aria-pressed={language === option.code}
                   title={option.label}
