@@ -158,7 +158,7 @@ const menuCategories = [
       en: "Small plates to share",
     },
 
-    image: "/assets/images/menu/amejoas_bulhao_pato.png",
+    image: "/assets/images/menu/ameijoas_bulhao_pato.png",
 
     items: [
       {
