@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
+import { useRouter } from "next/router";
 
 const languageOptions = [
   {
@@ -22,6 +23,7 @@ const languageOptions = [
 ];
 
 export default function Header() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { language, changeLanguage } = useLanguage();
@@ -34,6 +36,8 @@ export default function Header() {
   function selectLanguage(languageCode) {
     changeLanguage(languageCode);
     closeMenu();
+
+    router.push(`/${languageCode}/`);
   }
 
   return (
@@ -118,8 +122,8 @@ export default function Header() {
                   key={option.code}
                   type="button"
                   className={`language-button ${language === option.code
-                      ? "is-active"
-                      : ""
+                    ? "is-active"
+                    : ""
                     }`}
                   aria-label={option.label}
                   aria-pressed={language === option.code}
