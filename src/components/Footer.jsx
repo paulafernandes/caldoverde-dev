@@ -20,7 +20,7 @@ export default function Footer() {
       <div className="footer-main">
         <div className="footer-container">
           <div className="footer-brand">
-            <Link href="/" className="footer-logo">
+            <Link href={`/${language}/`} className="footer-logo">
               <Image
                 src="/assets/images/logo_completo.png"
                 alt={imageText.logo}

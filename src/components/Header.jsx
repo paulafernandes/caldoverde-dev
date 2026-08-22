@@ -61,7 +61,7 @@ export default function Header() {
       <header className="site-header">
         <div className="header-container">
           <Link
-            href="/"
+            href={`/${language}/`}
             className="header-logo"
             onClick={closeMenu}
           >
