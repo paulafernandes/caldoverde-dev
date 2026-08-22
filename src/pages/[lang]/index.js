@@ -10,6 +10,7 @@ import Footer from "../../components/Footer";
 import { useLanguage } from "../../context/LanguageContext";
 import translations from "../../data/translations";
 import { SITE_URL } from "../../config/site";
+import RestaurantSchema from "../../components/RestaurantSchema";
 
 const supportedLanguages = ["pt", "es", "en"];
 const openGraphLocales = {
@@ -43,26 +44,12 @@ export default function LanguageHome() {
   const seoData = translations[lang].seo;
   const canonicalUrl = `${SITE_URL}/${lang}/`;
 
-  const restaurantSchema = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    name: "Caldo Verde",
-    url: canonicalUrl,
-    email: "info@caldoverde.es",
-    servesCuisine: "Portuguese",
-  };
-
   return (
     <>
       <Head>
         <title>{seoData.title}</title>
-
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(restaurantSchema),
-          }}
-        />
+        
+        <RestaurantSchema url={canonicalUrl} />
         
         <meta
           name="description"

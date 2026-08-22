@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 const languageOptions = [
   {
@@ -28,6 +29,7 @@ export default function Header() {
 
   const { language, changeLanguage } = useLanguage();
   const text = translations[language].header;
+  const imageText = translations[language].images;
 
   function closeMenu() {
     setIsMenuOpen(false);
@@ -63,9 +65,12 @@ export default function Header() {
             className="header-logo"
             onClick={closeMenu}
           >
-            <img
+
+            <Image
               src="/assets/images/logo_completo.png"
-              alt="Restaurante Caldo Verde"
+              alt={imageText.logo}
+              width={280}
+              height={100}
             />
           </Link>
 

@@ -63,6 +63,11 @@ const translations = {
                 "Descubra os sabores tradicionais de Portugal no Restaurante Caldo Verde.",
             locale: "pt_PT",
         },
+        images: {
+            logo: "Restaurante Caldo Verde",
+            douro: "Paisagem das vinhas do Douro",
+            alentejo: "Paisagem rural do Alentejo",
+        },
     },
 
     es: {
@@ -129,6 +134,11 @@ const translations = {
                 "Descubre los sabores tradicionales de Portugal en el Restaurante Caldo Verde.",
             locale: "es_ES",
         },
+        images: {
+            logo: "Restaurante Caldo Verde",
+            douro: "Paisaje de los viñedos del Duero",
+            alentejo: "Paisaje rural del Alentejo",
+        },
     },
 
     en: {
@@ -194,6 +204,11 @@ const translations = {
             description:
                 "Discover traditional Portuguese flavours at Caldo Verde Restaurant.",
             locale: "en_GB",
+        },
+        images: {
+            logo: "Caldo Verde restaurant",
+            douro: "Landscape of the Douro vineyards",
+            alentejo: "Rural landscape of the Alentejo",
         },
     },
 

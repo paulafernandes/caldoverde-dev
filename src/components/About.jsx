@@ -1,9 +1,11 @@
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
+import Image from "next/image";
 
 export default function About() {
   const { language } = useLanguage();
   const text = translations[language].about;
+  const imageText = translations[language].images;
 
   return (
     <section className="about-section" id="restaurante">
@@ -32,16 +34,20 @@ export default function About() {
         </div>
 
         <div className="about-images">
-          <img
+          <Image
             className="about-image-main"
-            src="/assets/images/bg/douro-about-526x548.png"
-            alt="Paisagem das vinhas do Douro"
+            src="/assets/images/bg/douro-about-526x548.webp"
+            alt={imageText.douro}
+            width={526}
+            height={548}
           />
 
-          <img
+          <Image
             className="about-image-secondary"
             src="/assets/images/bg/alentejo-about-306x244.png"
-            alt="Paisagem rural do Alentejo"
+            alt={imageText.alentejo}
+            width={306}
+            height={244}
           />
         </div>
       </div>

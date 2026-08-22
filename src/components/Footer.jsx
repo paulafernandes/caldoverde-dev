@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const { language } = useLanguage();
   const text = translations[language].footer;
+  const imageText = translations[language].images;
 
   const reservationEmail =
     `mailto:info@caldoverde.es?subject=${encodeURIComponent(
@@ -19,12 +21,13 @@ export default function Footer() {
         <div className="footer-container">
           <div className="footer-brand">
             <Link href="/" className="footer-logo">
-              <img
+              <Image
                 src="/assets/images/logo_completo.png"
-                alt="Restaurante Caldo Verde"
+                alt={imageText.logo}
+                width={384}
+                height={100}
               />
             </Link>
-
             <p>{text.description}</p>
           </div>
 

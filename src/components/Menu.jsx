@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import menuCategories from "../data/menuCategories";
 import translations from "../data/translations";
+import Image from "next/image";
 
 export default function Menu() {
   const [activeCategoryId, setActiveCategoryId] = useState(
@@ -62,13 +63,13 @@ export default function Menu() {
           aria-labelledby={`tab-${activeCategory.id}`}
         >
           <div className="menu-panel-image">
-            <img
+            <Image
               src={activeCategory.image}
-              alt=""
-              aria-hidden="true"
+              alt={activeCategory.title[language]}
+              fill
+              sizes="(max-width: 900px) 100vw, 50vw"
             />
           </div>
-
           <div className="menu-list">
             <h3>{activeCategory.title[language]}</h3>
 

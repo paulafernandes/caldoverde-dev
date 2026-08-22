@@ -6,6 +6,7 @@
   --color-primary: #123c2d;
   --color-primary-dark: #0b2d21;
   --color-accent: #c49a52;
+  --color-accent-text: #876326;
   --container-width: 1320px;
 }
 
@@ -135,7 +136,7 @@ img {
 
 .main-navigation a:hover,
 .main-navigation a.is-active {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 .main-navigation a::after {
@@ -508,7 +509,7 @@ img {
   align-items: center;
   gap: 14px;
 
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -729,7 +730,7 @@ img {
   justify-content: center;
   gap: 14px;
 
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
@@ -832,7 +833,7 @@ img {
   justify-content: center;
   gap: 14px;
 
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   border: 0;
 
   font-family: "Cormorant Garamond", Georgia, serif;
@@ -893,7 +894,7 @@ img {
 }
 
 .menu-dish-price {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
