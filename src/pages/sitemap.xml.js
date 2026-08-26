@@ -3,12 +3,18 @@ import { SITE_URL } from "../config/site";
 const languages = ["es", "pt", "en"];
 
 function generateSitemap() {
+  const pages = ["", "about"];
+
   const urls = languages
-    .map(
-      (language) => `
+    .flatMap((language) =>
+      pages.map((page) => {
+        const path = page ? `/${page}` : "/";
+
+        return `
   <url>
-    <loc>${SITE_URL}/${language}/</loc>
-  </url>`
+    <loc>${SITE_URL}/${language}${path}</loc>
+  </url>`;
+      })
     )
     .join("");
 

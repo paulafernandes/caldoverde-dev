@@ -39,6 +39,11 @@ export default function Header() {
     changeLanguage(languageCode);
     closeMenu();
 
+    if (router.pathname === "/[lang]/about") {
+      router.push(`/${languageCode}/about`);
+      return;
+    }
+
     router.push(`/${languageCode}/`);
   }
 
@@ -67,7 +72,7 @@ export default function Header() {
           >
 
             <Image
-              src="/assets/images/logo_completo.png"
+              src="/assets/images/logo_text_280_100.png"
               alt={imageText.logo}
               width={280}
               height={100}
@@ -100,23 +105,39 @@ export default function Header() {
           >
             <a
               className="is-active"
-              href="#inicio"
+              href={`/${language}/#inicio`}
               onClick={closeMenu}
             >
               {text.home}
             </a>
-            <a href="#restaurante" onClick={closeMenu}>
+
+            <a
+              href={`/${language}/#restaurante`}
+              onClick={closeMenu}
+            >
               {text.about}
             </a>
 
-            <a href="#ementa" onClick={closeMenu}>
+            <Link
+              href={`/${language}/about`}
+              onClick={closeMenu}
+            >
+              {text.aboutUs}
+            </Link>
+
+            <a
+              href={`/${language}/#ementa`}
+              onClick={closeMenu}
+            >
               {text.menu}
             </a>
 
-            <a href="#contactos" onClick={closeMenu}>
+            <a
+              href={`/${language}/#contactos`}
+              onClick={closeMenu}
+            >
               {text.contact}
             </a>
-
             <div
               className="language-switcher"
               role="group"
@@ -144,18 +165,18 @@ export default function Header() {
               ))}
             </div>
 
-            <a
+            {/* <a
               className="mobile-reservation-link"
               href="#reservas"
               onClick={closeMenu}
             >
               {text.reservation}
-            </a>
+            </a> */}
           </nav>
 
-          <a className="reservation-button" href="#reservas">
+          {/* <a className="reservation-button" href="#reservas">
             {text.reservation}
-          </a>
+          </a> */}
         </div>
       </header>
     </>
