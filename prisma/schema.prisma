@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model MenuCategory {
+  id           Int                       @id @default(autoincrement())
+  slug         String                    @unique
+  imagePath    String?
+  position     Int                       @default(0)
+  isVisible    Boolean                   @default(true)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  translations MenuCategoryTranslation[]
+  items        MenuItem[]
+
+  @@index([position])
+}
+
+model MenuCategoryTranslation {
+  id         Int          @id @default(autoincrement())
+  categoryId Int
+  language   String
+  label      String
+  title      String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, language])
+  @@index([language])
+}
+
+model MenuItem {
+  id           Int                   @id @default(autoincrement())
+  categoryId   Int
+  priceCents   Int?
+  position     Int                   @default(0)
+  isVisible    Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  category     MenuCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  translations MenuItemTranslation[]
+
+  @@index([categoryId, position])
+}
+
+model MenuItemTranslation {
+  id          Int      @id @default(autoincrement())
+  itemId      Int
+  language    String
+  name        String
+  description String
+  item        MenuItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, language])
+  @@index([language])
+}
