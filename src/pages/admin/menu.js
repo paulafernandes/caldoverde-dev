@@ -7,6 +7,7 @@ import { getAdminMenuCategories } from "../../server/adminMenuService";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import MenuItemEditor from "../../components/admin/MenuItemEditor";
+import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
 
 const languages = ["pt", "es", "en"];
 
@@ -38,6 +39,11 @@ export default function AdminMenuPage({
   const [editingItemId, setEditingItemId] =
     useState(null);
 
+  const [
+    editingCategoryId,
+    setEditingCategoryId,
+  ] = useState(null);
+
   const [saveMessage, setSaveMessage] =
     useState("");
 
@@ -51,6 +57,7 @@ export default function AdminMenuPage({
   );
 
   function toggleCategory(categoryId) {
+    setEditingCategoryId(null);
     setEditingItemId(null);
     setSaveMessage("");
 
@@ -62,6 +69,7 @@ export default function AdminMenuPage({
   }
 
   function toggleItemEditor(itemId) {
+    setEditingCategoryId(null);
     setSaveMessage("");
 
     setEditingItemId((currentId) =>
@@ -69,7 +77,37 @@ export default function AdminMenuPage({
     );
   }
 
+  function toggleCategoryEditor(categoryId) {
+    setEditingItemId(null);
+    setSaveMessage("");
+
+    setEditingCategoryId((currentId) =>
+      currentId === categoryId
+        ? null
+        : categoryId
+    );
+  }
+
+  async function handleCategorySaved(categoryId) {
+    setEditingCategoryId(null);
+    setEditingItemId(null);
+    setExpandedCategoryId(categoryId);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "A categoria foi atualizada com sucesso."
+    );
+  }
+
   async function handleItemSaved(categoryId) {
+    setEditingCategoryId(null);
     setEditingItemId(null);
     setExpandedCategoryId(categoryId);
 
@@ -176,6 +214,12 @@ export default function AdminMenuPage({
                 const isExpanded =
                   category.id === expandedCategoryId;
 
+                const isEditingCategory =
+                  editingCategoryId === category.id;
+
+                const categoryEditorId =
+                  `category-editor-${category.id}`;
+
                 const buttonId =
                   `category-button-${category.id}`;
 
@@ -267,8 +311,40 @@ export default function AdminMenuPage({
                             {category.imagePath ??
                               "Sem imagem"}
                           </p>
+                          <div className={styles.categoryActions}>
+                            <button
+                              className={styles.editButton}
+                              type="button"
+                              aria-expanded={isEditingCategory}
+                              aria-controls={categoryEditorId}
+                              onClick={() =>
+                                toggleCategoryEditor(category.id)
+                              }
+                            >
+                              {isEditingCategory
+                                ? "Fechar edição"
+                                : "Editar categoria"}
+                            </button>
+                          </div>
                         </div>
-
+                        {isEditingCategory && (
+                          <div
+                            className={
+                              styles.categoryEditorWrapper
+                            }
+                            id={categoryEditorId}
+                          >
+                            <MenuCategoryEditor
+                              category={category}
+                              onCancel={() =>
+                                setEditingCategoryId(null)
+                              }
+                              onSaved={() =>
+                                handleCategorySaved(category.id)
+                              }
+                            />
+                          </div>
+                        )}
                         {category.items.length === 0 ? (
                           <p>
                             Esta categoria ainda não tem

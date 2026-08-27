@@ -783,3 +783,19 @@
     width: 100%;
   }
 }
+
+.categoryActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.categoryEditorWrapper {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .categoryActions .editButton {
+    width: 100%;
+  }
+}

@@ -162,3 +162,86 @@ export async function updateAdminMenuItem(
     };
   });
 }
+
+export async function updateAdminMenuCategory(
+  categoryId,
+  input
+) {
+  return prisma.$transaction(async (transaction) => {
+    const existingCategory =
+      await transaction.menuCategory.findUnique({
+        where: {
+          id: categoryId,
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+    if (!existingCategory) {
+      return null;
+    }
+
+    await transaction.menuCategory.update({
+      where: {
+        id: categoryId,
+      },
+
+      data: {
+        imagePath: input.imagePath,
+        isVisible: input.isVisible,
+      },
+    });
+
+    for (const language of supportedLanguages) {
+      const translation =
+        input.translations[language];
+
+      await transaction.menuCategoryTranslation.upsert({
+        where: {
+          categoryId_language: {
+            categoryId,
+            language,
+          },
+        },
+
+        update: {
+          label: translation.label,
+          title: translation.title,
+        },
+
+        create: {
+          categoryId,
+          language,
+          label: translation.label,
+          title: translation.title,
+        },
+      });
+    }
+
+    const updatedCategory =
+      await transaction.menuCategory.findUnique({
+        where: {
+          id: categoryId,
+        },
+
+        include: {
+          translations: true,
+        },
+      });
+
+    return {
+      id: updatedCategory.id,
+      slug: updatedCategory.slug,
+      imagePath: updatedCategory.imagePath,
+      position: updatedCategory.position,
+      isVisible: updatedCategory.isVisible,
+
+      translations: mapTranslationRecords(
+        updatedCategory.translations,
+        ["label", "title"]
+      ),
+    };
+  });
+}

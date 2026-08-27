@@ -36,3 +36,55 @@ export const updateMenuItemSchema = z.strictObject({
     en: menuItemTranslationSchema,
   }),
 });
+
+const menuCategoryTranslationSchema =
+  z.strictObject({
+    label: z
+      .string()
+      .trim()
+      .min(1, "O nome do separador é obrigatório.")
+      .max(
+        120,
+        "O nome do separador não pode ultrapassar 120 caracteres."
+      ),
+
+    title: z
+      .string()
+      .trim()
+      .min(1, "O título da categoria é obrigatório.")
+      .max(
+        120,
+        "O título não pode ultrapassar 120 caracteres."
+      ),
+  });
+
+const categoryImagePathSchema = z
+  .string()
+  .trim()
+  .min(1, "O caminho da imagem não pode estar vazio.")
+  .max(
+    500,
+    "O caminho da imagem não pode ultrapassar 500 caracteres."
+  )
+  .refine(
+    (imagePath) =>
+      imagePath.startsWith("/assets/images/") ||
+      imagePath.startsWith("/uploads/"),
+    {
+      message:
+        "A imagem deve estar em /assets/images/ ou /uploads/.",
+    }
+  );
+
+export const updateMenuCategorySchema =
+  z.strictObject({
+    imagePath: categoryImagePathSchema,
+
+    isVisible: z.boolean(),
+
+    translations: z.strictObject({
+      pt: menuCategoryTranslationSchema,
+      es: menuCategoryTranslationSchema,
+      en: menuCategoryTranslationSchema,
+    }),
+  });
