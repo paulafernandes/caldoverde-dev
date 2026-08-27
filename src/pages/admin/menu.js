@@ -1,11 +1,12 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { authClient } from "../../lib/authClient";
 import { getAdminMenuCategories } from "../../server/adminMenuService";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
+import MenuItemEditor from "../../components/admin/MenuItemEditor";
 
 const languages = ["pt", "es", "en"];
 
@@ -34,6 +35,12 @@ export default function AdminMenuPage({
   const [expandedCategoryId, setExpandedCategoryId] =
     useState(menuCategories[0]?.id ?? null);
 
+  const [editingItemId, setEditingItemId] =
+    useState(null);
+
+  const [saveMessage, setSaveMessage] =
+    useState("");
+
   const [isSigningOut, setIsSigningOut] =
     useState(false);
 
@@ -44,10 +51,38 @@ export default function AdminMenuPage({
   );
 
   function toggleCategory(categoryId) {
+    setEditingItemId(null);
+    setSaveMessage("");
+
     setExpandedCategoryId((currentId) =>
       currentId === categoryId
         ? null
         : categoryId
+    );
+  }
+
+  function toggleItemEditor(itemId) {
+    setSaveMessage("");
+
+    setEditingItemId((currentId) =>
+      currentId === itemId ? null : itemId
+    );
+  }
+
+  async function handleItemSaved(categoryId) {
+    setEditingItemId(null);
+    setExpandedCategoryId(categoryId);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "O prato foi atualizado com sucesso."
     );
   }
 
@@ -123,6 +158,15 @@ export default function AdminMenuPage({
               </span>
             </div>
           </section>
+
+          {saveMessage && (
+            <p
+              className={styles.successMessage}
+              role="status"
+            >
+              {saveMessage}
+            </p>
+          )}
 
           {menuCategories.length === 0 ? (
             <p>A ementa ainda não tem categorias.</p>
@@ -232,100 +276,107 @@ export default function AdminMenuPage({
                           </p>
                         ) : (
                           <div className={styles.dishList}>
-                            {category.items.map((item) => (
-                              <article
-                                className={styles.dishRow}
-                                key={item.id}
-                              >
-                                <span
-                                  className={
-                                    styles.dishOrder
-                                  }
-                                >
-                                  {item.position}
-                                </span>
 
-                                <div
-                                  className={
-                                    styles.dishPrimary
-                                  }
-                                >
-                                  <strong>
-                                    {
-                                      item.translations.pt
-                                        .name
-                                    }
-                                  </strong>
+                            {category.items.map((item) => {
+                              const isEditing =
+                                editingItemId === item.id;
 
-                                  <span>
-                                    {
-                                      item.translations.pt
-                                        .description
-                                    }
-                                  </span>
-                                </div>
+                              const editorId =
+                                `item-editor-${item.id}`;
 
-                                <div
-                                  className={
-                                    styles.dishAlternate
-                                  }
-                                >
-                                  <div>
-                                    <strong>
-                                      ES ·{" "}
-                                      {
-                                        item.translations.es
-                                          .name
-                                      }
-                                    </strong>
-
-                                    <span>
-                                      {
-                                        item.translations.es
-                                          .description
-                                      }
+                              return (
+                                <Fragment key={item.id}>
+                                  <article className={styles.dishRow}>
+                                    <span className={styles.dishOrder}>
+                                      {item.position}
                                     </span>
-                                  </div>
 
-                                  <div>
-                                    <strong>
-                                      EN ·{" "}
-                                      {
-                                        item.translations.en
-                                          .name
-                                      }
-                                    </strong>
+                                    <div className={styles.dishPrimary}>
+                                      <strong>
+                                        {item.translations.pt.name}
+                                      </strong>
 
-                                    <span>
-                                      {
-                                        item.translations.en
-                                          .description
-                                      }
+                                      <span>
+                                        {item.translations.pt.description}
+                                      </span>
+                                    </div>
+
+                                    <div className={styles.dishAlternate}>
+                                      <div>
+                                        <strong>
+                                          ES · {item.translations.es.name}
+                                        </strong>
+
+                                        <span>
+                                          {
+                                            item.translations.es
+                                              .description
+                                          }
+                                        </span>
+                                      </div>
+
+                                      <div>
+                                        <strong>
+                                          EN · {item.translations.en.name}
+                                        </strong>
+
+                                        <span>
+                                          {
+                                            item.translations.en
+                                              .description
+                                          }
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    <span className={styles.dishPrice}>
+                                      {formatPrice(item.priceCents)}
                                     </span>
-                                  </div>
-                                </div>
 
-                                <span
-                                  className={styles.dishPrice}
-                                >
-                                  {formatPrice(
-                                    item.priceCents
+                                    <span
+                                      className={
+                                        item.isVisible
+                                          ? styles.statusVisible
+                                          : styles.statusHidden
+                                      }
+                                    >
+                                      {item.isVisible
+                                        ? "Visível"
+                                        : "Oculto"}
+                                    </span>
+
+                                    <button
+                                      className={styles.editButton}
+                                      type="button"
+                                      aria-expanded={isEditing}
+                                      aria-controls={editorId}
+                                      onClick={() =>
+                                        toggleItemEditor(item.id)
+                                      }
+                                    >
+                                      {isEditing ? "Fechar" : "Editar"}
+                                    </button>
+                                  </article>
+
+                                  {isEditing && (
+                                    <div
+                                      className={styles.editorWrapper}
+                                      id={editorId}
+                                    >
+                                      <MenuItemEditor
+                                        item={item}
+                                        onCancel={() =>
+                                          setEditingItemId(null)
+                                        }
+                                        onSaved={() =>
+                                          handleItemSaved(category.id)
+                                        }
+                                      />
+                                    </div>
                                   )}
-                                </span>
-
-                                <span
-                                  className={
-                                    item.isVisible
-                                      ? styles.statusVisible
-                                      : styles.statusHidden
-                                  }
-                                >
-                                  {item.isVisible
-                                    ? "Visível"
-                                    : "Oculto"}
-                                </span>
-                              </article>
-                            ))}
+                                </Fragment>
+                              );
+                            })}
                           </div>
                         )}
                       </div>

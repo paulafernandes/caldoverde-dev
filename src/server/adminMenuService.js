@@ -80,3 +80,85 @@ export async function getAdminMenuCategories() {
     })),
   }));
 }
+
+export async function updateAdminMenuItem(
+  itemId,
+  input
+) {
+  return prisma.$transaction(async (transaction) => {
+    const existingItem =
+      await transaction.menuItem.findUnique({
+        where: {
+          id: itemId,
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+    if (!existingItem) {
+      return null;
+    }
+
+    await transaction.menuItem.update({
+      where: {
+        id: itemId,
+      },
+
+      data: {
+        priceCents: input.priceCents,
+        isVisible: input.isVisible,
+      },
+    });
+
+    for (const language of supportedLanguages) {
+      const translation =
+        input.translations[language];
+
+      await transaction.menuItemTranslation.upsert({
+        where: {
+          itemId_language: {
+            itemId,
+            language,
+          },
+        },
+
+        update: {
+          name: translation.name,
+          description: translation.description,
+        },
+
+        create: {
+          itemId,
+          language,
+          name: translation.name,
+          description: translation.description,
+        },
+      });
+    }
+
+    const updatedItem =
+      await transaction.menuItem.findUnique({
+        where: {
+          id: itemId,
+        },
+
+        include: {
+          translations: true,
+        },
+      });
+
+    return {
+      id: updatedItem.id,
+      priceCents: updatedItem.priceCents,
+      position: updatedItem.position,
+      isVisible: updatedItem.isVisible,
+
+      translations: mapTranslationRecords(
+        updatedItem.translations,
+        ["name", "description"]
+      ),
+    };
+  });
+}
