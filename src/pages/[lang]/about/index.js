@@ -33,7 +33,7 @@ export default function AboutPage() {
     }
 
     changeLanguage(lang);
-  }, [lang, router.isReady]);
+  }, [lang, router, changeLanguage]);
 
   if (!router.isReady || !supportedLanguages.includes(lang)) {
     return null;

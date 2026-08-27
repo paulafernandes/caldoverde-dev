@@ -72,7 +72,7 @@ export default function Footer() {
               <span>{text.hoursPending}</span>
             </div>
 
-            <p className="footer-reservation-text">
+            {/* <p className="footer-reservation-text">
               {text.reservationText}
             </p>
 
@@ -81,7 +81,7 @@ export default function Footer() {
               href={reservationEmail}
             >
               {text.reservationButton}
-            </a>
+            </a> */}
           </div>
         </div>
       </div>
@@ -93,9 +93,9 @@ export default function Footer() {
             {text.rightsReserved}
           </p>
 
-          <a href="/politica-de-privacidade">
+          <Link href="/politica-de-privacidade">
             {text.privacyPolicy}
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

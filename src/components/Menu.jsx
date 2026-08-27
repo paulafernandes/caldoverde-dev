@@ -1,19 +1,36 @@
 import { useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
-import menuCategories from "../data/menuCategories";
 import translations from "../data/translations";
 import Image from "next/image";
 
-export default function Menu() {
-  const [activeCategoryId, setActiveCategoryId] = useState(
-    menuCategories[0].id
-  );
+const priceLocales = {
+  pt: "pt-PT",
+  es: "es-ES",
+  en: "en-GB",
+};
+
+export default function Menu({
+  menuCategories = [],
+}) {
+  const [activeCategoryId, setActiveCategoryId] =
+    useState(menuCategories[0]?.id ?? null);
 
   const { language } = useLanguage();
   const text = translations[language].menu;
 
-  const activeCategory = menuCategories.find(
-    (category) => category.id === activeCategoryId
+  const activeCategory =
+    menuCategories.find(
+      (category) => category.id === activeCategoryId
+    ) ??
+    menuCategories[0] ??
+    null;
+
+  const priceFormatter = new Intl.NumberFormat(
+    priceLocales[language],
+    {
+      style: "currency",
+      currency: "EUR",
+    }
   );
 
   return (
@@ -27,77 +44,91 @@ export default function Menu() {
           <h2>{text.title}</h2>
         </div>
 
-        <div
-          className="menu-tabs"
-          role="tablist"
-          aria-label={text.categoriesLabel}
-        >
-          {menuCategories.map((category) => {
-            const isActive =
-              category.id === activeCategoryId;
+        {activeCategory && (
+          <>
+            <div
+              className="menu-tabs"
+              role="tablist"
+              aria-label={text.categoriesLabel}
+            >
+              {menuCategories.map((category) => {
+                const isActive =
+                  category.id === activeCategory.id;
 
-            return (
-              <button
-                key={category.id}
-                id={`tab-${category.id}`}
-                type="button"
-                role="tab"
-                className={`menu-tab-button ${isActive ? "is-active" : ""
-                  }`}
-                aria-selected={isActive}
-                aria-controls={`panel-${category.id}`}
-                onClick={() =>
-                  setActiveCategoryId(category.id)
-                }
-              >
-                {category.label[language]}
-              </button>
-            );
-          })}
-        </div>
+                return (
+                  <button
+                    key={category.id}
+                    id={`tab-${category.id}`}
+                    type="button"
+                    role="tab"
+                    className={`menu-tab-button ${
+                      isActive ? "is-active" : ""
+                    }`}
+                    aria-selected={isActive}
+                    aria-controls={`panel-${category.id}`}
+                    onClick={() =>
+                      setActiveCategoryId(category.id)
+                    }
+                  >
+                    {category.label[language]}
+                  </button>
+                );
+              })}
+            </div>
 
-        <div
-          className="menu-panel"
-          id={`panel-${activeCategory.id}`}
-          role="tabpanel"
-          aria-labelledby={`tab-${activeCategory.id}`}
-        >
-          <div className="menu-panel-image">
-            <Image
-              src={activeCategory.image}
-              alt={activeCategory.title[language]}
-              fill
-              sizes="(max-width: 900px) 100vw, 50vw"
-            />
-          </div>
-          <div className="menu-list">
-            <h3>{activeCategory.title[language]}</h3>
+            <div
+              className="menu-panel"
+              id={`panel-${activeCategory.id}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${activeCategory.id}`}
+            >
+              <div className="menu-panel-image">
+                <Image
+                  src={activeCategory.image}
+                  alt={activeCategory.title[language]}
+                  fill
+                  sizes="(max-width: 900px) 100vw, 50vw"
+                />
+              </div>
 
-            <ul>
-              {activeCategory.items.map((item) => (
-                <li
-                  key={item.id}
-                  className="menu-dish"
-                >
-                  <div className="menu-dish-heading">
-                    <h4>{item.name[language]}</h4>
+              <div className="menu-list">
+                <h3>
+                  {activeCategory.title[language]}
+                </h3>
 
-                    <span
-                      className="menu-dish-separator"
-                      aria-hidden="true"
-                    />
+                <ul>
+                  {activeCategory.items.map((item) => (
+                    <li
+                      key={item.id}
+                      className="menu-dish"
+                    >
+                      <div className="menu-dish-heading">
+                        <h4>{item.name[language]}</h4>
 
-                    <span className="menu-dish-price">
-                      {item.price ?? text.pricePending}
-                    </span>
-                  </div>
+                        <span
+                          className="menu-dish-separator"
+                          aria-hidden="true"
+                        />
 
-                  <p>{item.description[language]}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+                        <span className="menu-dish-price">
+                          {item.price === null
+                            ? text.pricePending
+                            : priceFormatter.format(
+                                item.price
+                              )}
+                        </span>
+                      </div>
+
+                      <p>
+                        {item.description[language]}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
