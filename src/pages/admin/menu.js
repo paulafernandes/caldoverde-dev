@@ -3,13 +3,53 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import { authClient } from "../../lib/authClient";
+import { getAdminMenuCategories } from "../../server/adminMenuService";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 
-export default function AdminMenuPage({ admin }) {
+const languages = ["pt", "es", "en"];
+
+const priceFormatter = new Intl.NumberFormat(
+  "pt-PT",
+  {
+    style: "currency",
+    currency: "EUR",
+  }
+);
+
+function formatPrice(priceCents) {
+  if (priceCents === null) {
+    return "Pendente";
+  }
+
+  return priceFormatter.format(priceCents / 100);
+}
+
+export default function AdminMenuPage({
+  admin,
+  menuCategories,
+}) {
   const router = useRouter();
+
+  const [expandedCategoryId, setExpandedCategoryId] =
+    useState(menuCategories[0]?.id ?? null);
+
   const [isSigningOut, setIsSigningOut] =
     useState(false);
+
+  const totalItems = menuCategories.reduce(
+    (total, category) =>
+      total + category.items.length,
+    0
+  );
+
+  function toggleCategory(categoryId) {
+    setExpandedCategoryId((currentId) =>
+      currentId === categoryId
+        ? null
+        : categoryId
+    );
+  }
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -21,26 +61,35 @@ export default function AdminMenuPage({ admin }) {
     <>
       <Head>
         <title>Ementa | Administração</title>
+
         <meta
           name="robots"
           content="noindex, nofollow"
         />
       </Head>
 
-      <main className={styles.page}>
-        <section
-          className={`${styles.card} ${styles.adminCard}`}
-        >
-          <header className={styles.adminHeader}>
-            <div>
-              <h1>Gestão da ementa</h1>
-              <p>
-                Sessão iniciada como {admin.email}
-              </p>
+      <main className={styles.adminDashboard}>
+        <div className={styles.adminShell}>
+          <header className={styles.topbar}>
+            <div className={styles.brand}>
+              <span
+                className={styles.brandMark}
+                aria-hidden="true"
+              >
+                CV
+              </span>
+
+              <div className={styles.brandText}>
+                <strong>
+                  Caldo Verde · Administração
+                </strong>
+
+                <span>{admin.email}</span>
+              </div>
             </div>
 
             <button
-              className={styles.button}
+              className={styles.logoutButton}
               type="button"
               disabled={isSigningOut}
               onClick={handleSignOut}
@@ -51,16 +100,242 @@ export default function AdminMenuPage({ admin }) {
             </button>
           </header>
 
-          <div className={styles.adminContent}>
-            <h2>Área protegida</h2>
+          <section className={styles.dashboardHeading}>
+            <div>
+              <h1>Gestão da ementa</h1>
 
-            <p>
-              A autenticação está funcional. A gestão de
-              categorias e pratos será acrescentada no
-              próximo passo.
-            </p>
-          </div>
-        </section>
+              <p>
+                Categorias, traduções, pratos e preços.
+              </p>
+            </div>
+
+            <div
+              className={styles.statList}
+              aria-label="Resumo da ementa"
+            >
+              <span className={styles.stat}>
+                <strong>{menuCategories.length}</strong>{" "}
+                categorias
+              </span>
+
+              <span className={styles.stat}>
+                <strong>{totalItems}</strong> pratos
+              </span>
+            </div>
+          </section>
+
+          {menuCategories.length === 0 ? (
+            <p>A ementa ainda não tem categorias.</p>
+          ) : (
+            <div className={styles.accordionList}>
+              {menuCategories.map((category) => {
+                const isExpanded =
+                  category.id === expandedCategoryId;
+
+                const buttonId =
+                  `category-button-${category.id}`;
+
+                const panelId =
+                  `category-panel-${category.id}`;
+
+                return (
+                  <section
+                    className={styles.accordion}
+                    key={category.id}
+                  >
+                    <button
+                      className={styles.accordionButton}
+                      id={buttonId}
+                      type="button"
+                      aria-expanded={isExpanded}
+                      aria-controls={panelId}
+                      onClick={() =>
+                        toggleCategory(category.id)
+                      }
+                    >
+                      <span
+                        className={styles.categoryIdentity}
+                      >
+                        <strong>
+                          {category.translations.pt.label ||
+                            category.slug}
+                        </strong>
+
+                        <span>
+                          {category.slug} ·{" "}
+                          {category.items.length} pratos
+                        </span>
+                      </span>
+
+                      <span
+                        className={
+                          category.isVisible
+                            ? styles.statusVisible
+                            : styles.statusHidden
+                        }
+                      >
+                        {category.isVisible
+                          ? "Visível"
+                          : "Oculta"}
+                      </span>
+
+                      <span
+                        className={styles.chevron}
+                        aria-hidden="true"
+                      >
+                        ⌄
+                      </span>
+                    </button>
+
+                    {isExpanded && (
+                      <div
+                        className={styles.accordionBody}
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={buttonId}
+                      >
+                        <div
+                          className={
+                            styles.categoryDetails
+                          }
+                        >
+                          <div
+                            className={
+                              styles.translationList
+                            }
+                          >
+                            {languages.map((language) => (
+                              <span key={language}>
+                                <strong>
+                                  {language.toUpperCase()}
+                                </strong>{" "}
+                                {
+                                  category.translations[
+                                    language
+                                  ].label
+                                }
+                              </span>
+                            ))}
+                          </div>
+
+                          <p className={styles.imagePath}>
+                            <strong>Imagem:</strong>{" "}
+                            {category.imagePath ??
+                              "Sem imagem"}
+                          </p>
+                        </div>
+
+                        {category.items.length === 0 ? (
+                          <p>
+                            Esta categoria ainda não tem
+                            pratos.
+                          </p>
+                        ) : (
+                          <div className={styles.dishList}>
+                            {category.items.map((item) => (
+                              <article
+                                className={styles.dishRow}
+                                key={item.id}
+                              >
+                                <span
+                                  className={
+                                    styles.dishOrder
+                                  }
+                                >
+                                  {item.position}
+                                </span>
+
+                                <div
+                                  className={
+                                    styles.dishPrimary
+                                  }
+                                >
+                                  <strong>
+                                    {
+                                      item.translations.pt
+                                        .name
+                                    }
+                                  </strong>
+
+                                  <span>
+                                    {
+                                      item.translations.pt
+                                        .description
+                                    }
+                                  </span>
+                                </div>
+
+                                <div
+                                  className={
+                                    styles.dishAlternate
+                                  }
+                                >
+                                  <div>
+                                    <strong>
+                                      ES ·{" "}
+                                      {
+                                        item.translations.es
+                                          .name
+                                      }
+                                    </strong>
+
+                                    <span>
+                                      {
+                                        item.translations.es
+                                          .description
+                                      }
+                                    </span>
+                                  </div>
+
+                                  <div>
+                                    <strong>
+                                      EN ·{" "}
+                                      {
+                                        item.translations.en
+                                          .name
+                                      }
+                                    </strong>
+
+                                    <span>
+                                      {
+                                        item.translations.en
+                                          .description
+                                      }
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <span
+                                  className={styles.dishPrice}
+                                >
+                                  {formatPrice(
+                                    item.priceCents
+                                  )}
+                                </span>
+
+                                <span
+                                  className={
+                                    item.isVisible
+                                      ? styles.statusVisible
+                                      : styles.statusHidden
+                                  }
+                                >
+                                  {item.isVisible
+                                    ? "Visível"
+                                    : "Oculto"}
+                                </span>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </main>
     </>
   );
@@ -78,12 +353,16 @@ export async function getServerSideProps({ req }) {
     };
   }
 
+  const menuCategories =
+    await getAdminMenuCategories();
+
   return {
     props: {
       admin: {
         name: session.user.name,
         email: session.user.email,
       },
+      menuCategories,
     },
   };
 }
