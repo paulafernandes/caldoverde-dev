@@ -61,11 +61,6 @@ export default function AdminMenuPage({
     0
   );
 
-  const hasOpenEditor =
-    editingItemId !== null ||
-    editingCategoryId !== null ||
-    creatingItemCategoryId !== null;
-
   const [movingItemId, setMovingItemId] =
     useState(null);
 
@@ -77,7 +72,20 @@ export default function AdminMenuPage({
   const [actionError, setActionError] =
     useState("");
 
+  const [
+    isCreatingCategory,
+    setIsCreatingCategory,
+  ] = useState(false);
+
+  const hasOpenEditor =
+    isCreatingCategory ||
+    editingItemId !== null ||
+    editingCategoryId !== null ||
+    creatingItemCategoryId !== null;
+
+
   function toggleCategory(categoryId) {
+    setIsCreatingCategory(false);
     setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
@@ -91,6 +99,7 @@ export default function AdminMenuPage({
   }
 
   function toggleItemEditor(itemId) {
+    setIsCreatingCategory(false);
     setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setSaveMessage("");
@@ -101,6 +110,7 @@ export default function AdminMenuPage({
   }
 
   function toggleItemCreator(categoryId) {
+    setIsCreatingCategory(false);
     setEditingItemId(null);
     setEditingCategoryId(null);
     setSaveMessage("");
@@ -132,6 +142,7 @@ export default function AdminMenuPage({
   }
 
   function toggleCategoryEditor(categoryId) {
+    setIsCreatingCategory(false);
     setCreatingItemCategoryId(null);
     setEditingItemId(null);
     setSaveMessage("");
@@ -326,6 +337,38 @@ export default function AdminMenuPage({
     await router.replace("/admin/login");
   }
 
+  function toggleCategoryCreator() {
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setCreatingItemCategoryId(null);
+    setSaveMessage("");
+    setActionError("");
+
+    setIsCreatingCategory(
+      (currentValue) => !currentValue
+    );
+  }
+
+  async function handleCategoryCreated(category) {
+    setIsCreatingCategory(false);
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setCreatingItemCategoryId(null);
+    setExpandedCategoryId(category.id);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "A nova categoria foi criada com sucesso."
+    );
+  }
+
   return (
     <>
       <Head>
@@ -393,6 +436,20 @@ export default function AdminMenuPage({
             </div>
           </section>
 
+          <div className={styles.menuActions}>
+            <button
+              className={styles.addCategoryButton}
+              type="button"
+              aria-expanded={isCreatingCategory}
+              aria-controls="new-category-editor"
+              onClick={toggleCategoryCreator}
+            >
+              {isCreatingCategory
+                ? "Fechar nova categoria"
+                : "Adicionar categoria"}
+            </button>
+          </div>
+
           {saveMessage && (
             <p
               className={styles.successMessage}
@@ -409,6 +466,21 @@ export default function AdminMenuPage({
             >
               {actionError}
             </p>
+          )}
+
+          {isCreatingCategory && (
+            <section
+              className={styles.newCategoryPanel}
+              id="new-category-editor"
+            >
+              <MenuCategoryEditor
+                category={null}
+                onCancel={() =>
+                  setIsCreatingCategory(false)
+                }
+                onSaved={handleCategoryCreated}
+              />
+            </section>
           )}
 
           {menuCategories.length === 0 ? (

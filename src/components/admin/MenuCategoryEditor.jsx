@@ -24,21 +24,42 @@ function isAllowedImagePath(imagePath) {
   );
 }
 
+function createEmptyTranslation() {
+  return {
+    label: "",
+    title: "",
+  };
+}
+
 export default function MenuCategoryEditor({
-  category,
+  category = null,
   onCancel,
   onSaved,
 }) {
+  const isCreating = category === null;
+
+  const formIdentifier = isCreating
+    ? "new"
+    : category.id;
+
   const [formValues, setFormValues] = useState(
     () => ({
-      imagePath: category.imagePath ?? "",
-      isVisible: category.isVisible,
+      imagePath: category?.imagePath ?? "",
 
-      translations: {
-        pt: { ...category.translations.pt },
-        es: { ...category.translations.es },
-        en: { ...category.translations.en },
-      },
+      isVisible:
+        category?.isVisible ?? false,
+
+      translations: category
+        ? {
+          pt: { ...category.translations.pt },
+          es: { ...category.translations.es },
+          en: { ...category.translations.en },
+        }
+        : {
+          pt: createEmptyTranslation(),
+          es: createEmptyTranslation(),
+          en: createEmptyTranslation(),
+        },
     })
   );
 
@@ -81,24 +102,30 @@ export default function MenuCategoryEditor({
       return;
     }
 
+    const endpoint = isCreating
+      ? "/api/admin/menu/categories"
+      : `/api/admin/menu/categories/${category.id}`;
+
+    const method = isCreating
+      ? "POST"
+      : "PATCH";
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `/api/admin/menu/categories/${category.id}`,
-        {
-          method: "PATCH",
+      const response = await fetch(endpoint, {
+        method,
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({
-            imagePath,
-            isVisible: formValues.isVisible,
-            translations: formValues.translations,
-          }),
-        }
+        body: JSON.stringify({
+          imagePath,
+          isVisible: formValues.isVisible,
+          translations: formValues.translations,
+        }),
+      }
       );
 
       const result = await response
@@ -111,8 +138,8 @@ export default function MenuCategoryEditor({
 
         setErrorMessage(
           validationMessage ??
-            result.error ??
-            "Não foi possível guardar a categoria."
+          result.error ??
+          "Não foi possível guardar a categoria."
         );
 
         setIsSubmitting(false);
@@ -120,7 +147,7 @@ export default function MenuCategoryEditor({
       }
 
       setIsSubmitting(false);
-      await onSaved();
+      await onSaved(result.category);
     } catch {
       setErrorMessage(
         "Não foi possível comunicar com o servidor."
@@ -137,11 +164,16 @@ export default function MenuCategoryEditor({
     >
       <div className={styles.editorHeading}>
         <div>
-          <h3>Editar categoria</h3>
+          <h3>
+            {isCreating
+              ? "Adicionar categoria"
+              : "Editar categoria"}
+          </h3>
 
           <p>
-            Slug: {category.slug} · Ordem:{" "}
-            {category.position}
+            {isCreating
+              ? "O slug e a posição serão criados automaticamente."
+              : `Slug: ${category.slug} · Ordem: ${category.position}`}
           </p>
         </div>
       </div>
@@ -154,10 +186,10 @@ export default function MenuCategoryEditor({
             formValues.translations[language.code];
 
           const labelId =
-            `category-${category.id}-${language.code}-label`;
+            `category-${formIdentifier}-${language.code}-label`;
 
           const titleId =
-            `category-${category.id}-${language.code}-title`;
+            `category-${formIdentifier}-${language.code}-title`;
 
           return (
             <fieldset
@@ -284,7 +316,9 @@ export default function MenuCategoryEditor({
         >
           {isSubmitting
             ? "A guardar..."
-            : "Guardar categoria"}
+            : isCreating
+              ? "Criar categoria"
+              : "Guardar categoria"}
         </button>
       </div>
     </form>

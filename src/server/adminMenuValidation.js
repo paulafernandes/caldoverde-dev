@@ -127,3 +127,6 @@ export const moveMenuCategorySchema =
 
     direction: z.enum(["up", "down"]),
   });
+
+export const createMenuCategorySchema =
+  updateMenuCategorySchema;

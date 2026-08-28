@@ -2,6 +2,45 @@ import prisma from "./prisma";
 
 const supportedLanguages = ["pt", "es", "en"];
 
+function createSlug(value) {
+  const slug = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "categoria";
+}
+
+async function createUniqueCategorySlug(
+  transaction,
+  label
+) {
+  const baseSlug = createSlug(label);
+
+  let slug = baseSlug;
+  let suffix = 2;
+
+  while (
+    await transaction.menuCategory.findUnique({
+      where: {
+        slug,
+      },
+
+      select: {
+        id: true,
+      },
+    })
+  ) {
+    slug = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+
+  return slug;
+}
+
 function mapTranslationRecords(
   translations,
   fields
@@ -514,31 +553,31 @@ export async function moveAdminMenuCategory(
           position:
             direction === "up"
               ? {
-                  lt: category.position,
-                }
+                lt: category.position,
+              }
               : {
-                  gt: category.position,
-                },
+                gt: category.position,
+              },
         },
 
         orderBy:
           direction === "up"
             ? [
-                {
-                  position: "desc",
-                },
-                {
-                  id: "desc",
-                },
-              ]
+              {
+                position: "desc",
+              },
+              {
+                id: "desc",
+              },
+            ]
             : [
-                {
-                  position: "asc",
-                },
-                {
-                  id: "asc",
-                },
-              ],
+              {
+                position: "asc",
+              },
+              {
+                id: "asc",
+              },
+            ],
 
         select: {
           id: true,
@@ -576,6 +615,78 @@ export async function moveAdminMenuCategory(
     return {
       moved: true,
       position: adjacentCategory.position,
+    };
+  });
+}
+
+export async function createAdminMenuCategory(
+  input
+) {
+  return prisma.$transaction(async (transaction) => {
+    const slug =
+      await createUniqueCategorySlug(
+        transaction,
+        input.translations.pt.label
+      );
+
+    const positionResult =
+      await transaction.menuCategory.aggregate({
+        _max: {
+          position: true,
+        },
+      });
+
+    const nextPosition =
+      (positionResult._max.position ?? 0) + 1;
+
+    const createdCategory =
+      await transaction.menuCategory.create({
+        data: {
+          slug,
+          imagePath: input.imagePath,
+          position: nextPosition,
+          isVisible: input.isVisible,
+        },
+      });
+
+    for (const language of supportedLanguages) {
+      const translation =
+        input.translations[language];
+
+      await transaction.menuCategoryTranslation.create({
+        data: {
+          categoryId: createdCategory.id,
+          language,
+          label: translation.label,
+          title: translation.title,
+        },
+      });
+    }
+
+    const category =
+      await transaction.menuCategory.findUnique({
+        where: {
+          id: createdCategory.id,
+        },
+
+        include: {
+          translations: true,
+        },
+      });
+
+    return {
+      id: category.id,
+      slug: category.slug,
+      imagePath: category.imagePath,
+      position: category.position,
+      isVisible: category.isVisible,
+
+      translations: mapTranslationRecords(
+        category.translations,
+        ["label", "title"]
+      ),
+
+      items: [],
     };
   });
 }

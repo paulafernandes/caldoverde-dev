@@ -956,3 +956,40 @@
     padding-inline: 4px;
   }
 }
+
+.menuActions {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 18px;
+}
+
+.addCategoryButton {
+  min-height: 42px;
+  padding: 10px 16px;
+  border: 1px solid #315c45;
+  border-radius: 9px;
+  background: #315c45;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addCategoryButton:hover {
+  background: #264a38;
+}
+
+.addCategoryButton:focus-visible {
+  outline: 3px solid rgba(49, 92, 69, 0.2);
+  outline-offset: 2px;
+}
+
+.newCategoryPanel {
+  margin-bottom: 20px;
+}
+
+@media (max-width: 600px) {
+  .addCategoryButton {
+    width: 100%;
+  }
+}
