@@ -113,3 +113,17 @@ export const moveMenuItemSchema = z.strictObject({
 
   direction: z.enum(["up", "down"]),
 });
+
+export const moveMenuCategorySchema =
+  z.strictObject({
+    categoryId: z
+      .number()
+      .int(
+        "O identificador da categoria tem de ser inteiro."
+      )
+      .positive(
+        "O identificador da categoria é inválido."
+      ),
+
+    direction: z.enum(["up", "down"]),
+  });

@@ -486,3 +486,96 @@ export async function moveAdminMenuItem(
     };
   });
 }
+
+export async function moveAdminMenuCategory(
+  categoryId,
+  direction
+) {
+  return prisma.$transaction(async (transaction) => {
+    const category =
+      await transaction.menuCategory.findUnique({
+        where: {
+          id: categoryId,
+        },
+
+        select: {
+          id: true,
+          position: true,
+        },
+      });
+
+    if (!category) {
+      return null;
+    }
+
+    const adjacentCategory =
+      await transaction.menuCategory.findFirst({
+        where: {
+          position:
+            direction === "up"
+              ? {
+                  lt: category.position,
+                }
+              : {
+                  gt: category.position,
+                },
+        },
+
+        orderBy:
+          direction === "up"
+            ? [
+                {
+                  position: "desc",
+                },
+                {
+                  id: "desc",
+                },
+              ]
+            : [
+                {
+                  position: "asc",
+                },
+                {
+                  id: "asc",
+                },
+              ],
+
+        select: {
+          id: true,
+          position: true,
+        },
+      });
+
+    if (!adjacentCategory) {
+      return {
+        moved: false,
+        position: category.position,
+      };
+    }
+
+    await transaction.menuCategory.update({
+      where: {
+        id: category.id,
+      },
+
+      data: {
+        position: adjacentCategory.position,
+      },
+    });
+
+    await transaction.menuCategory.update({
+      where: {
+        id: adjacentCategory.id,
+      },
+
+      data: {
+        position: category.position,
+      },
+    });
+
+    return {
+      moved: true,
+      position: adjacentCategory.position,
+    };
+  });
+}

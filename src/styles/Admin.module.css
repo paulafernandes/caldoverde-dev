@@ -924,3 +924,35 @@
   color: #8a2924;
   font-weight: 700;
 }
+
+.categoryHeaderRow {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.categoryOrderControls {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 8px 6px;
+  border-right: 1px solid #e2e7e3;
+  background: #f7f9f7;
+}
+
+.categoryPosition {
+  color: #77837b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .categoryHeaderRow {
+    grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .categoryOrderControls {
+    padding-inline: 4px;
+  }
+}
