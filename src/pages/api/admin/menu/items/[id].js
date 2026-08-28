@@ -1,4 +1,5 @@
 import {
+  deleteAdminMenuItem,
   updateAdminMenuItem,
 } from "../../../../../server/adminMenuService";
 import {
@@ -19,8 +20,13 @@ export default async function handler(
   request,
   response
 ) {
-  if (request.method !== "PATCH") {
-    response.setHeader("Allow", "PATCH");
+  const allowedMethods = ["PATCH", "DELETE"];
+
+  if (!allowedMethods.includes(request.method)) {
+    response.setHeader(
+      "Allow",
+      allowedMethods.join(", ")
+    );
 
     return response.status(405).json({
       error: "Método não permitido.",
@@ -32,15 +38,6 @@ export default async function handler(
   if (!session) {
     return response.status(401).json({
       error: "Sessão de administradora necessária.",
-    });
-  }
-
-  const contentType =
-    request.headers["content-type"] ?? "";
-
-  if (!contentType.includes("application/json")) {
-    return response.status(415).json({
-      error: "O pedido deve utilizar JSON.",
     });
   }
 
@@ -56,6 +53,42 @@ export default async function handler(
   ) {
     return response.status(400).json({
       error: "Identificador do prato inválido.",
+    });
+  }
+
+  if (request.method === "DELETE") {
+    try {
+      const wasDeleted =
+        await deleteAdminMenuItem(itemId);
+
+      if (!wasDeleted) {
+        return response.status(404).json({
+          error: "Prato não encontrado.",
+        });
+      }
+
+      return response.status(200).json({
+        success: true,
+      });
+    } catch (error) {
+      console.error(
+        "Erro ao eliminar o prato:",
+        error
+      );
+
+      return response.status(500).json({
+        error:
+          "Não foi possível eliminar o prato.",
+      });
+    }
+  }
+
+  const contentType =
+    request.headers["content-type"] ?? "";
+
+  if (!contentType.includes("application/json")) {
+    return response.status(415).json({
+      error: "O pedido deve utilizar JSON.",
     });
   }
 

@@ -147,9 +147,9 @@ export default function AdminMenuPage({
   }
 
   async function handleItemSaved(categoryId) {
-    setCreatingItemCategoryId(null);
-    setEditingCategoryId(null);
     setEditingItemId(null);
+    setEditingCategoryId(null);
+    setCreatingItemCategoryId(null);
     setExpandedCategoryId(categoryId);
 
     await router.replace(
@@ -162,6 +162,25 @@ export default function AdminMenuPage({
 
     setSaveMessage(
       "O prato foi atualizado com sucesso."
+    );
+  }
+
+  async function handleItemDeleted(categoryId) {
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setCreatingItemCategoryId(null);
+    setExpandedCategoryId(categoryId);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "O prato foi eliminado com sucesso."
     );
   }
 
@@ -524,6 +543,9 @@ export default function AdminMenuPage({
                                         }
                                         onSaved={() =>
                                           handleItemSaved(category.id)
+                                        }
+                                        onDeleted={() =>
+                                          handleItemDeleted(category.id)
                                         }
                                       />
                                     </div>

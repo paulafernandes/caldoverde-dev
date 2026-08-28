@@ -326,3 +326,67 @@ export async function createAdminMenuItem(input) {
     };
   });
 }
+
+export async function deleteAdminMenuItem(itemId) {
+  return prisma.$transaction(async (transaction) => {
+    const existingItem =
+      await transaction.menuItem.findUnique({
+        where: {
+          id: itemId,
+        },
+
+        select: {
+          id: true,
+          categoryId: true,
+        },
+      });
+
+    if (!existingItem) {
+      return false;
+    }
+
+    await transaction.menuItem.delete({
+      where: {
+        id: itemId,
+      },
+    });
+
+    const remainingItems =
+      await transaction.menuItem.findMany({
+        where: {
+          categoryId: existingItem.categoryId,
+        },
+
+        orderBy: [
+          {
+            position: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+
+        select: {
+          id: true,
+        },
+      });
+
+    for (
+      let index = 0;
+      index < remainingItems.length;
+      index += 1
+    ) {
+      await transaction.menuItem.update({
+        where: {
+          id: remainingItems[index].id,
+        },
+
+        data: {
+          position: index + 1,
+        },
+      });
+    }
+
+    return true;
+  });
+}

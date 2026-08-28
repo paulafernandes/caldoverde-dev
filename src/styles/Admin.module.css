@@ -832,3 +832,68 @@
     width: 100%;
   }
 }
+
+.deleteButton,
+.confirmDeleteButton {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deleteButton {
+  margin-right: auto;
+  border: 1px solid #a43a34;
+  background: #ffffff;
+  color: #922f2a;
+}
+
+.deleteButton:hover {
+  background: #f8e9e7;
+}
+
+.deleteConfirmation {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #dfb7b3;
+  border-radius: 10px;
+  background: #faecea;
+  color: #702622;
+}
+
+.deleteConfirmation p {
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.deleteConfirmationActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.confirmDeleteButton {
+  border: 1px solid #922f2a;
+  background: #922f2a;
+  color: #ffffff;
+}
+
+.deleteButton:disabled,
+.confirmDeleteButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 600px) {
+  .deleteButton,
+  .confirmDeleteButton {
+    width: 100%;
+  }
+
+  .deleteConfirmationActions {
+    flex-direction: column;
+  }
+}

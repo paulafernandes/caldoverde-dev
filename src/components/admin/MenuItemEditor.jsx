@@ -81,6 +81,7 @@ export default function MenuItemEditor({
   categoryId,
   onCancel,
   onSaved,
+  onDeleted,
 }) {
   const isCreating = item === null;
 
@@ -98,15 +99,15 @@ export default function MenuItemEditor({
 
       translations: item
         ? {
-            pt: { ...item.translations.pt },
-            es: { ...item.translations.es },
-            en: { ...item.translations.en },
-          }
+          pt: { ...item.translations.pt },
+          es: { ...item.translations.es },
+          en: { ...item.translations.en },
+        }
         : {
-            pt: createEmptyTranslation(),
-            es: createEmptyTranslation(),
-            en: createEmptyTranslation(),
-          },
+          pt: createEmptyTranslation(),
+          es: createEmptyTranslation(),
+          en: createEmptyTranslation(),
+        },
     })
   );
 
@@ -115,6 +116,16 @@ export default function MenuItemEditor({
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
+
+  const [
+    isConfirmingDelete,
+    setIsConfirmingDelete,
+  ] = useState(false);
+
+  const [isDeleting, setIsDeleting] =
+    useState(false);
+
+  const isBusy = isSubmitting || isDeleting;
 
   function updateTranslation(
     language,
@@ -169,8 +180,8 @@ export default function MenuItemEditor({
         body: JSON.stringify({
           ...(isCreating
             ? {
-                categoryId,
-              }
+              categoryId,
+            }
             : {}),
 
           priceCents: parsedPrice.value,
@@ -189,8 +200,8 @@ export default function MenuItemEditor({
 
         setErrorMessage(
           validationMessage ??
-            result.error ??
-            "Não foi possível guardar o prato."
+          result.error ??
+          "Não foi possível guardar o prato."
         );
 
         setIsSubmitting(false);
@@ -205,6 +216,43 @@ export default function MenuItemEditor({
       );
 
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    setErrorMessage("");
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/menu/items/${item.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setErrorMessage(
+          result.error ??
+          "Não foi possível eliminar o prato."
+        );
+
+        setIsDeleting(false);
+        return;
+      }
+
+      setIsDeleting(false);
+      await onDeleted();
+    } catch {
+      setErrorMessage(
+        "Não foi possível comunicar com o servidor."
+      );
+
+      setIsDeleting(false);
     }
   }
 
@@ -246,7 +294,7 @@ export default function MenuItemEditor({
             <fieldset
               className={styles.translationEditor}
               key={language.code}
-              disabled={isSubmitting}
+              disabled={isBusy}
             >
               <legend>{language.label}</legend>
 
@@ -309,7 +357,7 @@ export default function MenuItemEditor({
             type="text"
             inputMode="decimal"
             placeholder="Ex.: 12,50"
-            disabled={isSubmitting}
+            disabled={isBusy}
             value={formValues.price}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -327,7 +375,7 @@ export default function MenuItemEditor({
         <label className={styles.checkboxField}>
           <input
             type="checkbox"
-            disabled={isSubmitting}
+            disabled={isBusy}
             checked={formValues.isVisible}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -350,11 +398,67 @@ export default function MenuItemEditor({
         </p>
       )}
 
+      {!isCreating && isConfirmingDelete && (
+        <div
+          className={styles.deleteConfirmation}
+          role="alert"
+        >
+          <strong>
+            Eliminar “{item.translations.pt.name}”?
+          </strong>
+
+          <p>
+            Esta ação é permanente. As traduções do
+            prato também serão eliminadas.
+          </p>
+
+          <div
+            className={
+              styles.deleteConfirmationActions
+            }
+          >
+            <button
+              className={styles.cancelButton}
+              type="button"
+              disabled={isBusy}
+              onClick={() =>
+                setIsConfirmingDelete(false)
+              }
+            >
+              Manter prato
+            </button>
+
+            <button
+              className={styles.confirmDeleteButton}
+              type="button"
+              disabled={isBusy}
+              onClick={handleDelete}
+            >
+              {isDeleting
+                ? "A eliminar..."
+                : "Eliminar permanentemente"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.editorActions}>
+        {!isCreating && !isConfirmingDelete && (
+          <button
+            className={styles.deleteButton}
+            type="button"
+            disabled={isBusy}
+            onClick={() =>
+              setIsConfirmingDelete(true)
+            }
+          >
+            Eliminar prato
+          </button>
+        )}
         <button
           className={styles.cancelButton}
           type="button"
-          disabled={isSubmitting}
+          disabled={isBusy}
           onClick={onCancel}
         >
           Cancelar
@@ -363,7 +467,7 @@ export default function MenuItemEditor({
         <button
           className={styles.saveButton}
           type="submit"
-          disabled={isSubmitting}
+          disabled={isBusy}
         >
           {isSubmitting
             ? "A guardar..."
