@@ -69,20 +69,44 @@ function parsePriceInput(price) {
   };
 }
 
+function createEmptyTranslation() {
+  return {
+    name: "",
+    description: "",
+  };
+}
+
 export default function MenuItemEditor({
-  item,
+  item = null,
+  categoryId,
   onCancel,
   onSaved,
 }) {
+  const isCreating = item === null;
+
+  const formIdentifier = isCreating
+    ? `new-${categoryId}`
+    : item.id;
+
   const [formValues, setFormValues] = useState(
     () => ({
-      price: formatPriceInput(item.priceCents),
-      isVisible: item.isVisible,
-      translations: {
-        pt: { ...item.translations.pt },
-        es: { ...item.translations.es },
-        en: { ...item.translations.en },
-      },
+      price: formatPriceInput(
+        item?.priceCents ?? null
+      ),
+
+      isVisible: item?.isVisible ?? true,
+
+      translations: item
+        ? {
+            pt: { ...item.translations.pt },
+            es: { ...item.translations.es },
+            en: { ...item.translations.en },
+          }
+        : {
+            pt: createEmptyTranslation(),
+            es: createEmptyTranslation(),
+            en: createEmptyTranslation(),
+          },
     })
   );
 
@@ -124,25 +148,36 @@ export default function MenuItemEditor({
       return;
     }
 
+    const endpoint = isCreating
+      ? "/api/admin/menu/items"
+      : `/api/admin/menu/items/${item.id}`;
+
+    const method = isCreating
+      ? "POST"
+      : "PATCH";
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        `/api/admin/menu/items/${item.id}`,
-        {
-          method: "PATCH",
+      const response = await fetch(endpoint, {
+        method,
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({
-            priceCents: parsedPrice.value,
-            isVisible: formValues.isVisible,
-            translations: formValues.translations,
-          }),
-        }
-      );
+        body: JSON.stringify({
+          ...(isCreating
+            ? {
+                categoryId,
+              }
+            : {}),
+
+          priceCents: parsedPrice.value,
+          isVisible: formValues.isVisible,
+          translations: formValues.translations,
+        }),
+      });
 
       const result = await response
         .json()
@@ -163,7 +198,7 @@ export default function MenuItemEditor({
       }
 
       setIsSubmitting(false);
-      await onSaved();
+      await onSaved(result.item);
     } catch {
       setErrorMessage(
         "Não foi possível comunicar com o servidor."
@@ -181,12 +216,15 @@ export default function MenuItemEditor({
       <div className={styles.editorHeading}>
         <div>
           <h3>
-            Editar prato #{item.position}
+            {isCreating
+              ? "Adicionar prato"
+              : `Editar prato #${item.position}`}
           </h3>
 
           <p>
-            Altera os textos, o preço ou a
-            visibilidade.
+            {isCreating
+              ? "Preenche os textos nos três idiomas."
+              : "Altera os textos, o preço ou a visibilidade."}
           </p>
         </div>
       </div>
@@ -199,10 +237,10 @@ export default function MenuItemEditor({
             formValues.translations[language.code];
 
           const nameId =
-            `item-${item.id}-${language.code}-name`;
+            `item-${formIdentifier}-${language.code}-name`;
 
           const descriptionId =
-            `item-${item.id}-${language.code}-description`;
+            `item-${formIdentifier}-${language.code}-description`;
 
           return (
             <fieldset
@@ -329,7 +367,9 @@ export default function MenuItemEditor({
         >
           {isSubmitting
             ? "A guardar..."
-            : "Guardar alterações"}
+            : isCreating
+              ? "Criar prato"
+              : "Guardar alterações"}
         </button>
       </div>
     </form>

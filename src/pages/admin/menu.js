@@ -44,6 +44,11 @@ export default function AdminMenuPage({
     setEditingCategoryId,
   ] = useState(null);
 
+  const [
+    creatingItemCategoryId,
+    setCreatingItemCategoryId,
+  ] = useState(null);
+
   const [saveMessage, setSaveMessage] =
     useState("");
 
@@ -57,6 +62,7 @@ export default function AdminMenuPage({
   );
 
   function toggleCategory(categoryId) {
+    setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
     setSaveMessage("");
@@ -69,6 +75,7 @@ export default function AdminMenuPage({
   }
 
   function toggleItemEditor(itemId) {
+    setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setSaveMessage("");
 
@@ -77,7 +84,39 @@ export default function AdminMenuPage({
     );
   }
 
+  function toggleItemCreator(categoryId) {
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setSaveMessage("");
+
+    setCreatingItemCategoryId((currentId) =>
+      currentId === categoryId
+        ? null
+        : categoryId
+    );
+  }
+
+  async function handleItemCreated(categoryId) {
+    setCreatingItemCategoryId(null);
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setExpandedCategoryId(categoryId);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "O novo prato foi criado com sucesso."
+    );
+  }
+
   function toggleCategoryEditor(categoryId) {
+    setCreatingItemCategoryId(null);
     setEditingItemId(null);
     setSaveMessage("");
 
@@ -89,6 +128,7 @@ export default function AdminMenuPage({
   }
 
   async function handleCategorySaved(categoryId) {
+    setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
     setExpandedCategoryId(categoryId);
@@ -107,6 +147,7 @@ export default function AdminMenuPage({
   }
 
   async function handleItemSaved(categoryId) {
+    setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
     setExpandedCategoryId(categoryId);
@@ -226,6 +267,12 @@ export default function AdminMenuPage({
                 const panelId =
                   `category-panel-${category.id}`;
 
+                const isCreatingItem =
+                  creatingItemCategoryId === category.id;
+
+                const itemCreatorId =
+                  `item-creator-${category.id}`;
+
                 return (
                   <section
                     className={styles.accordion}
@@ -313,6 +360,19 @@ export default function AdminMenuPage({
                           </p>
                           <div className={styles.categoryActions}>
                             <button
+                              className={styles.addButton}
+                              type="button"
+                              aria-expanded={isCreatingItem}
+                              aria-controls={itemCreatorId}
+                              onClick={() =>
+                                toggleItemCreator(category.id)
+                              }
+                            >
+                              {isCreatingItem
+                                ? "Fechar novo prato"
+                                : "Adicionar prato"}
+                            </button>
+                            <button
                               className={styles.editButton}
                               type="button"
                               aria-expanded={isEditingCategory}
@@ -345,6 +405,25 @@ export default function AdminMenuPage({
                             />
                           </div>
                         )}
+                        {isCreatingItem && (
+                          <div
+                            className={
+                              styles.categoryEditorWrapper
+                            }
+                            id={itemCreatorId}
+                          >
+                            <MenuItemEditor
+                              item={null}
+                              categoryId={category.id}
+                              onCancel={() =>
+                                setCreatingItemCategoryId(null)
+                              }
+                              onSaved={() =>
+                                handleItemCreated(category.id)
+                              }
+                            />
+                          </div>
+                        )}
                         {category.items.length === 0 ? (
                           <p>
                             Esta categoria ainda não tem
@@ -352,7 +431,6 @@ export default function AdminMenuPage({
                           </p>
                         ) : (
                           <div className={styles.dishList}>
-
                             {category.items.map((item) => {
                               const isEditing =
                                 editingItemId === item.id;

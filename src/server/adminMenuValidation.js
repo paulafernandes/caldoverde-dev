@@ -88,3 +88,15 @@ export const updateMenuCategorySchema =
       en: menuCategoryTranslationSchema,
     }),
   });
+
+  export const createMenuItemSchema =
+  updateMenuItemSchema.extend({
+    categoryId: z
+      .number()
+      .int(
+        "O identificador da categoria tem de ser inteiro."
+      )
+      .positive(
+        "O identificador da categoria é inválido."
+      ),
+  });

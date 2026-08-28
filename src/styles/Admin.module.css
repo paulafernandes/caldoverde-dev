@@ -799,3 +799,36 @@
     width: 100%;
   }
 }
+
+.categoryActions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.addButton {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #315c45;
+  border-radius: 8px;
+  background: #315c45;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  background: #264a38;
+}
+
+.addButton:focus-visible {
+  outline: 3px solid rgba(49, 92, 69, 0.2);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .categoryActions .addButton {
+    width: 100%;
+  }
+}

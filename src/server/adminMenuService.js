@@ -245,3 +245,84 @@ export async function updateAdminMenuCategory(
     };
   });
 }
+
+export async function createAdminMenuItem(input) {
+  return prisma.$transaction(async (transaction) => {
+    const category =
+      await transaction.menuCategory.findUnique({
+        where: {
+          id: input.categoryId,
+        },
+
+        select: {
+          id: true,
+        },
+      });
+
+    if (!category) {
+      return null;
+    }
+
+    const positionResult =
+      await transaction.menuItem.aggregate({
+        where: {
+          categoryId: input.categoryId,
+        },
+
+        _max: {
+          position: true,
+        },
+      });
+
+    const nextPosition =
+      (positionResult._max.position ?? 0) + 1;
+
+    const createdItem =
+      await transaction.menuItem.create({
+        data: {
+          categoryId: input.categoryId,
+          priceCents: input.priceCents,
+          position: nextPosition,
+          isVisible: input.isVisible,
+        },
+      });
+
+    for (const language of supportedLanguages) {
+      const translation =
+        input.translations[language];
+
+      await transaction.menuItemTranslation.create({
+        data: {
+          itemId: createdItem.id,
+          language,
+          name: translation.name,
+          description: translation.description,
+        },
+      });
+    }
+
+    const item =
+      await transaction.menuItem.findUnique({
+        where: {
+          id: createdItem.id,
+        },
+
+        include: {
+          translations: true,
+        },
+      });
+
+    return {
+      id: item.id,
+      categoryId: item.categoryId,
+      priceCents: item.priceCents,
+      position: item.position,
+      isVisible: item.isVisible,
+
+      translations: mapTranslationRecords(
+        item.translations,
+        ["name", "description"]
+      ),
+    };
+  });
+}
