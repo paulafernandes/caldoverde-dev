@@ -61,6 +61,17 @@ export default function AdminMenuPage({
     0
   );
 
+  const hasOpenEditor =
+    editingItemId !== null ||
+    editingCategoryId !== null ||
+    creatingItemCategoryId !== null;
+
+  const [movingItemId, setMovingItemId] =
+    useState(null);
+
+  const [actionError, setActionError] =
+    useState("");
+
   function toggleCategory(categoryId) {
     setCreatingItemCategoryId(null);
     setEditingCategoryId(null);
@@ -184,6 +195,67 @@ export default function AdminMenuPage({
     );
   }
 
+  async function handleMoveItem(
+    itemId,
+    direction,
+    categoryId
+  ) {
+    setActionError("");
+    setSaveMessage("");
+    setMovingItemId(itemId);
+
+    try {
+      const response = await fetch(
+        "/api/admin/menu/items/order",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            itemId,
+            direction,
+          }),
+        }
+      );
+
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setActionError(
+          result.error ??
+          "Não foi possível alterar a ordem."
+        );
+        return;
+      }
+
+      if (!result.moved) {
+        return;
+      }
+
+      setExpandedCategoryId(categoryId);
+
+      await router.replace(
+        router.asPath,
+        undefined,
+        {
+          scroll: false,
+        }
+      );
+
+    } catch {
+      setActionError(
+        "Não foi possível comunicar com o servidor."
+      );
+    } finally {
+      setMovingItemId(null);
+    }
+  }
+
   async function handleSignOut() {
     setIsSigningOut(true);
     await authClient.signOut();
@@ -263,6 +335,15 @@ export default function AdminMenuPage({
               role="status"
             >
               {saveMessage}
+            </p>
+          )}
+
+          {actionError && (
+            <p
+              className={styles.pageErrorMessage}
+              role="alert"
+            >
+              {actionError}
             </p>
           )}
 
@@ -450,7 +531,7 @@ export default function AdminMenuPage({
                           </p>
                         ) : (
                           <div className={styles.dishList}>
-                            {category.items.map((item) => {
+                            {category.items.map((item, itemIndex) => {
                               const isEditing =
                                 editingItemId === item.id;
 
@@ -460,10 +541,57 @@ export default function AdminMenuPage({
                               return (
                                 <Fragment key={item.id}>
                                   <article className={styles.dishRow}>
-                                    <span className={styles.dishOrder}>
-                                      {item.position}
-                                    </span>
+                                    <div
+                                      className={styles.orderControls}
+                                      aria-label={`Alterar ordem de ${item.translations.pt.name}`}
+                                    >
+                                      <button
+                                        className={styles.orderButton}
+                                        type="button"
+                                        title="Mover para cima"
+                                        aria-label={`Mover ${item.translations.pt.name} para cima`}
+                                        disabled={
+                                          itemIndex === 0 ||
+                                          movingItemId !== null ||
+                                          hasOpenEditor
+                                        }
+                                        onClick={() =>
+                                          handleMoveItem(
+                                            item.id,
+                                            "up",
+                                            category.id
+                                          )
+                                        }
+                                      >
+                                        ↑
+                                      </button>
 
+                                      <span className={styles.dishOrder}>
+                                        {item.position}
+                                      </span>
+
+                                      <button
+                                        className={styles.orderButton}
+                                        type="button"
+                                        title="Mover para baixo"
+                                        aria-label={`Mover ${item.translations.pt.name} para baixo`}
+                                        disabled={
+                                          itemIndex ===
+                                          category.items.length - 1 ||
+                                          movingItemId !== null ||
+                                          hasOpenEditor
+                                        }
+                                        onClick={() =>
+                                          handleMoveItem(
+                                            item.id,
+                                            "down",
+                                            category.id
+                                          )
+                                        }
+                                      >
+                                        ↓
+                                      </button>
+                                    </div>
                                     <div className={styles.dishPrimary}>
                                       <strong>
                                         {item.translations.pt.name}

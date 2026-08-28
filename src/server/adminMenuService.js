@@ -390,3 +390,99 @@ export async function deleteAdminMenuItem(itemId) {
     return true;
   });
 }
+
+export async function moveAdminMenuItem(
+  itemId,
+  direction
+) {
+  return prisma.$transaction(async (transaction) => {
+    const item =
+      await transaction.menuItem.findUnique({
+        where: {
+          id: itemId,
+        },
+
+        select: {
+          id: true,
+          categoryId: true,
+          position: true,
+        },
+      });
+
+    if (!item) {
+      return null;
+    }
+
+    const adjacentItem =
+      await transaction.menuItem.findFirst({
+        where: {
+          categoryId: item.categoryId,
+
+          position:
+            direction === "up"
+              ? {
+                lt: item.position,
+              }
+              : {
+                gt: item.position,
+              },
+        },
+
+        orderBy:
+          direction === "up"
+            ? [
+              {
+                position: "desc",
+              },
+              {
+                id: "desc",
+              },
+            ]
+            : [
+              {
+                position: "asc",
+              },
+              {
+                id: "asc",
+              },
+            ],
+
+        select: {
+          id: true,
+          position: true,
+        },
+      });
+
+    if (!adjacentItem) {
+      return {
+        moved: false,
+        position: item.position,
+      };
+    }
+
+    await transaction.menuItem.update({
+      where: {
+        id: item.id,
+      },
+
+      data: {
+        position: adjacentItem.position,
+      },
+    });
+
+    await transaction.menuItem.update({
+      where: {
+        id: adjacentItem.id,
+      },
+
+      data: {
+        position: item.position,
+      },
+    });
+
+    return {
+      moved: true,
+      position: adjacentItem.position,
+    };
+  });
+}

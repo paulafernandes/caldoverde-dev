@@ -89,7 +89,7 @@ export const updateMenuCategorySchema =
     }),
   });
 
-  export const createMenuItemSchema =
+export const createMenuItemSchema =
   updateMenuItemSchema.extend({
     categoryId: z
       .number()
@@ -100,3 +100,16 @@ export const updateMenuCategorySchema =
         "O identificador da categoria é inválido."
       ),
   });
+
+export const moveMenuItemSchema = z.strictObject({
+  itemId: z
+    .number()
+    .int(
+      "O identificador do prato tem de ser inteiro."
+    )
+    .positive(
+      "O identificador do prato é inválido."
+    ),
+
+  direction: z.enum(["up", "down"]),
+});
