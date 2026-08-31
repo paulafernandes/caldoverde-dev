@@ -331,6 +331,26 @@ export default function AdminMenuPage({
     }
   }
 
+  async function handleCategoryDeleted() {
+    setIsCreatingCategory(false);
+    setEditingCategoryId(null);
+    setEditingItemId(null);
+    setCreatingItemCategoryId(null);
+    setExpandedCategoryId(null);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(
+      "A categoria foi eliminada com sucesso."
+    );
+  }
+
   async function handleSignOut() {
     setIsSigningOut(true);
     await authClient.signOut();
@@ -698,6 +718,7 @@ export default function AdminMenuPage({
                                 onSaved={() =>
                                   handleCategorySaved(category.id)
                                 }
+                                onDeleted={handleCategoryDeleted}
                               />
                             </div>
                           )}

@@ -127,6 +127,10 @@ export default function MenuItemEditor({
 
   const isBusy = isSubmitting || isDeleting;
 
+  const isFormLocked =
+    isBusy || isConfirmingDelete;
+
+
   function updateTranslation(
     language,
     field,
@@ -266,13 +270,17 @@ export default function MenuItemEditor({
           <h3>
             {isCreating
               ? "Adicionar prato"
-              : `Editar prato #${item.position}`}
+              : isConfirmingDelete
+                ? "Eliminar prato"
+                : `Editar prato #${item.position}`}
           </h3>
 
           <p>
             {isCreating
               ? "Preenche os textos nos três idiomas."
-              : "Altera os textos, o preço ou a visibilidade."}
+              : isConfirmingDelete
+                ? item.translations.pt.name
+                : "Altera os textos, o preço ou a visibilidade."}
           </p>
         </div>
       </div>
@@ -294,7 +302,7 @@ export default function MenuItemEditor({
             <fieldset
               className={styles.translationEditor}
               key={language.code}
-              disabled={isBusy}
+              disabled={isFormLocked}
             >
               <legend>{language.label}</legend>
 
@@ -357,7 +365,7 @@ export default function MenuItemEditor({
             type="text"
             inputMode="decimal"
             placeholder="Ex.: 12,50"
-            disabled={isBusy}
+            disabled={isFormLocked}
             value={formValues.price}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -375,7 +383,7 @@ export default function MenuItemEditor({
         <label className={styles.checkboxField}>
           <input
             type="checkbox"
-            disabled={isBusy}
+            disabled={isFormLocked}
             checked={formValues.isVisible}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -458,7 +466,7 @@ export default function MenuItemEditor({
         <button
           className={styles.cancelButton}
           type="button"
-          disabled={isBusy}
+          disabled={isFormLocked}
           onClick={onCancel}
         >
           Cancelar
@@ -467,7 +475,7 @@ export default function MenuItemEditor({
         <button
           className={styles.saveButton}
           type="submit"
-          disabled={isBusy}
+          disabled={isFormLocked}
         >
           {isSubmitting
             ? "A guardar..."

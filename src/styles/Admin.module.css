@@ -993,3 +993,14 @@
     width: 100%;
   }
 }
+
+.itemEditor input:disabled,
+.itemEditor textarea:disabled {
+  cursor: not-allowed;
+  background: #edf0ed;
+  color: #6c776f;
+}
+
+.itemEditor button:disabled {
+  cursor: not-allowed;
+}

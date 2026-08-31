@@ -35,6 +35,7 @@ export default function MenuCategoryEditor({
   category = null,
   onCancel,
   onSaved,
+  onDeleted,
 }) {
   const isCreating = category === null;
 
@@ -68,6 +69,19 @@ export default function MenuCategoryEditor({
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
+
+  const [
+    isConfirmingDelete,
+    setIsConfirmingDelete,
+  ] = useState(false);
+
+  const [isDeleting, setIsDeleting] =
+    useState(false);
+
+  const isBusy = isSubmitting || isDeleting;
+
+  const isFormLocked =
+    isBusy || isConfirmingDelete;
 
   function updateTranslation(
     language,
@@ -157,6 +171,43 @@ export default function MenuCategoryEditor({
     }
   }
 
+  async function handleDelete() {
+    setErrorMessage("");
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `/api/admin/menu/categories/${category.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setErrorMessage(
+          result.error ??
+          "Não foi possível eliminar a categoria."
+        );
+
+        setIsDeleting(false);
+        return;
+      }
+
+      setIsDeleting(false);
+      await onDeleted();
+    } catch {
+      setErrorMessage(
+        "Não foi possível comunicar com o servidor."
+      );
+
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <form
       className={styles.itemEditor}
@@ -167,17 +218,20 @@ export default function MenuCategoryEditor({
           <h3>
             {isCreating
               ? "Adicionar categoria"
-              : "Editar categoria"}
+              : isConfirmingDelete
+                ? "Eliminar categoria"
+                : "Editar categoria"}
           </h3>
 
           <p>
             {isCreating
               ? "O slug e a posição serão criados automaticamente."
-              : `Slug: ${category.slug} · Ordem: ${category.position}`}
+              : isConfirmingDelete
+                ? category.translations.pt.label
+                : `Slug: ${category.slug} · Ordem: ${category.position}`}
           </p>
         </div>
       </div>
-
       <div
         className={styles.translationEditorList}
       >
@@ -195,7 +249,7 @@ export default function MenuCategoryEditor({
             <fieldset
               className={styles.translationEditor}
               key={language.code}
-              disabled={isSubmitting}
+              disabled={isFormLocked}
             >
               <legend>{language.label}</legend>
 
@@ -258,7 +312,7 @@ export default function MenuCategoryEditor({
             type="text"
             required
             maxLength={500}
-            disabled={isSubmitting}
+            disabled={isFormLocked}
             value={formValues.imagePath}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -276,7 +330,7 @@ export default function MenuCategoryEditor({
         <label className={styles.checkboxField}>
           <input
             type="checkbox"
-            disabled={isSubmitting}
+            disabled={isFormLocked}
             checked={formValues.isVisible}
             onChange={(event) =>
               setFormValues((currentValues) => ({
@@ -299,11 +353,68 @@ export default function MenuCategoryEditor({
         </p>
       )}
 
+      {!isCreating && isConfirmingDelete && (
+        <div
+          className={styles.deleteConfirmation}
+          role="alert"
+        >
+          <strong>
+            Eliminar “
+            {category.translations.pt.label}”?
+          </strong>
+
+          <p>
+            Esta ação é permanente e só será
+            permitida se a categoria estiver vazia.
+          </p>
+
+          <div
+            className={
+              styles.deleteConfirmationActions
+            }
+          >
+            <button
+              className={styles.cancelButton}
+              type="button"
+              disabled={isFormLocked}
+              onClick={() =>
+                setIsConfirmingDelete(false)
+              }
+            >
+              Manter categoria
+            </button>
+
+            <button
+              className={styles.confirmDeleteButton}
+              type="button"
+              disabled={isBusy}
+              onClick={handleDelete}
+            >
+              {isDeleting
+                ? "A eliminar..."
+                : "Eliminar permanentemente"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.editorActions}>
+        {!isCreating && !isConfirmingDelete && (
+          <button
+            className={styles.deleteButton}
+            type="button"
+            disabled={isBusy}
+            onClick={() =>
+              setIsConfirmingDelete(true)
+            }
+          >
+            Eliminar categoria
+          </button>
+        )}
         <button
           className={styles.cancelButton}
           type="button"
-          disabled={isSubmitting}
+          disabled={isFormLocked}
           onClick={onCancel}
         >
           Cancelar
@@ -312,7 +423,7 @@ export default function MenuCategoryEditor({
         <button
           className={styles.saveButton}
           type="submit"
-          disabled={isSubmitting}
+          disabled={isFormLocked}
         >
           {isSubmitting
             ? "A guardar..."
