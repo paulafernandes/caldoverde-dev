@@ -588,6 +588,7 @@ img {
 
   transform: translateY(-1px);
 }
+
 /* Botão */
 
 .about-button {
@@ -826,7 +827,7 @@ img {
   padding: 50px;
 }
 
-.menu-list > h3 {
+.menu-list>h3 {
   margin-bottom: 35px;
   padding: 0;
 
@@ -846,8 +847,8 @@ img {
   text-wrap: balance;
 }
 
-.menu-list > h3::before,
-.menu-list > h3::after {
+.menu-list>h3::before,
+.menu-list>h3::after {
   content: "";
   width: 30px;
   height: 12px;
@@ -859,7 +860,7 @@ img {
   background-size: contain;
 }
 
-.menu-list > h3::after {
+.menu-list>h3::after {
   transform: scaleX(-1);
 }
 
@@ -1014,7 +1015,6 @@ img {
   padding: 12px 18px;
 
   display: inline-flex;
-  background-color: #ffffff;
 }
 
 .footer-logo img {
@@ -1528,19 +1528,30 @@ img {
   line-height: 1.45;
 }
 
-/* Imagem integrada no texto */
+/* Imagens integradas no texto */
 
 .about-page-inline-image {
-  float: right;
-
   width: 42%;
-  margin: 10px 0 30px 40px;
+  margin-top: 10px;
+  margin-bottom: 30px;
+}
+
+.about-page-inline-image-left {
+  float: left;
+  margin-right: 40px;
+}
+
+.about-page-inline-image-right {
+  float: right;
+  clear: both;
+  margin-left: 40px;
 }
 
 .about-page-inline-image img {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 4px;
 }
 
 /* Conclusão */
