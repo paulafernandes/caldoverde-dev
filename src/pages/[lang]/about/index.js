@@ -157,6 +157,7 @@ export default function AboutPage() {
                 <Image
                   src="/assets/images/bg/avo-prazeres-memorias.png"
                   alt={aboutImageAltTexts[lang].memories}
+                  title={aboutImageAltTexts[lang].memories}
                   width={941}
                   height={1354}
                   sizes="(max-width: 750px) calc(100vw - 32px), 345px"
@@ -180,6 +181,7 @@ export default function AboutPage() {
                 <Image
                   src="/assets/images/bg/avo-prazeres.png"
                   alt={aboutImageAltTexts[lang].portrait}
+                  title={aboutImageAltTexts[lang].portrait}
                   width={941}
                   height={1431}
                   sizes="(max-width: 750px) calc(100vw - 32px), 345px"

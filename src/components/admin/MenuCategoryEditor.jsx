@@ -88,9 +88,9 @@ export default function MenuCategoryEditor({
     useState(false);
 
   const [
-  isUploadingImage,
-  setIsUploadingImage,
-] = useState(false);
+    isUploadingImage,
+    setIsUploadingImage,
+  ] = useState(false);
 
   const isBusy =
     isSubmitting ||
@@ -430,6 +430,21 @@ export default function MenuCategoryEditor({
           </small>
         )}
       </div>
+      <label className={styles.checkboxField}>
+        <input
+          type="checkbox"
+          disabled={isFormLocked}
+          checked={formValues.isVisible}
+          onChange={(event) =>
+            setFormValues((currentValues) => ({
+              ...currentValues,
+              isVisible: event.target.checked,
+            }))
+          }
+        />
+
+        <span>Categoria visível no site público</span>
+      </label>
       {errorMessage && (
         <p
           className={styles.editorError}
