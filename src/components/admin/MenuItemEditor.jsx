@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { useState } from "react";
-
 import styles from "../../styles/Admin.module.css";
 
 const languages = [
@@ -16,6 +16,14 @@ const languages = [
     label: "English",
   },
 ];
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+const allowedImageTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 function formatPriceInput(priceCents) {
   if (priceCents === null) {
@@ -91,6 +99,7 @@ export default function MenuItemEditor({
 
   const [formValues, setFormValues] = useState(
     () => ({
+      imagePath: item?.imagePath ?? "",
       price: formatPriceInput(
         item?.priceCents ?? null
       ),
@@ -125,7 +134,15 @@ export default function MenuItemEditor({
   const [isDeleting, setIsDeleting] =
     useState(false);
 
-  const isBusy = isSubmitting || isDeleting;
+  const [
+    isUploadingImage,
+    setIsUploadingImage,
+  ] = useState(false);
+
+  const isBusy =
+    isSubmitting ||
+    isDeleting ||
+    isUploadingImage;
 
   const isFormLocked =
     isBusy || isConfirmingDelete;
@@ -148,6 +165,75 @@ export default function MenuItemEditor({
         },
       },
     }));
+  }
+
+  async function handleImageUpload(event) {
+    const input = event.currentTarget;
+    const image = input.files?.[0];
+
+    if (!image) {
+      return;
+    }
+
+    setErrorMessage("");
+
+    if (!allowedImageTypes.has(image.type)) {
+      setErrorMessage(
+        "Seleciona uma imagem PNG, JPEG ou WebP."
+      );
+
+      input.value = "";
+      return;
+    }
+
+    if (image.size > MAX_IMAGE_SIZE) {
+      setErrorMessage(
+        "A imagem não pode ultrapassar 5 MB."
+      );
+
+      input.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    setIsUploadingImage(true);
+
+    try {
+      const response = await fetch(
+        "/api/admin/menu/uploads",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setErrorMessage(
+          result.error ??
+          "Não foi possível carregar a imagem."
+        );
+
+        return;
+      }
+
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        imagePath: result.imagePath,
+      }));
+    } catch {
+      setErrorMessage(
+        "Não foi possível comunicar com o servidor."
+      );
+    } finally {
+      setIsUploadingImage(false);
+      input.value = "";
+    }
   }
 
   async function handleSubmit(event) {
@@ -188,6 +274,8 @@ export default function MenuItemEditor({
             }
             : {}),
 
+          imagePath:
+            formValues.imagePath.trim() || null,
           priceCents: parsedPrice.value,
           isVisible: formValues.isVisible,
           translations: formValues.translations,
@@ -354,6 +442,67 @@ export default function MenuItemEditor({
             </fieldset>
           );
         })}
+      </div>
+
+      <div className={styles.imageUploadField}>
+        <span className={styles.editorField}>
+          Imagem do prato
+        </span>
+
+        {formValues.imagePath && (
+          <Image
+            className={styles.imagePreview}
+            src={formValues.imagePath}
+            alt="Pré-visualização do prato"
+            width={180}
+            height={180}
+            unoptimized
+          />
+        )}
+
+        <input
+          className={styles.editorInput}
+          id={`item-${formIdentifier}-image`}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          disabled={isFormLocked}
+          onChange={handleImageUpload}
+        />
+
+        <small>
+          Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.
+        </small>
+
+        {isUploadingImage && (
+          <span
+            className={styles.uploadStatus}
+            role="status"
+          >
+            A carregar imagem...
+          </span>
+        )}
+
+        {formValues.imagePath && (
+          <>
+            <small className={styles.imagePathValue}>
+              {formValues.imagePath}
+            </small>
+
+            <button
+              className={styles.removeImageButton}
+              type="button"
+              disabled={isFormLocked}
+              onClick={() =>
+                setFormValues((currentValues) => ({
+                  ...currentValues,
+                  imagePath: "",
+                }))
+              }
+            >
+              Remover imagem do prato
+            </button>
+          </>
+        )}
       </div>
 
       <div className={styles.editorOptions}>

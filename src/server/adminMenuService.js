@@ -108,6 +108,7 @@ export async function getAdminMenuCategories() {
 
     items: category.items.map((item) => ({
       id: item.id,
+      imagePath: item.imagePath,
       priceCents: item.priceCents,
       position: item.position,
       isVisible: item.isVisible,
@@ -146,6 +147,7 @@ export async function updateAdminMenuItem(
       },
 
       data: {
+        imagePath: input.imagePath,
         priceCents: input.priceCents,
         isVisible: input.isVisible,
       },
@@ -190,6 +192,7 @@ export async function updateAdminMenuItem(
 
     return {
       id: updatedItem.id,
+      imagePath: updatedItem.imagePath,
       priceCents: updatedItem.priceCents,
       position: updatedItem.position,
       isVisible: updatedItem.isVisible,
@@ -320,6 +323,7 @@ export async function createAdminMenuItem(input) {
       await transaction.menuItem.create({
         data: {
           categoryId: input.categoryId,
+          imagePath: input.imagePath,
           priceCents: input.priceCents,
           position: nextPosition,
           isVisible: input.isVisible,
@@ -354,6 +358,7 @@ export async function createAdminMenuItem(input) {
     return {
       id: item.id,
       categoryId: item.categoryId,
+      imagePath: item.imagePath,
       priceCents: item.priceCents,
       position: item.position,
       isVisible: item.isVisible,

@@ -17,6 +17,25 @@ const menuItemTranslationSchema = z.strictObject({
     ),
 });
 
+const menuImagePathSchema = z
+  .string()
+  .trim()
+  .min(1, "O caminho da imagem não pode estar vazio.")
+  .max(
+    500,
+    "O caminho da imagem não pode ultrapassar 500 caracteres."
+  )
+  .refine(
+    (imagePath) =>
+      imagePath.startsWith("/assets/images/") ||
+      imagePath.startsWith("/uploads/"),
+    {
+      message:
+        "A imagem deve estar em /assets/images/ ou /uploads/.",
+    }
+  );
+
+
 export const updateMenuItemSchema = z.strictObject({
   priceCents: z
     .number()
@@ -27,6 +46,7 @@ export const updateMenuItemSchema = z.strictObject({
       "O preço não pode ultrapassar 10 000 euros."
     )
     .nullable(),
+  imagePath: menuImagePathSchema.nullable(),
 
   isVisible: z.boolean(),
 
@@ -58,27 +78,9 @@ const menuCategoryTranslationSchema =
       ),
   });
 
-const categoryImagePathSchema = z
-  .string()
-  .trim()
-  .min(1, "O caminho da imagem não pode estar vazio.")
-  .max(
-    500,
-    "O caminho da imagem não pode ultrapassar 500 caracteres."
-  )
-  .refine(
-    (imagePath) =>
-      imagePath.startsWith("/assets/images/") ||
-      imagePath.startsWith("/uploads/"),
-    {
-      message:
-        "A imagem deve estar em /assets/images/ ou /uploads/.",
-    }
-  );
-
 export const updateMenuCategorySchema =
   z.strictObject({
-    imagePath: categoryImagePathSchema,
+    imagePath: menuImagePathSchema.nullable(),
 
     isVisible: z.boolean(),
 

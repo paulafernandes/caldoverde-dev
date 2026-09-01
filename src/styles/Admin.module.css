@@ -1032,3 +1032,24 @@
 .imagePathValue {
   overflow-wrap: anywhere;
 }
+
+.removeImageButton {
+  justify-self: start;
+  padding: 8px 12px;
+  border: 1px solid #a84a43;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #8a302b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.removeImageButton:hover:not(:disabled) {
+  background: #f9ecea;
+}
+
+.removeImageButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

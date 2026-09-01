@@ -41,6 +41,7 @@ model MenuCategoryTranslation {
 model MenuItem {
   id           Int                   @id @default(autoincrement())
   categoryId   Int
+  imagePath    String?
   priceCents   Int?
   position     Int                   @default(0)
   isVisible    Boolean               @default(true)
