@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
@@ -13,31 +14,19 @@ export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState("pt");
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem(
-      "caldo-verde-language"
-    );
-
-    if (supportedLanguages.includes(savedLanguage)) {
-      setLanguage(savedLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 
-  function changeLanguage(newLanguage) {
-    if (!supportedLanguages.includes(newLanguage)) {
-      return;
-    }
+  const changeLanguage = useCallback(
+    (newLanguage) => {
+      if (!supportedLanguages.includes(newLanguage)) {
+        return;
+      }
 
-    setLanguage(newLanguage);
-
-    localStorage.setItem(
-      "caldo-verde-language",
-      newLanguage
-    );
-  }
+      setLanguage(newLanguage);
+    },
+    []
+  );
 
   return (
     <LanguageContext.Provider

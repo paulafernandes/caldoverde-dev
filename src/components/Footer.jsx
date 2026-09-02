@@ -22,10 +22,10 @@ export default function Footer() {
           <div className="footer-brand">
             <Link href={`/${language}/`} className="footer-logo">
               <Image
-                src="/assets/images/logo_text_280_100.png"
+                src="/assets/images/logo_dourado_andorinha.png"
                 alt={imageText.logo}
-                width={384}
-                height={100}
+                width={356}
+                height={98}
               />
             </Link>
             <p>{text.description}</p>
@@ -72,7 +72,7 @@ export default function Footer() {
               <span>{text.hoursPending}</span>
             </div>
 
-            <p className="footer-reservation-text">
+            {/* <p className="footer-reservation-text">
               {text.reservationText}
             </p>
 
@@ -81,7 +81,7 @@ export default function Footer() {
               href={reservationEmail}
             >
               {text.reservationButton}
-            </a>
+            </a> */}
           </div>
         </div>
       </div>
@@ -93,9 +93,9 @@ export default function Footer() {
             {text.rightsReserved}
           </p>
 
-          <a href="/politica-de-privacidade">
+          <Link href="/politica-de-privacidade">
             {text.privacyPolicy}
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

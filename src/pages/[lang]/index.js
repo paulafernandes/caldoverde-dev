@@ -11,6 +11,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import translations from "../../data/translations";
 import { SITE_URL } from "../../config/site";
 import RestaurantSchema from "../../components/RestaurantSchema";
+import { getPublicMenuCategories } from "../../server/menuService";
 
 const supportedLanguages = ["pt", "es", "en"];
 const openGraphLocales = {
@@ -19,7 +20,7 @@ const openGraphLocales = {
   en: "en_GB",
 };
 
-export default function LanguageHome() {
+export default function LanguageHome({ menuCategories }) {
   const router = useRouter();
   const { lang } = router.query;
   const { changeLanguage } = useLanguage();
@@ -30,16 +31,12 @@ export default function LanguageHome() {
     }
 
     if (!supportedLanguages.includes(lang)) {
-      router.replace("/es/");
+      router.replace("/es/about");
       return;
     }
 
     changeLanguage(lang);
-  }, [lang, router.isReady]);
-
-  if (!router.isReady || !supportedLanguages.includes(lang)) {
-    return null;
-  }
+  }, [lang, router, changeLanguage]);
 
   const seoData = translations[lang].seo;
   const canonicalUrl = `${SITE_URL}/${lang}/`;
@@ -48,9 +45,9 @@ export default function LanguageHome() {
     <>
       <Head>
         <title>{seoData.title}</title>
-        
+
         <RestaurantSchema url={canonicalUrl} />
-        
+
         <meta
           name="description"
           content={seoData.description}
@@ -125,10 +122,32 @@ export default function LanguageHome() {
       <main>
         <Banner />
         <About />
-        <Menu />
+        <Menu menuCategories={menuCategories} />
       </main>
 
       <Footer />
     </>
   );
+}
+
+export async function getServerSideProps({ params }) {
+  const { lang } = params;
+
+  if (!supportedLanguages.includes(lang)) {
+    return {
+      redirect: {
+        destination: "/es/",
+        permanent: false,
+      },
+    };
+  }
+
+  const menuCategories =
+    await getPublicMenuCategories();
+
+  return {
+    props: {
+      menuCategories,
+    },
+  };
 }

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 
 import { useLanguage } from "../../../context/LanguageContext";
 import { SITE_URL } from "../../../config/site";
+import Image from "next/image";
 
 const supportedLanguages = ["pt", "es", "en"];
 
@@ -15,6 +16,21 @@ const openGraphLocales = {
   pt: "pt_PT",
   es: "es_ES",
   en: "en_GB",
+};
+
+const aboutImageAltTexts = {
+  pt: {
+    memories: "Fotografia antiga da avó Prazeres",
+    portrait: "Retrato da avó Prazeres",
+  },
+  es: {
+    memories: "Fotografía antigua de la abuela Prazeres",
+    portrait: "Retrato de la abuela Prazeres",
+  },
+  en: {
+    memories: "Old photograph of Grandmother Prazeres",
+    portrait: "Portrait of Grandmother Prazeres",
+  },
 };
 
 export default function AboutPage() {
@@ -33,7 +49,7 @@ export default function AboutPage() {
     }
 
     changeLanguage(lang);
-  }, [lang, router.isReady]);
+  }, [lang, router, changeLanguage]);
 
   if (!router.isReady || !supportedLanguages.includes(lang)) {
     return null;
@@ -132,6 +148,22 @@ export default function AboutPage() {
             </blockquote>
 
             <div className="about-page-text">
+              <figure
+                className="
+      about-page-inline-image
+      about-page-inline-image-left
+    "
+              >
+                <Image
+                  src="/assets/images/bg/avo-prazeres-memorias.png"
+                  alt={aboutImageAltTexts[lang].memories}
+                  title={aboutImageAltTexts[lang].memories}
+                  width={941}
+                  height={1354}
+                  sizes="(max-width: 750px) calc(100vw - 32px), 345px"
+                />
+              </figure>
+
               <p>{text.paragraphs[0]}</p>
 
               <p className="about-page-lead">
@@ -140,12 +172,19 @@ export default function AboutPage() {
 
               <p>{text.paragraphs[2]}</p>
 
-              <figure className="about-page-inline-image">
-                <img
-                  src="/assets/images/bg/douro-about-526x548.webp"
-                  alt=""
-                  width="526"
-                  height="548"
+              <figure
+                className="
+      about-page-inline-image
+      about-page-inline-image-right
+    "
+              >
+                <Image
+                  src="/assets/images/bg/avo-prazeres.png"
+                  alt={aboutImageAltTexts[lang].portrait}
+                  title={aboutImageAltTexts[lang].portrait}
+                  width={941}
+                  height={1431}
+                  sizes="(max-width: 750px) calc(100vw - 32px), 345px"
                 />
               </figure>
 
@@ -153,7 +192,6 @@ export default function AboutPage() {
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
-
             <div className="about-page-closing">
               <p>{text.paragraphs[text.paragraphs.length - 1]}</p>
             </div>

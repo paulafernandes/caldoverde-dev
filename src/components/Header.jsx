@@ -39,12 +39,16 @@ export default function Header() {
     changeLanguage(languageCode);
     closeMenu();
 
-    if (router.pathname === "/[lang]/about") {
-      router.push(`/${languageCode}/about`);
-      return;
-    }
+    const currentHash = window.location.hash;
 
-    router.push(`/${languageCode}/`);
+    const destination =
+      router.pathname === "/[lang]/about"
+        ? `/${languageCode}/about${currentHash}`
+        : `/${languageCode}/${currentHash}`;
+
+    router.push(destination, undefined, {
+      scroll: false,
+    });
   }
 
   return (
@@ -72,7 +76,7 @@ export default function Header() {
           >
 
             <Image
-              src="/assets/images/logo_text_280_100.png"
+              src="/assets/images/logo_andorinha.png"
               alt={imageText.logo}
               width={280}
               height={100}

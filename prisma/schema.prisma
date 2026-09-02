@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model MenuCategory {
+  id           Int                       @id @default(autoincrement())
+  slug         String                    @unique
+  imagePath    String?
+  position     Int                       @default(0)
+  isVisible    Boolean                   @default(true)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  translations MenuCategoryTranslation[]
+  items        MenuItem[]
+
+  @@index([position])
+}
+
+model MenuCategoryTranslation {
+  id         Int          @id @default(autoincrement())
+  categoryId Int
+  language   String
+  label      String
+  title      String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, language])
+  @@index([language])
+}
+
+model MenuItem {
+  id           Int                   @id @default(autoincrement())
+  categoryId   Int
+  imagePath    String?
+  priceCents   Int?
+  position     Int                   @default(0)
+  isVisible    Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  category     MenuCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  translations MenuItemTranslation[]
+
+  @@index([categoryId, position])
+}
+
+model MenuItemTranslation {
+  id          Int      @id @default(autoincrement())
+  itemId      Int
+  language    String
+  name        String
+  description String
+  item        MenuItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, language])
+  @@index([language])
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  issuer                String
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
