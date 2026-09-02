@@ -342,14 +342,24 @@
   background: #ffffff;
 }
 
-.accordionButton {
+.categoryHeaderContent {
   display: grid;
-  width: 100%;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns:
+    minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 14px;
   min-height: 72px;
   padding: 15px 18px;
+}
+
+.accordionButton {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
@@ -381,10 +391,6 @@
 .chevron {
   font-size: 1.2rem;
   transition: transform 0.18s ease;
-}
-
-.accordionButton[aria-expanded="true"] .chevron {
-  transform: rotate(180deg);
 }
 
 .accordionBody {
@@ -523,10 +529,15 @@
   cursor: pointer;
 }
 
-.editButton:hover,
+.editButton:hover:not(:disabled),
 .editButton[aria-expanded="true"] {
   background: #315c45;
   color: #ffffff;
+}
+
+.editButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .editButton:focus-visible {
@@ -1052,4 +1063,126 @@
 .removeImageButton:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.categoryThumbnail {
+  display: block;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #d4ddd6;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.categoryIdentity .categoryTitleLine {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  margin-top: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.categoryIdentity .categoryItemCount {
+  display: inline;
+  margin-top: 0;
+  color: #68766d;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.categoryHeaderEditButton {
+  grid-column: auto;
+  justify-self: auto;
+  width: auto;
+  white-space: nowrap;
+}
+
+.categoryChevronButton {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.categoryChevronButton:focus-visible {
+  outline: 3px solid #d7ae36;
+  outline-offset: 2px;
+}
+
+.categoryChevronButton[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 760px) {
+  .categoryHeaderContent {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .accordionButton {
+    grid-column: 1 / -1;
+  }
+
+  .categoryHeaderEditButton {
+    grid-column: auto;
+    justify-self: auto;
+    width: auto;
+  }
+}
+
+.categoryImageUploadRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 430px;
+}
+
+.categoryImageInput {
+  flex: 1 1 320px;
+  min-width: 0;
+  max-width: 320px;
+  padding: 10px 12px;
+  border: 1px solid #cbd8cf;
+  border-radius: 8px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+}
+
+.categoryImageThumbnail {
+  display: block;
+  flex: 0 0 88px;
+  width: 88px;
+  height: 88px;
+  border: 1px solid #d4ddd6;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .categoryImageUploadRow {
+    gap: 10px;
+  }
+
+  .categoryImageInput {
+    flex-basis: auto;
+  }
+
+  .categoryImageThumbnail {
+    flex-basis: 72px;
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.addButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }

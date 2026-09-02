@@ -31,6 +31,11 @@ export async function getPublicMenuCategories() {
       imagePath: {
         not: null,
       },
+      items: {
+        some: {
+          isVisible: true,
+        },
+      },
     },
 
     orderBy: [

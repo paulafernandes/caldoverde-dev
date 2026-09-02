@@ -192,7 +192,10 @@ export default function MenuCategoryEditor({
     const imagePath =
       formValues.imagePath.trim();
 
-    if (!isAllowedImagePath(imagePath)) {
+    if (
+      imagePath &&
+      !isAllowedImagePath(imagePath)
+    ) {
       setErrorMessage(
         "A imagem deve estar em /assets/images/ ou /uploads/."
       );
@@ -218,7 +221,7 @@ export default function MenuCategoryEditor({
         },
 
         body: JSON.stringify({
-          imagePath,
+          imagePath: imagePath || null,
           isVisible: formValues.isVisible,
           translations: formValues.translations,
         }),
@@ -306,13 +309,14 @@ export default function MenuCategoryEditor({
                 : "Editar categoria"}
           </h3>
 
-          <p>
-            {isCreating
-              ? "O slug e a posição serão criados automaticamente."
-              : isConfirmingDelete
-                ? category.translations.pt.label
-                : `Slug: ${category.slug} · Ordem: ${category.position}`}
-          </p>
+          {!isCreating && isConfirmingDelete && (
+            <p>
+              {category.translations.pt.label ||
+                category.translations.es.label ||
+                category.translations.en.label ||
+                category.slug}
+            </p>
+          )}
         </div>
       </div>
       <div
@@ -347,7 +351,6 @@ export default function MenuCategoryEditor({
                 className={styles.editorInput}
                 id={labelId}
                 type="text"
-                required
                 maxLength={120}
                 value={translation.label}
                 onChange={(event) =>
@@ -370,7 +373,6 @@ export default function MenuCategoryEditor({
                 className={styles.editorInput}
                 id={titleId}
                 type="text"
-                required
                 maxLength={120}
                 value={translation.title}
                 onChange={(event) =>
@@ -391,28 +393,30 @@ export default function MenuCategoryEditor({
           Imagem da categoria
         </span>
 
-        {formValues.imagePath && (
-          <Image
-            className={styles.imagePreview}
-            src={formValues.imagePath}
-            alt="Pré-visualização da categoria"
-            width={180}
-            height={180}
-            unoptimized
+        <div className={styles.categoryImageUploadRow}>
+          <input
+            className={styles.categoryImageInput}
+            id={`category-${formIdentifier}-image`}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            disabled={isFormLocked}
+            onChange={handleImageUpload}
           />
-        )}
 
-        <input
-          className={styles.editorInput}
-          id={`category-${formIdentifier}-image`}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          disabled={isFormLocked}
-          onChange={handleImageUpload}
-        />
+          {formValues.imagePath && (
+            <Image
+              className={styles.categoryImageThumbnail}
+              src={formValues.imagePath}
+              alt="Pré-visualização da categoria"
+              width={88}
+              height={88}
+              unoptimized
+            />
+          )}
+        </div>
 
         <small>
-          PNG, JPEG ou WebP. Máximo de 5 MB.
+          Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.
         </small>
 
         {isUploadingImage && (
@@ -422,12 +426,6 @@ export default function MenuCategoryEditor({
           >
             A carregar imagem...
           </span>
-        )}
-
-        {formValues.imagePath && (
-          <small className={styles.imagePathValue}>
-            {formValues.imagePath}
-          </small>
         )}
       </div>
       <label className={styles.checkboxField}>

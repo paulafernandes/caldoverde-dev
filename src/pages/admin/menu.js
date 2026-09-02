@@ -8,6 +8,7 @@ import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import MenuItemEditor from "../../components/admin/MenuItemEditor";
 import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
+import Image from "next/image";
 
 const languages = ["pt", "es", "en"];
 
@@ -594,29 +595,44 @@ export default function AdminMenuPage({
                           </button>
                         </div>
 
-                        <button
-                          className={styles.accordionButton}
-                          id={buttonId}
-                          type="button"
-                          aria-expanded={isExpanded}
-                          aria-controls={panelId}
-                          onClick={() =>
-                            toggleCategory(category.id)
-                          }
-                        >
-                          <span
-                            className={styles.categoryIdentity}
+                        <div className={styles.categoryHeaderContent}>
+                          <button
+                            className={styles.accordionButton}
+                            id={buttonId}
+                            type="button"
+                            aria-expanded={isExpanded}
+                            aria-controls={panelId}
+                            onClick={() =>
+                              toggleCategory(category.id)
+                            }
                           >
-                            <strong>
-                              {category.translations.pt.label ||
-                                category.slug}
-                            </strong>
+                            <span className={styles.categoryIdentity}>
+                              <span className={styles.categoryTitleLine}>
+                                <strong>
+                                  {category.translations.pt.label ||
+                                    category.slug}
+                                </strong>
 
-                            <span>
-                              {category.slug} ·{" "}
-                              {category.items.length} pratos
+                                <span className={styles.categoryItemCount}>
+                                  - {category.items.length}{" "}
+                                  {category.items.length === 1
+                                    ? "prato"
+                                    : "pratos"}
+                                </span>
+                              </span>
                             </span>
-                          </span>
+
+                            {category.imagePath && (
+                              <Image
+                                className={styles.categoryThumbnail}
+                                src={category.imagePath}
+                                alt=""
+                                width={64}
+                                height={64}
+                                unoptimized
+                              />
+                            )}
+                          </button>
 
                           <span
                             className={
@@ -625,18 +641,50 @@ export default function AdminMenuPage({
                                 : styles.statusHidden
                             }
                           >
-                            {category.isVisible
-                              ? "Visível"
-                              : "Oculta"}
+                            {category.isVisible ? "Visível" : "Oculta"}
                           </span>
 
-                          <span
-                            className={styles.chevron}
-                            aria-hidden="true"
+                          <button
+                            className={`${styles.editButton} ${styles.categoryHeaderEditButton}`}
+                            type="button"
+                            disabled={isCreatingItem}
+                            aria-expanded={isEditingCategory}
+                            aria-controls={categoryEditorId}
+                            onClick={() => {
+                              if (!isExpanded) {
+                                setExpandedCategoryId(category.id);
+                              }
+
+                              toggleCategoryEditor(category.id);
+                            }}
                           >
-                            ⌄
-                          </span>
-                        </button>
+                            {isEditingCategory
+                              ? "Fechar edição"
+                              : "Editar categoria"}
+                          </button>
+
+                          <button
+                            className={styles.categoryChevronButton}
+                            type="button"
+                            aria-label={
+                              isExpanded
+                                ? "Fechar categoria"
+                                : "Abrir categoria"
+                            }
+                            aria-expanded={isExpanded}
+                            aria-controls={panelId}
+                            onClick={() =>
+                              toggleCategory(category.id)
+                            }
+                          >
+                            <span
+                              className={styles.chevron}
+                              aria-hidden="true"
+                            >
+                              ⌄
+                            </span>
+                          </button>
+                        </div>
                       </div>
                       {isExpanded && (
                         <div
@@ -650,11 +698,29 @@ export default function AdminMenuPage({
                               styles.categoryDetails
                             }
                           >
+                            <div className={styles.categoryActions}>
+                              <button
+                                className={styles.addButton}
+                                type="button"
+                                disabled={isEditingCategory}
+                                aria-expanded={isCreatingItem}
+                                aria-controls={itemCreatorId}
+                                onClick={() =>
+                                  toggleItemCreator(category.id)
+                                }
+                              >
+                                {isCreatingItem
+                                  ? "Fechar novo prato"
+                                  : "Adicionar prato"}
+                              </button>
+                            </div>
                             <div
                               className={
                                 styles.translationList
                               }
+
                             >
+
                               {languages.map((language) => (
                                 <span key={language}>
                                   <strong>
@@ -667,40 +733,6 @@ export default function AdminMenuPage({
                                   }
                                 </span>
                               ))}
-                            </div>
-
-                            <p className={styles.imagePath}>
-                              <strong>Imagem:</strong>{" "}
-                              {category.imagePath ??
-                                "Sem imagem"}
-                            </p>
-                            <div className={styles.categoryActions}>
-                              <button
-                                className={styles.addButton}
-                                type="button"
-                                aria-expanded={isCreatingItem}
-                                aria-controls={itemCreatorId}
-                                onClick={() =>
-                                  toggleItemCreator(category.id)
-                                }
-                              >
-                                {isCreatingItem
-                                  ? "Fechar novo prato"
-                                  : "Adicionar prato"}
-                              </button>
-                              <button
-                                className={styles.editButton}
-                                type="button"
-                                aria-expanded={isEditingCategory}
-                                aria-controls={categoryEditorId}
-                                onClick={() =>
-                                  toggleCategoryEditor(category.id)
-                                }
-                              >
-                                {isEditingCategory
-                                  ? "Fechar edição"
-                                  : "Editar categoria"}
-                              </button>
                             </div>
                           </div>
                           {isEditingCategory && (

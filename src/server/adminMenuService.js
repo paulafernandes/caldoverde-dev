@@ -628,10 +628,15 @@ export async function createAdminMenuCategory(
   input
 ) {
   return prisma.$transaction(async (transaction) => {
+    const slugSource =
+      input.translations.pt.label ||
+      input.translations.es.label ||
+      input.translations.en.label;
+
     const slug =
       await createUniqueCategorySlug(
         transaction,
-        input.translations.pt.label
+        slugSource
       );
 
     const positionResult =

@@ -363,13 +363,16 @@ export default function MenuItemEditor({
                 : `Editar prato #${item.position}`}
           </h3>
 
-          <p>
-            {isCreating
-              ? "Preenche os textos nos três idiomas."
-              : isConfirmingDelete
-                ? item.translations.pt.name
+          {!isCreating && (
+            <p>
+              {isConfirmingDelete
+                ? item.translations.pt.name ||
+                item.translations.es.name ||
+                item.translations.en.name ||
+                `Prato #${item.position}`
                 : "Altera os textos, o preço ou a visibilidade."}
-          </p>
+            </p>
+          )}
         </div>
       </div>
 
@@ -405,7 +408,6 @@ export default function MenuItemEditor({
                 className={styles.editorInput}
                 id={nameId}
                 type="text"
-                required
                 maxLength={120}
                 value={translation.name}
                 onChange={(event) =>
@@ -427,7 +429,6 @@ export default function MenuItemEditor({
               <textarea
                 className={styles.editorTextarea}
                 id={descriptionId}
-                required
                 maxLength={500}
                 rows={4}
                 value={translation.description}
@@ -449,25 +450,27 @@ export default function MenuItemEditor({
           Imagem do prato
         </span>
 
-        {formValues.imagePath && (
-          <Image
-            className={styles.imagePreview}
-            src={formValues.imagePath}
-            alt="Pré-visualização do prato"
-            width={180}
-            height={180}
-            unoptimized
+        <div className={styles.categoryImageUploadRow}>
+          <input
+            className={styles.categoryImageInput}
+            id={`item-${formIdentifier}-image`}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            disabled={isFormLocked}
+            onChange={handleImageUpload}
           />
-        )}
 
-        <input
-          className={styles.editorInput}
-          id={`item-${formIdentifier}-image`}
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          disabled={isFormLocked}
-          onChange={handleImageUpload}
-        />
+          {formValues.imagePath && (
+            <Image
+              className={styles.categoryImageThumbnail}
+              src={formValues.imagePath}
+              alt="Pré-visualização do prato"
+              width={88}
+              height={88}
+              unoptimized
+            />
+          )}
+        </div>
 
         <small>
           Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.
@@ -483,28 +486,21 @@ export default function MenuItemEditor({
         )}
 
         {formValues.imagePath && (
-          <>
-            <small className={styles.imagePathValue}>
-              {formValues.imagePath}
-            </small>
-
-            <button
-              className={styles.removeImageButton}
-              type="button"
-              disabled={isFormLocked}
-              onClick={() =>
-                setFormValues((currentValues) => ({
-                  ...currentValues,
-                  imagePath: "",
-                }))
-              }
-            >
-              Remover imagem do prato
-            </button>
-          </>
+          <button
+            className={styles.removeImageButton}
+            type="button"
+            disabled={isFormLocked}
+            onClick={() =>
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                imagePath: "",
+              }))
+            }
+          >
+            Remover imagem do prato
+          </button>
         )}
       </div>
-
       <div className={styles.editorOptions}>
         <label className={styles.priceField}>
           <span>Preço em euros</span>
