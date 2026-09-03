@@ -427,6 +427,21 @@ export default function MenuCategoryEditor({
             A carregar imagem...
           </span>
         )}
+        {formValues.imagePath && (
+          <button
+            className={styles.removeImageButton}
+            type="button"
+            disabled={isFormLocked}
+            onClick={() =>
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                imagePath: "",
+              }))
+            }
+          >
+            Remover imagem da categoria
+          </button>
+        )}
       </div>
       <label className={styles.checkboxField}>
         <input
