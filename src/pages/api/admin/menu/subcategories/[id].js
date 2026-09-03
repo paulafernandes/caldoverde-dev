@@ -1,9 +1,9 @@
 import {
-  deleteAdminMenuItem,
-  updateAdminMenuItem,
+  deleteAdminMenuSubcategory,
+  updateAdminMenuSubcategory,
 } from "../../../../../server/adminMenuService";
 import {
-  updateMenuItemSchema,
+  updateMenuSubcategorySchema,
 } from "../../../../../server/adminMenuValidation";
 import {
   getAdminSession,
@@ -41,29 +41,34 @@ export default async function handler(
     });
   }
 
-  const rawItemId = Array.isArray(request.query.id)
+  const rawSubcategoryId = Array.isArray(
+    request.query.id
+  )
     ? request.query.id[0]
     : request.query.id;
 
-  const itemId = Number(rawItemId);
+  const subcategoryId = Number(rawSubcategoryId);
 
   if (
-    !Number.isInteger(itemId) ||
-    itemId <= 0
+    !Number.isInteger(subcategoryId) ||
+    subcategoryId <= 0
   ) {
     return response.status(400).json({
-      error: "Identificador do prato inválido.",
+      error:
+        "Identificador da subcategoria inválido.",
     });
   }
 
   if (request.method === "DELETE") {
     try {
-      const wasDeleted =
-        await deleteAdminMenuItem(itemId);
+      const result =
+        await deleteAdminMenuSubcategory(
+          subcategoryId
+        );
 
-      if (!wasDeleted) {
+      if (result.status === "not-found") {
         return response.status(404).json({
-          error: "Prato não encontrado.",
+          error: "Subcategoria não encontrada.",
         });
       }
 
@@ -72,13 +77,13 @@ export default async function handler(
       });
     } catch (error) {
       console.error(
-        "Erro ao eliminar o prato:",
+        "Erro ao eliminar a subcategoria:",
         error
       );
 
       return response.status(500).json({
         error:
-          "Não foi possível eliminar o prato.",
+          "Não foi possível eliminar a subcategoria.",
       });
     }
   }
@@ -93,11 +98,15 @@ export default async function handler(
   }
 
   const validation =
-    updateMenuItemSchema.safeParse(request.body);
+    updateMenuSubcategorySchema.safeParse(
+      request.body
+    );
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados do prato são inválidos.",
+      error:
+        "Os dados da subcategoria são inválidos.",
+
       details: formatValidationErrors(
         validation.error
       ),
@@ -105,43 +114,30 @@ export default async function handler(
   }
 
   try {
-    const updatedItem =
-      await updateAdminMenuItem(
-        itemId,
+    const subcategory =
+      await updateAdminMenuSubcategory(
+        subcategoryId,
         validation.data
       );
 
-    if (updatedItem === null) {
+    if (!subcategory) {
       return response.status(404).json({
-        error: "Prato não encontrado.",
-      });
-    }
-
-    if (updatedItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria selecionada não pertence à categoria do prato.",
-      });
-    }
-
-    if (updatedItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria não pertence à categoria do prato.",
+        error: "Subcategoria não encontrada.",
       });
     }
 
     return response.status(200).json({
-      item: updatedItem,
+      subcategory,
     });
   } catch (error) {
     console.error(
-      "Erro ao atualizar o prato:",
+      "Erro ao atualizar a subcategoria:",
       error
     );
 
     return response.status(500).json({
-      error: "Não foi possível atualizar o prato.",
+      error:
+        "Não foi possível atualizar a subcategoria.",
     });
   }
 }

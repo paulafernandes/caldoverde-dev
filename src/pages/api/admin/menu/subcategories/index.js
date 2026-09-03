@@ -1,8 +1,8 @@
 import {
-  createAdminMenuItem,
+  createAdminMenuSubcategory,
 } from "../../../../../server/adminMenuService";
 import {
-  createMenuItemSchema,
+  createMenuSubcategorySchema,
 } from "../../../../../server/adminMenuValidation";
 import {
   getAdminSession,
@@ -45,11 +45,14 @@ export default async function handler(
   }
 
   const validation =
-    createMenuItemSchema.safeParse(request.body);
+    createMenuSubcategorySchema.safeParse(
+      request.body
+    );
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados do prato são inválidos.",
+      error:
+        "Os dados da subcategoria são inválidos.",
 
       details: formatValidationErrors(
         validation.error
@@ -58,42 +61,29 @@ export default async function handler(
   }
 
   try {
-    const createdItem =
-      await createAdminMenuItem(
+    const subcategory =
+      await createAdminMenuSubcategory(
         validation.data
       );
 
-    if (createdItem === null) {
+    if (!subcategory) {
       return response.status(404).json({
         error: "Categoria não encontrada.",
       });
     }
 
-    if (createdItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria selecionada não pertence a esta categoria.",
-      });
-    }
-
-    if (createdItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria não pertence à categoria selecionada.",
-      });
-    }
-
     return response.status(201).json({
-      item: createdItem,
+      subcategory,
     });
   } catch (error) {
     console.error(
-      "Erro ao criar o prato:",
+      "Erro ao criar a subcategoria:",
       error
     );
 
     return response.status(500).json({
-      error: "Não foi possível criar o prato.",
+      error:
+        "Não foi possível criar a subcategoria.",
     });
   }
 }

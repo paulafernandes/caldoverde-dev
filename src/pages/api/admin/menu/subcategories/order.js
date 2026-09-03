@@ -1,8 +1,8 @@
 import {
-  createAdminMenuItem,
+  moveAdminMenuSubcategory,
 } from "../../../../../server/adminMenuService";
 import {
-  createMenuItemSchema,
+  moveMenuSubcategorySchema,
 } from "../../../../../server/adminMenuValidation";
 import {
   getAdminSession,
@@ -19,8 +19,8 @@ export default async function handler(
   request,
   response
 ) {
-  if (request.method !== "POST") {
-    response.setHeader("Allow", "POST");
+  if (request.method !== "PATCH") {
+    response.setHeader("Allow", "PATCH");
 
     return response.status(405).json({
       error: "Método não permitido.",
@@ -45,11 +45,14 @@ export default async function handler(
   }
 
   const validation =
-    createMenuItemSchema.safeParse(request.body);
+    moveMenuSubcategorySchema.safeParse(
+      request.body
+    );
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados do prato são inválidos.",
+      error:
+        "Os dados da ordenação são inválidos.",
 
       details: formatValidationErrors(
         validation.error
@@ -58,42 +61,28 @@ export default async function handler(
   }
 
   try {
-    const createdItem =
-      await createAdminMenuItem(
-        validation.data
+    const result =
+      await moveAdminMenuSubcategory(
+        validation.data.subcategoryId,
+        validation.data.direction
       );
 
-    if (createdItem === null) {
+    if (!result) {
       return response.status(404).json({
-        error: "Categoria não encontrada.",
+        error: "Subcategoria não encontrada.",
       });
     }
 
-    if (createdItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria selecionada não pertence a esta categoria.",
-      });
-    }
-
-    if (createdItem === false) {
-      return response.status(400).json({
-        error:
-          "A subcategoria não pertence à categoria selecionada.",
-      });
-    }
-
-    return response.status(201).json({
-      item: createdItem,
-    });
+    return response.status(200).json(result);
   } catch (error) {
     console.error(
-      "Erro ao criar o prato:",
+      "Erro ao ordenar a subcategoria:",
       error
     );
 
     return response.status(500).json({
-      error: "Não foi possível criar o prato.",
+      error:
+        "Não foi possível alterar a ordem da subcategoria.",
     });
   }
 }

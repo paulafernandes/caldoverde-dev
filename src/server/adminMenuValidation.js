@@ -81,6 +81,15 @@ const menuImagePathSchema = z
 
 
 export const updateMenuItemSchema = z.strictObject({
+  subcategoryId: z
+  .number()
+  .int(
+    "O identificador da subcategoria tem de ser inteiro."
+  )
+  .positive(
+    "O identificador da subcategoria é inválido."
+  )
+  .nullable(),
   priceCents: z
     .number()
     .int("O preço tem de ser um número inteiro de cêntimos.")
@@ -156,6 +165,70 @@ const menuCategoryTranslationsSchema = z
         "Preenche o nome do separador e o título da categoria em pelo menos um idioma.",
     }
   );
+
+const menuSubcategoryTranslationSchema =
+  z.strictObject({
+    name: z
+      .string()
+      .trim()
+      .max(
+        120,
+        "O nome da subcategoria não pode ultrapassar 120 caracteres."
+      ),
+  });
+
+const menuSubcategoryTranslationsSchema =
+  z
+    .strictObject({
+      pt: menuSubcategoryTranslationSchema,
+      es: menuSubcategoryTranslationSchema,
+      en: menuSubcategoryTranslationSchema,
+    })
+    .refine(
+      (translations) =>
+        Object.values(translations).some(
+          (translation) =>
+            translation.name.length > 0
+        ),
+      {
+        message:
+          "Preenche o nome da subcategoria em pelo menos um idioma.",
+      }
+    );
+
+export const updateMenuSubcategorySchema =
+  z.strictObject({
+    isVisible: z.boolean(),
+
+    translations:
+      menuSubcategoryTranslationsSchema,
+  });
+
+export const createMenuSubcategorySchema =
+  updateMenuSubcategorySchema.extend({
+    categoryId: z
+      .number()
+      .int(
+        "O identificador da categoria tem de ser inteiro."
+      )
+      .positive(
+        "O identificador da categoria é inválido."
+      ),
+  });
+
+export const moveMenuSubcategorySchema =
+  z.strictObject({
+    subcategoryId: z
+      .number()
+      .int(
+        "O identificador da subcategoria tem de ser inteiro."
+      )
+      .positive(
+        "O identificador da subcategoria é inválido."
+      ),
+
+    direction: z.enum(["up", "down"]),
+  });
 
 export const updateMenuCategorySchema =
   z.strictObject({
