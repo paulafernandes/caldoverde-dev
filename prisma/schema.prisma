@@ -13,15 +13,16 @@ datasource db {
 }
 
 model MenuCategory {
-  id           Int                       @id @default(autoincrement())
-  slug         String                    @unique
-  imagePath    String?
-  position     Int                       @default(0)
-  isVisible    Boolean                   @default(true)
-  createdAt    DateTime                  @default(now())
-  updatedAt    DateTime                  @updatedAt
-  translations MenuCategoryTranslation[]
-  items        MenuItem[]
+  id            Int                       @id @default(autoincrement())
+  slug          String                    @unique
+  imagePath     String?
+  position      Int                       @default(0)
+  isVisible     Boolean                   @default(true)
+  createdAt     DateTime                  @default(now())
+  updatedAt     DateTime                  @updatedAt
+  translations  MenuCategoryTranslation[]
+  subcategories MenuSubcategory[]
+  items         MenuItem[]
 
   @@index([position])
 }
@@ -38,19 +39,47 @@ model MenuCategoryTranslation {
   @@index([language])
 }
 
-model MenuItem {
-  id           Int                   @id @default(autoincrement())
+model MenuSubcategory {
+  id           Int                          @id @default(autoincrement())
   categoryId   Int
-  imagePath    String?
-  priceCents   Int?
-  position     Int                   @default(0)
-  isVisible    Boolean               @default(true)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
-  category     MenuCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  translations MenuItemTranslation[]
+  position     Int                          @default(0)
+  isVisible    Boolean                      @default(true)
+  createdAt    DateTime                     @default(now())
+  updatedAt    DateTime                     @updatedAt
+  category     MenuCategory                 @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  translations MenuSubcategoryTranslation[]
+  items        MenuItem[]
 
   @@index([categoryId, position])
+}
+
+model MenuSubcategoryTranslation {
+  id            Int             @id @default(autoincrement())
+  subcategoryId Int
+  language      String
+  name          String
+  subcategory   MenuSubcategory @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([subcategoryId, language])
+  @@index([language])
+}
+
+model MenuItem {
+  id            Int                   @id @default(autoincrement())
+  categoryId    Int
+  subcategoryId Int?
+  imagePath     String?
+  priceCents    Int?
+  position      Int                   @default(0)
+  isVisible     Boolean               @default(true)
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  category      MenuCategory          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategory   MenuSubcategory?      @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+  translations  MenuItemTranslation[]
+
+  @@index([categoryId, position])
+  @@index([subcategoryId, position])
 }
 
 model MenuItemTranslation {
