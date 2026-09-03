@@ -61,9 +61,8 @@ export default function Menu({
                     id={`tab-${category.id}`}
                     type="button"
                     role="tab"
-                    className={`menu-tab-button ${
-                      isActive ? "is-active" : ""
-                    }`}
+                    className={`menu-tab-button ${isActive ? "is-active" : ""
+                      }`}
                     aria-selected={isActive}
                     aria-controls={`panel-${category.id}`}
                     onClick={() =>
@@ -88,6 +87,9 @@ export default function Menu({
                   alt={activeCategory.title[language]}
                   fill
                   sizes="(max-width: 900px) 100vw, 50vw"
+                  unoptimized={activeCategory.image.startsWith(
+                    "/uploads/"
+                  )}
                 />
               </div>
 
@@ -114,8 +116,8 @@ export default function Menu({
                           {item.price === null
                             ? text.pricePending
                             : priceFormatter.format(
-                                item.price
-                              )}
+                              item.price
+                            )}
                         </span>
                       </div>
 

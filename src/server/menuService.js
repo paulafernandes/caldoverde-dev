@@ -2,6 +2,9 @@ import prisma from "./prisma";
 
 const supportedLanguages = ["pt", "es", "en"];
 
+const defaultCategoryImage =
+  "/assets/images/bg/azulejo_portugues.jpg";
+
 function mapTranslations(translations, field) {
   const valuesByLanguage = Object.fromEntries(
     translations.map((translation) => [
@@ -11,16 +14,26 @@ function mapTranslations(translations, field) {
   );
 
   const fallback =
-    valuesByLanguage.es ??
-    valuesByLanguage.pt ??
-    valuesByLanguage.en ??
-    "";
+    supportedLanguages
+      .map((language) => valuesByLanguage[language])
+      .find(
+        (value) =>
+          typeof value === "string" &&
+          value.trim().length > 0
+      ) ?? "";
 
   return Object.fromEntries(
-    supportedLanguages.map((language) => [
-      language,
-      valuesByLanguage[language] ?? fallback,
-    ])
+    supportedLanguages.map((language) => {
+      const value = valuesByLanguage[language];
+
+      const translatedValue =
+        typeof value === "string" &&
+          value.trim().length > 0
+          ? value
+          : fallback;
+
+      return [language, translatedValue];
+    })
   );
 }
 
@@ -28,9 +41,6 @@ export async function getPublicMenuCategories() {
   const categories = await prisma.menuCategory.findMany({
     where: {
       isVisible: true,
-      imagePath: {
-        not: null,
-      },
       items: {
         some: {
           isVisible: true,
@@ -81,7 +91,8 @@ export async function getPublicMenuCategories() {
       category.translations,
       "title"
     ),
-    image: category.imagePath,
+    image:
+      category.imagePath || defaultCategoryImage,
 
     items: category.items.map((item) => ({
       id: item.id,
