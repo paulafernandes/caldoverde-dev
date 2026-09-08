@@ -82,21 +82,20 @@ const menuImagePathSchema = z
 
 export const updateMenuItemSchema = z.strictObject({
   subcategoryId: z
-  .number()
-  .int(
-    "O identificador da subcategoria tem de ser inteiro."
-  )
-  .positive(
-    "O identificador da subcategoria é inválido."
-  )
-  .nullable(),
-  priceCents: z
     .number()
-    .int("O preço tem de ser um número inteiro de cêntimos.")
-    .min(0, "O preço não pode ser negativo.")
+    .int(
+      "O identificador da subcategoria tem de ser inteiro."
+    )
+    .positive(
+      "O identificador da subcategoria é inválido."
+    )
+    .nullable(),
+  priceText: z
+    .string()
+    .trim()
     .max(
-      1000000,
-      "O preço não pode ultrapassar 10 000 euros."
+      200,
+      "A informação do preço não pode ultrapassar 200 caracteres."
     )
     .nullable(),
   imagePath: menuImagePathSchema.nullable(),

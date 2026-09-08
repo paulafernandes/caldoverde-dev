@@ -809,8 +809,14 @@ img {
 }
 
 .menu-panel-image {
-  position: relative;
+  position: sticky;
+  top: 90px;
+  align-self: start;
+
+  height: calc(100vh - 120px);
   min-height: 580px;
+  max-height: 760px;
+
   overflow: hidden;
   background-color: var(--color-primary-dark);
 }
@@ -824,10 +830,10 @@ img {
 /* Lista de pratos */
 
 .menu-list {
-  padding: 50px;
+  padding: 25px;
 }
 
-.menu-list>h3 {
+.menu-group>h3 {
   margin-bottom: 35px;
   padding: 0;
 
@@ -847,8 +853,8 @@ img {
   text-wrap: balance;
 }
 
-.menu-list>h3::before,
-.menu-list>h3::after {
+.menu-group>h3::before,
+.menu-group>h3::after {
   content: "";
   width: 30px;
   height: 12px;
@@ -860,7 +866,7 @@ img {
   background-size: contain;
 }
 
-.menu-list>h3::after {
+.menu-group>h3::after {
   transform: scaleX(-1);
 }
 
@@ -920,7 +926,11 @@ img {
   }
 
   .menu-panel-image {
+    position: relative;
+    top: auto;
+    height: auto;
     min-height: 380px;
+    max-height: none;
   }
 }
 
@@ -962,10 +972,6 @@ img {
     grid-column: 1 / -1;
   }
 
-  .menu-panel-image {
-    min-height: 300px;
-  }
-
   .menu-list {
     padding: 30px 22px;
   }
@@ -985,6 +991,16 @@ img {
   .menu-dish-price {
     font-size: 12px;
   }
+}
+
+@media (max-width: 650px) {
+  .menu-group>h3 {
+    font-size: 31px;
+  }
+}
+
+.menu-group + .menu-group {
+  margin-top: 20px;
 }
 
 /* Rodapé */

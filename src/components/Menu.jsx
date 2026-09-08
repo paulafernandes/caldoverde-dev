@@ -25,16 +25,8 @@ export default function Menu({
     menuCategories[0] ??
     null;
 
-  const priceFormatter = new Intl.NumberFormat(
-    priceLocales[language],
-    {
-      style: "currency",
-      currency: "EUR",
-    }
-  );
-
   return (
-    <section className="menu-section" id="ementa">
+    <section className="menu-group" id="ementa">
       <div className="menu-container">
         <div className="menu-heading">
           <p className="menu-subtitle">
@@ -94,39 +86,46 @@ export default function Menu({
               </div>
 
               <div className="menu-list">
-                <h3>
-                  {activeCategory.title[language]}
-                </h3>
-
-                <ul>
-                  {activeCategory.items.map((item) => (
-                    <li
-                      key={item.id}
-                      className="menu-dish"
+                <div className="menu-list">
+                  {activeCategory.sections.map((section) => (
+                    <div
+                      className="menu-group"
+                      key={section.id}
                     >
-                      <div className="menu-dish-heading">
-                        <h4>{item.name[language]}</h4>
+                      <h3>
+                        {section.title[language]}
+                      </h3>
 
-                        <span
-                          className="menu-dish-separator"
-                          aria-hidden="true"
-                        />
+                      <ul>
+                        {section.items.map((item) => (
+                          <li
+                            key={item.id}
+                            className="menu-dish"
+                          >
+                            <div className="menu-dish-heading">
+                              <h4>{item.name[language]}</h4>
 
-                        <span className="menu-dish-price">
-                          {item.price === null
-                            ? text.pricePending
-                            : priceFormatter.format(
-                              item.price
-                            )}
-                        </span>
-                      </div>
+                              <span
+                                className="menu-dish-separator"
+                                aria-hidden="true"
+                              />
 
-                      <p>
-                        {item.description[language]}
-                      </p>
-                    </li>
+                              <span className="menu-dish-price">
+                                {item.price === null
+                                  ? text.pricePending
+                                  : item.price}
+                              </span>
+                            </div>
+
+                            <p>
+                              {item.description[language]}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
           </>

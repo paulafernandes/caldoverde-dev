@@ -632,7 +632,7 @@
 .editorOptions {
   display: grid;
   grid-template-columns:
-    minmax(180px, 240px) minmax(0, 1fr);
+    repeat(2, minmax(180px, 240px)) minmax(0, 1fr);
   align-items: end;
   gap: 20px;
   margin-top: 18px;
@@ -1185,4 +1185,245 @@
 .addButton:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+@media (max-width: 760px) {
+  .editorOptions {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 14px;
+  }
+}
+
+.subcategoryList {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.subcategoryRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.subcategoryRow > :first-child {
+  flex: 1;
+}
+
+.categorySubcategories {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+}
+
+.categorySubcategoriesHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.categorySubcategoriesHeading p {
+  margin: 0.25rem 0 0;
+}
+
+.categorySubcategory {
+  margin-top: 0.75rem;
+}
+
+.categorySubcategorySummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+.categorySubcategorySummary > div {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.categorySubcategorySummary span {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 700px) {
+  .categorySubcategoriesHeading,
+  .categorySubcategorySummary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .categorySubcategorySummary > div {
+    justify-content: space-between;
+  }
+}
+
+.subcategoryAddButton,
+.subcategoryEditButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.subcategoryAddButton {
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #9fb4a7;
+  background: #eef4f0;
+  color: #315d48;
+  font-size: 0.875rem;
+}
+
+.subcategoryAddButton:hover:not(:disabled) {
+  background: #e2ede6;
+  border-color: #7f9e8c;
+}
+
+.subcategoryEditButton {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #b8c4bc;
+  background: #ffffff;
+  color: #2f4f40;
+  font-size: 0.82rem;
+}
+
+.subcategoryEditButton:hover:not(:disabled) {
+  background: #f3f6f4;
+  border-color: #91a397;
+}
+
+.subcategoryAddButton:disabled,
+.subcategoryEditButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+  .subcategoryAddButton,
+  .subcategoryEditButton {
+    width: 100%;
+  }
+}
+
+.editorActions .subcategoryAddButton {
+  min-height: 0;
+  height: auto;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  align-self: center;
+}
+
+.editorActions {
+  align-items: center;
+}
+
+.itemSubcategories {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid #d8e0da;
+  border-radius: 10px;
+}
+
+.itemSubcategoriesHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.itemSubcategoriesHeading p {
+  margin: 0.25rem 0 0;
+}
+
+.itemSubcategoryOptions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.itemSubcategoryOption {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #e0e5e1;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.itemSubcategoryOption input {
+  margin: 0;
+}
+
+.itemSubcategoryOption:has(input:checked) {
+  border-color: #8fa897;
+  background: #f0f5f2;
+}
+
+.itemSubcategoryOption:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 700px) {
+  .itemSubcategoriesHeading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+.itemSubcategoryOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.itemSubcategoryOption > label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1;
+  cursor: pointer;
+}
+
+label.itemSubcategoryOption {
+  justify-content: flex-start;
+}
+
+.dishGroup {
+  margin-top: 1.5rem;
+}
+
+.dishGroup:first-child {
+  margin-top: 0;
+}
+
+.dishGroupTitle {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #315d48;
 }

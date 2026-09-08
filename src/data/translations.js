@@ -2,7 +2,9 @@ const translations = {
     pt: {
         header: {
             welcome: "Bem-vindo ao Restaurante Caldo Verde!",
-            address: "Morada a colocar",
+            address:
+                "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Sevilla, Spain",
+
             home: "Início",
             about: "O Restaurante",
             menu: "Ementa",
@@ -45,12 +47,18 @@ const translations = {
             contactTitle: "Contactos",
             emailLabel: "Email",
             phoneLabel: "Telefone",
-            phonePending: "Telefone a colocar",
+            phone: "603 269 410",
             addressLabel: "Morada",
-            addressPending: "Morada a colocar",
-            reservationsTitle: "Horário e reservas",
+            addressLines: [
+                "Centro Comercial los altos de Simón Verde",
+                "Ctra. San Juan Palomares",
+                "41927 Mairena del Aljarafe, Sevilla, Spain",
+            ], reservationsTitle: "Horário e reservas",
             hoursLabel: "Horário",
-            hoursPending: "Horário a colocar",
+            hours: [
+                "Terça a sábado: 08:00 - 20:00",
+                "Domingo: 10:00 - 16:00",
+            ],
             reservationText:
                 "Para informações ou pedidos de reserva, contacte-nos por email.",
             reservationButton: "Pedir uma reserva",
@@ -104,7 +112,9 @@ const translations = {
     es: {
         header: {
             welcome: "¡Bienvenido al Restaurante Caldo Verde!",
-            address: "Dirección pendiente",
+            address:
+                "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Sevilla, España",
+
             home: "Inicio",
             about: "El restaurante",
             menu: "Carta",
@@ -147,12 +157,19 @@ const translations = {
             contactTitle: "Contacto",
             emailLabel: "Email",
             phoneLabel: "Teléfono",
-            phonePending: "Teléfono pendiente",
+            phone: "603 269 410",
             addressLabel: "Dirección",
-            addressPending: "Dirección pendiente",
+            addressLines: [
+                "Centro Comercial los altos de Simón Verde",
+                "Ctra. San Juan Palomares",
+                "41927 Mairena del Aljarafe, Sevilla, España",
+            ],
             reservationsTitle: "Horario y reservas",
             hoursLabel: "Horario",
-            hoursPending: "Horario pendiente",
+            hours: [
+                "Martes a sábado: 08:00 - 20:00",
+                "Domingo: 10:00 - 16:00",
+            ],
             reservationText:
                 "Para obtener información o solicitar una reserva, contacte con nosotros por email.",
             reservationButton: "Solicitar una reserva",
@@ -206,7 +223,9 @@ const translations = {
     en: {
         header: {
             welcome: "Welcome to Caldo Verde Restaurant!",
-            address: "Address to be added",
+            address:
+                "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Seville, Spain",
+
             home: "Home",
             about: "The restaurant",
             menu: "Menu",
@@ -249,12 +268,19 @@ const translations = {
             contactTitle: "Contact",
             emailLabel: "Email",
             phoneLabel: "Phone",
-            phonePending: "Phone number to be added",
+            phone: "603 269 410",
             addressLabel: "Address",
-            addressPending: "Address to be added",
+            addressLines: [
+                "Centro Comercial los altos de Simón Verde",
+                "Ctra. San Juan Palomares",
+                "41927 Mairena del Aljarafe, Seville, Spain",
+            ],
             reservationsTitle: "Opening hours and reservations",
             hoursLabel: "Opening hours",
-            hoursPending: "Opening hours to be added",
+            hours: [
+                "Tuesday to Saturday: 08:00 - 20:00",
+                "Sunday: 10:00 - 16:00",
+            ],
             reservationText:
                 "For information or reservation requests, please contact us by email.",
             reservationButton: "Request a reservation",

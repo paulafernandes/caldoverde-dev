@@ -37,6 +37,24 @@ function mapTranslations(translations, field) {
   );
 }
 
+function mapPublicItem(item) {
+  return {
+    id: item.id,
+
+    name: mapTranslations(
+      item.translations,
+      "name"
+    ),
+
+    description: mapTranslations(
+      item.translations,
+      "description"
+    ),
+
+    price: item.priceText,
+  };
+}
+
 export async function getPublicMenuCategories() {
   const categories = await prisma.menuCategory.findMany({
     where: {
@@ -44,6 +62,17 @@ export async function getPublicMenuCategories() {
       items: {
         some: {
           isVisible: true,
+
+          OR: [
+            {
+              subcategoryId: null,
+            },
+            {
+              subcategory: {
+                isVisible: true,
+              },
+            },
+          ],
         },
       },
     },
@@ -58,11 +87,49 @@ export async function getPublicMenuCategories() {
     ],
 
     include: {
+      subcategories: {
+        where: {
+          isVisible: true,
+        },
+
+        orderBy: [
+          {
+            position: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+
+        include: {
+          translations: true,
+
+          items: {
+            where: {
+              isVisible: true,
+            },
+
+            orderBy: [
+              {
+                position: "asc",
+              },
+              {
+                id: "asc",
+              },
+            ],
+
+            include: {
+              translations: true,
+            },
+          },
+        },
+      },
       translations: true,
 
       items: {
         where: {
           isVisible: true,
+          subcategoryId: null,
         },
 
         orderBy: [
@@ -81,30 +148,56 @@ export async function getPublicMenuCategories() {
     },
   });
 
-  return categories.map((category) => ({
-    id: category.slug,
-    label: mapTranslations(
-      category.translations,
-      "label"
-    ),
-    title: mapTranslations(
+  return categories.map((category) => {
+    const categoryTitle = mapTranslations(
       category.translations,
       "title"
-    ),
-    image:
-      category.imagePath || defaultCategoryImage,
+    );
 
-    items: category.items.map((item) => ({
-      id: item.id,
-      name: mapTranslations(item.translations, "name"),
-      description: mapTranslations(
-        item.translations,
-        "description"
+    const sections = [
+      ...(category.items.length > 0
+        ? [
+          {
+            id: `category-${category.id}`,
+            title: categoryTitle,
+            items: category.items.map(mapPublicItem),
+          },
+        ]
+        : []),
+
+      ...category.subcategories
+        .filter(
+          (subcategory) =>
+            subcategory.items.length > 0
+        )
+        .map((subcategory) => ({
+          id: `subcategory-${subcategory.id}`,
+
+          title: mapTranslations(
+            subcategory.translations,
+            "name"
+          ),
+
+          items:
+            subcategory.items.map(mapPublicItem),
+        })),
+    ];
+
+    return {
+      id: category.slug,
+
+      label: mapTranslations(
+        category.translations,
+        "label"
       ),
-      price:
-        item.priceCents === null
-          ? null
-          : item.priceCents / 100,
-    })),
-  }));
+
+      title: categoryTitle,
+
+      image:
+        category.imagePath ||
+        defaultCategoryImage,
+
+      sections,
+    };
+  });
 }

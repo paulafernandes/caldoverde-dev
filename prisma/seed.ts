@@ -16,22 +16,6 @@ const adapter = new PrismaBetterSqlite3({
 
 const prisma = new PrismaClient({ adapter });
 
-function convertPriceToCents(price: unknown) {
-  if (price === null) {
-    return null;
-  }
-
-  if (
-    typeof price !== "number" ||
-    !Number.isFinite(price) ||
-    price < 0
-  ) {
-    throw new Error(`Preço inválido encontrado: ${String(price)}`);
-  }
-
-  return Math.round(price * 100);
-}
-
 async function main() {
   const existingCategoryCount =
     await prisma.menuCategory.count();
@@ -62,7 +46,10 @@ async function main() {
           items: {
             create: category.items.map(
               (item, itemIndex) => ({
-                priceCents: convertPriceToCents(item.price),
+                priceText:
+                  item.price === null
+                    ? null
+                    : `${String(item.price).replace(".", ",")} €`,
                 position: itemIndex + 1,
                 isVisible: true,
 

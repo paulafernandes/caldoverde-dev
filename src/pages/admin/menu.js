@@ -8,25 +8,10 @@ import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import MenuItemEditor from "../../components/admin/MenuItemEditor";
 import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
+import MenuSubcategoryEditor from "../../components/admin/MenuSubcategoryEditor";
 import Image from "next/image";
 
 const languages = ["pt", "es", "en"];
-
-const priceFormatter = new Intl.NumberFormat(
-  "pt-PT",
-  {
-    style: "currency",
-    currency: "EUR",
-  }
-);
-
-function formatPrice(priceCents) {
-  if (priceCents === null) {
-    return "Pendente";
-  }
-
-  return priceFormatter.format(priceCents / 100);
-}
 
 export default function AdminMenuPage({
   admin,
@@ -46,9 +31,22 @@ export default function AdminMenuPage({
   ] = useState(null);
 
   const [
-    creatingItemCategoryId,
-    setCreatingItemCategoryId,
+    creatingSubcategoryCategoryId,
+    setCreatingSubcategoryCategoryId,
   ] = useState(null);
+
+  const [
+    movingSubcategoryId,
+    setMovingSubcategoryId,
+  ] = useState(null);
+
+  const [
+    editingSubcategoryId,
+    setEditingSubcategoryId,
+  ] = useState(null);
+
+  const [creatingItem, setCreatingItem] =
+    useState(null);
 
   const [saveMessage, setSaveMessage] =
     useState("");
@@ -78,19 +76,44 @@ export default function AdminMenuPage({
     setIsCreatingCategory,
   ] = useState(false);
 
+  const [
+    newSubcategoryCategoryId,
+    setNewSubcategoryCategoryId,
+  ] = useState(null);
+
   const hasOpenEditor =
     isCreatingCategory ||
     editingItemId !== null ||
     editingCategoryId !== null ||
-    creatingItemCategoryId !== null;
+    creatingItem !== null ||
+    creatingSubcategoryCategoryId !== null ||
+    editingSubcategoryId !== null;
+
+  function toggleSubcategoryCreator(categoryId) {
+    setIsCreatingCategory(false);
+    setCreatingItem(null);
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setSaveMessage("");
+    setActionError("");
+    setEditingSubcategoryId(null);
+
+    setCreatingSubcategoryCategoryId(
+      (currentCategoryId) =>
+        currentCategoryId === categoryId
+          ? null
+          : categoryId
+    );
+  }
 
 
   function toggleCategory(categoryId) {
     setIsCreatingCategory(false);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
     setSaveMessage("");
+    setCreatingSubcategoryCategoryId(null);
 
     setExpandedCategoryId((currentId) =>
       currentId === categoryId
@@ -99,32 +122,142 @@ export default function AdminMenuPage({
     );
   }
 
-  function toggleItemEditor(itemId) {
+  function scrollEditorIntoView(editorId) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document
+          .getElementById(editorId)
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+      });
+    });
+  }
+
+  function toggleItemEditor(itemId, editorId) {
     setIsCreatingCategory(false);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setEditingCategoryId(null);
     setSaveMessage("");
+    setCreatingSubcategoryCategoryId(null);
+    setEditingSubcategoryId(null);
 
-    setEditingItemId((currentId) =>
-      currentId === itemId ? null : itemId
+    setEditingItemId((currentId) => {
+      const isClosing = currentId === itemId;
+
+      if (!isClosing) {
+        scrollEditorIntoView(editorId);
+      }
+
+      return isClosing ? null : itemId;
+    });
+  }
+
+  function toggleSubcategoryEditor(subcategoryId) {
+    setIsCreatingCategory(false);
+    setCreatingItem(null);
+    setCreatingSubcategoryCategoryId(null);
+    setEditingItemId(null);
+    setEditingCategoryId(null);
+    setSaveMessage("");
+    setActionError("");
+
+    setEditingSubcategoryId((currentId) =>
+      currentId === subcategoryId
+        ? null
+        : subcategoryId
     );
   }
 
-  function toggleItemCreator(categoryId) {
+  function toggleItemCreator(
+    categoryId,
+    subcategoryId = null
+  ) {
     setIsCreatingCategory(false);
     setEditingItemId(null);
     setEditingCategoryId(null);
     setSaveMessage("");
+    setCreatingSubcategoryCategoryId(null);
+    setEditingSubcategoryId(null);
 
-    setCreatingItemCategoryId((currentId) =>
-      currentId === categoryId
-        ? null
-        : categoryId
-    );
+    setCreatingItem((currentItem) => {
+      if (
+        currentItem?.categoryId === categoryId &&
+        currentItem?.subcategoryId === subcategoryId
+      ) {
+        return null;
+      }
+
+      return {
+        categoryId,
+        subcategoryId,
+      };
+    });
+  }
+
+  async function handleMoveSubcategory(
+    subcategoryId,
+    direction,
+    categoryId
+  ) {
+    setActionError("");
+    setSaveMessage("");
+    setMovingSubcategoryId(subcategoryId);
+
+    try {
+      const response = await fetch(
+        "/api/admin/menu/subcategories/order",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+          },
+
+          body: JSON.stringify({
+            subcategoryId,
+            direction,
+          }),
+        }
+      );
+
+      const result = await response
+        .json()
+        .catch(() => ({}));
+
+      if (!response.ok) {
+        setActionError(
+          result.error ??
+          "Não foi possível alterar a ordem da subcategoria."
+        );
+        return;
+      }
+
+      if (!result.moved) {
+        return;
+      }
+
+      setExpandedCategoryId(categoryId);
+
+      await router.replace(
+        router.asPath,
+        undefined,
+        {
+          scroll: false,
+        }
+      );
+    } catch {
+      setActionError(
+        "Não foi possível comunicar com o servidor."
+      );
+    } finally {
+      setMovingSubcategoryId(null);
+    }
   }
 
   async function handleItemCreated(categoryId) {
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setEditingItemId(null);
     setEditingCategoryId(null);
     setExpandedCategoryId(categoryId);
@@ -142,21 +275,29 @@ export default function AdminMenuPage({
     );
   }
 
-  function toggleCategoryEditor(categoryId) {
+  function toggleCategoryEditor(categoryId, editorId) {
     setIsCreatingCategory(false);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setEditingItemId(null);
     setSaveMessage("");
+    setEditingSubcategoryId(null);
 
-    setEditingCategoryId((currentId) =>
-      currentId === categoryId
+    setEditingCategoryId((currentId) => {
+      const isClosing =
+        currentId === categoryId;
+
+      if (!isClosing) {
+        scrollEditorIntoView(editorId);
+      }
+
+      return isClosing
         ? null
-        : categoryId
-    );
+        : categoryId;
+    });
   }
 
   async function handleCategorySaved(categoryId) {
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
     setExpandedCategoryId(categoryId);
@@ -174,10 +315,27 @@ export default function AdminMenuPage({
     );
   }
 
+  async function handleCategorySubcategoriesChanged(
+    categoryId,
+    message
+  ) {
+    setExpandedCategoryId(categoryId);
+
+    await router.replace(
+      router.asPath,
+      undefined,
+      {
+        scroll: false,
+      }
+    );
+
+    setSaveMessage(message);
+  }
+
   async function handleItemSaved(categoryId) {
     setEditingItemId(null);
     setEditingCategoryId(null);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setExpandedCategoryId(categoryId);
 
     await router.replace(
@@ -196,7 +354,7 @@ export default function AdminMenuPage({
   async function handleItemDeleted(categoryId) {
     setEditingItemId(null);
     setEditingCategoryId(null);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setExpandedCategoryId(categoryId);
 
     await router.replace(
@@ -336,7 +494,7 @@ export default function AdminMenuPage({
     setIsCreatingCategory(false);
     setEditingCategoryId(null);
     setEditingItemId(null);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setExpandedCategoryId(null);
 
     await router.replace(
@@ -361,21 +519,32 @@ export default function AdminMenuPage({
   function toggleCategoryCreator() {
     setEditingItemId(null);
     setEditingCategoryId(null);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setSaveMessage("");
     setActionError("");
+    setEditingSubcategoryId(null);
 
     setIsCreatingCategory(
       (currentValue) => !currentValue
     );
   }
 
-  async function handleCategoryCreated(category) {
+  async function handleCategoryCreated(
+    category,
+    options = {}
+  ) {
     setIsCreatingCategory(false);
     setEditingItemId(null);
-    setEditingCategoryId(null);
-    setCreatingItemCategoryId(null);
+    setCreatingItem(null);
     setExpandedCategoryId(category.id);
+
+    if (options.addSubcategory) {
+      setEditingCategoryId(category.id);
+      setNewSubcategoryCategoryId(category.id);
+    } else {
+      setEditingCategoryId(null);
+      setNewSubcategoryCategoryId(null);
+    }
 
     await router.replace(
       router.asPath,
@@ -385,11 +554,27 @@ export default function AdminMenuPage({
       }
     );
 
+    if (options.addSubcategory) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          document
+            .getElementById(
+              `category-editor-${category.id}`
+            )
+            ?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+        });
+      });
+    }
+
     setSaveMessage(
-      "A nova categoria foi criada com sucesso."
+      options.addSubcategory
+        ? "A categoria foi criada. Adiciona agora a subcategoria."
+        : "A nova categoria foi criada com sucesso."
     );
   }
-
   return (
     <>
       <Head>
@@ -500,6 +685,9 @@ export default function AdminMenuPage({
                   setIsCreatingCategory(false)
                 }
                 onSaved={handleCategoryCreated}
+                onSubcategoryCreationFinished={() =>
+                  setNewSubcategoryCategoryId(null)
+                }
               />
             </section>
           )}
@@ -526,10 +714,56 @@ export default function AdminMenuPage({
                     `category-panel-${category.id}`;
 
                   const isCreatingItem =
-                    creatingItemCategoryId === category.id;
+                    creatingItem?.categoryId === category.id;
+
+                  const isCreatingSubcategory =
+                    creatingSubcategoryCategoryId === category.id;
+
+                  const subcategoryCreatorId =
+                    `subcategory-creator-${category.id}`;
+
+
 
                   const itemCreatorId =
                     `item-creator-${category.id}`;
+
+                  const categoryName =
+                    category.translations.pt.label ||
+                    category.translations.es.label ||
+                    category.translations.en.label ||
+                    category.slug;
+
+                  const itemsWithoutSubcategory =
+                    category.items.filter(
+                      (item) => item.subcategoryId === null
+                    );
+
+                  const itemGroups = [
+                    ...(itemsWithoutSubcategory.length > 0
+                      ? [
+                        {
+                          id: `category-${category.id}`,
+                          name: categoryName,
+                          items: itemsWithoutSubcategory,
+                        },
+                      ]
+                      : []),
+
+                    ...category.subcategories.map(
+                      (subcategory) => ({
+                        id: `subcategory-${subcategory.id}`,
+                        name:
+                          subcategory.translations.pt.name ||
+                          subcategory.translations.es.name ||
+                          subcategory.translations.en.name ||
+                          `Subcategoria ${subcategory.position}`,
+                        items: category.items.filter(
+                          (item) =>
+                            item.subcategoryId === subcategory.id
+                        ),
+                      })
+                    ),
+                  ];
 
                   return (
                     <section
@@ -655,7 +889,7 @@ export default function AdminMenuPage({
                                 setExpandedCategoryId(category.id);
                               }
 
-                              toggleCategoryEditor(category.id);
+                              toggleCategoryEditor(category.id, categoryEditorId);
                             }}
                           >
                             {isEditingCategory
@@ -744,6 +978,9 @@ export default function AdminMenuPage({
                             >
                               <MenuCategoryEditor
                                 category={category}
+                                startCreatingSubcategory={
+                                  newSubcategoryCategoryId === category.id
+                                }
                                 onCancel={() =>
                                   setEditingCategoryId(null)
                                 }
@@ -751,6 +988,15 @@ export default function AdminMenuPage({
                                   handleCategorySaved(category.id)
                                 }
                                 onDeleted={handleCategoryDeleted}
+                                onSubcategoriesChanged={(message) =>
+                                  handleCategorySubcategoriesChanged(
+                                    category.id,
+                                    message
+                                  )
+                                }
+                                onSubcategoryCreationFinished={() =>
+                                  setNewSubcategoryCategoryId(null)
+                                }
                               />
                             </div>
                           )}
@@ -764,8 +1010,12 @@ export default function AdminMenuPage({
                               <MenuItemEditor
                                 item={null}
                                 categoryId={category.id}
+                                subcategories={category.subcategories}
+                                initialSubcategoryId={
+                                  creatingItem?.subcategoryId ?? null
+                                }
                                 onCancel={() =>
-                                  setCreatingItemCategoryId(null)
+                                  setCreatingItem(null)
                                 }
                                 onSaved={() =>
                                   handleItemCreated(category.id)
@@ -775,161 +1025,178 @@ export default function AdminMenuPage({
                           )}
                           {category.items.length === 0 ? (
                             <p>
-                              Esta categoria ainda não tem
-                              pratos.
+                              Esta categoria ainda não tem pratos.
                             </p>
                           ) : (
                             <div className={styles.dishList}>
-                              {category.items.map((item, itemIndex) => {
-                                const isEditing =
-                                  editingItemId === item.id;
+                              {itemGroups.map((group) => (
+                                <div
+                                  className={styles.dishGroup}
+                                  key={group.id}
+                                >
+                                  <h3 className={styles.dishGroupTitle}>
+                                    {group.name}
+                                  </h3>
 
-                                const editorId =
-                                  `item-editor-${item.id}`;
+                                  {group.items.map((item, itemIndex) => {
+                                    const isEditing =
+                                      editingItemId === item.id;
 
-                                return (
-                                  <Fragment key={item.id}>
-                                    <article className={styles.dishRow}>
-                                      <div
-                                        className={styles.orderControls}
-                                        aria-label={`Alterar ordem de ${item.translations.pt.name}`}
-                                      >
-                                        <button
-                                          className={styles.orderButton}
-                                          type="button"
-                                          title="Mover para cima"
-                                          aria-label={`Mover ${item.translations.pt.name} para cima`}
-                                          disabled={
-                                            itemIndex === 0 ||
-                                            movingItemId !== null ||
-                                            hasOpenEditor
-                                          }
-                                          onClick={() =>
-                                            handleMoveItem(
-                                              item.id,
-                                              "up",
-                                              category.id
-                                            )
-                                          }
-                                        >
-                                          ↑
-                                        </button>
+                                    const editorId =
+                                      `item-editor-${item.id}`;
 
-                                        <span className={styles.dishOrder}>
-                                          {item.position}
-                                        </span>
+                                    return (
+                                      <Fragment key={item.id}>
+                                        <article className={styles.dishRow}>
+                                          <div
+                                            className={styles.orderControls}
+                                            aria-label={`Alterar ordem de ${item.translations.pt.name}`}
+                                          >
+                                            <button
+                                              className={styles.orderButton}
+                                              type="button"
+                                              title="Mover para cima"
+                                              aria-label={`Mover ${item.translations.pt.name} para cima`}
+                                              disabled={
+                                                itemIndex === 0 ||
+                                                movingItemId !== null ||
+                                                movingSubcategoryId !== null ||
+                                                hasOpenEditor
+                                              }
+                                              onClick={() =>
+                                                handleMoveItem(
+                                                  item.id,
+                                                  "up",
+                                                  category.id
+                                                )
+                                              }
+                                            >
+                                              ↑
+                                            </button>
 
-                                        <button
-                                          className={styles.orderButton}
-                                          type="button"
-                                          title="Mover para baixo"
-                                          aria-label={`Mover ${item.translations.pt.name} para baixo`}
-                                          disabled={
-                                            itemIndex ===
-                                            category.items.length - 1 ||
-                                            movingItemId !== null ||
-                                            hasOpenEditor
-                                          }
-                                          onClick={() =>
-                                            handleMoveItem(
-                                              item.id,
-                                              "down",
-                                              category.id
-                                            )
-                                          }
-                                        >
-                                          ↓
-                                        </button>
-                                      </div>
-                                      <div className={styles.dishPrimary}>
-                                        <strong>
-                                          {item.translations.pt.name}
-                                        </strong>
+                                            <span className={styles.dishOrder}>
+                                              {item.position}
+                                            </span>
 
-                                        <span>
-                                          {item.translations.pt.description}
-                                        </span>
-                                      </div>
+                                            <button
+                                              className={styles.orderButton}
+                                              type="button"
+                                              title="Mover para baixo"
+                                              aria-label={`Mover ${item.translations.pt.name} para baixo`}
+                                              disabled={
+                                                itemIndex ===
+                                                group.items.length - 1 ||
+                                                movingItemId !== null ||
+                                                movingSubcategoryId !== null ||
+                                                hasOpenEditor
+                                              }
+                                              onClick={() =>
+                                                handleMoveItem(
+                                                  item.id,
+                                                  "down",
+                                                  category.id
+                                                )
+                                              }
+                                            >
+                                              ↓
+                                            </button>
+                                          </div>
 
-                                      <div className={styles.dishAlternate}>
-                                        <div>
-                                          <strong>
-                                            ES · {item.translations.es.name}
-                                          </strong>
+                                          <div className={styles.dishPrimary}>
+                                            <strong>
+                                              {item.translations.pt.name}
+                                            </strong>
 
-                                          <span>
-                                            {
-                                              item.translations.es
-                                                .description
-                                            }
+                                            <span>
+                                              {item.translations.pt.description}
+                                            </span>
+                                          </div>
+
+                                          <div className={styles.dishAlternate}>
+                                            <div>
+                                              <strong>
+                                                ES · {item.translations.es.name}
+                                              </strong>
+
+                                              <span>
+                                                {
+                                                  item.translations.es
+                                                    .description
+                                                }
+                                              </span>
+                                            </div>
+
+                                            <div>
+                                              <strong>
+                                                EN · {item.translations.en.name}
+                                              </strong>
+
+                                              <span>
+                                                {
+                                                  item.translations.en
+                                                    .description
+                                                }
+                                              </span>
+                                            </div>
+                                          </div>
+
+                                          <span className={styles.dishPrice}>
+                                            {item.priceText || "Pendente"}
                                           </span>
-                                        </div>
 
-                                        <div>
-                                          <strong>
-                                            EN · {item.translations.en.name}
-                                          </strong>
-
-                                          <span>
-                                            {
-                                              item.translations.en
-                                                .description
+                                          <span
+                                            className={
+                                              item.isVisible
+                                                ? styles.statusVisible
+                                                : styles.statusHidden
                                             }
+                                          >
+                                            {item.isVisible
+                                              ? "Visível"
+                                              : "Oculto"}
                                           </span>
-                                        </div>
-                                      </div>
 
-                                      <span className={styles.dishPrice}>
-                                        {formatPrice(item.priceCents)}
-                                      </span>
+                                          <button
+                                            className={styles.editButton}
+                                            type="button"
+                                            aria-expanded={isEditing}
+                                            aria-controls={editorId}
+                                            onClick={() =>
+                                              toggleItemEditor(item.id, editorId)
+                                            }
+                                          >
+                                            {isEditing ? "Fechar" : "Editar"}
+                                          </button>
+                                        </article>
 
-                                      <span
-                                        className={
-                                          item.isVisible
-                                            ? styles.statusVisible
-                                            : styles.statusHidden
-                                        }
-                                      >
-                                        {item.isVisible
-                                          ? "Visível"
-                                          : "Oculto"}
-                                      </span>
-
-                                      <button
-                                        className={styles.editButton}
-                                        type="button"
-                                        aria-expanded={isEditing}
-                                        aria-controls={editorId}
-                                        onClick={() =>
-                                          toggleItemEditor(item.id)
-                                        }
-                                      >
-                                        {isEditing ? "Fechar" : "Editar"}
-                                      </button>
-                                    </article>
-
-                                    {isEditing && (
-                                      <div
-                                        className={styles.editorWrapper}
-                                        id={editorId}
-                                      >
-                                        <MenuItemEditor
-                                          item={item}
-                                          onCancel={() =>
-                                            setEditingItemId(null)
-                                          }
-                                          onSaved={() =>
-                                            handleItemSaved(category.id)
-                                          }
-                                          onDeleted={() =>
-                                            handleItemDeleted(category.id)
-                                          }
-                                        />
-                                      </div>
-                                    )}
-                                  </Fragment>
-                                );
-                              })}
+                                        {isEditing && (
+                                          <div
+                                            className={styles.editorWrapper}
+                                            id={editorId}
+                                          >
+                                            <MenuItemEditor
+                                              item={item}
+                                              categoryId={category.id}
+                                              subcategories={
+                                                category.subcategories
+                                              }
+                                              onCancel={() =>
+                                                setEditingItemId(null)
+                                              }
+                                              onSaved={() =>
+                                                handleItemSaved(category.id)
+                                              }
+                                              onDeleted={() =>
+                                                handleItemDeleted(category.id)
+                                              }
+                                            />
+                                          </div>
+                                        )}
+                                      </Fragment>
+                                    );
+                                  })}
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>

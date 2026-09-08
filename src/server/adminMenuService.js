@@ -115,9 +115,20 @@ export async function getAdminMenuCategories() {
     include: {
       translations: true,
 
-      subcategories: category.subcategories.map(
-        mapAdminSubcategory
-      ),
+      subcategories: {
+        orderBy: [
+          {
+            position: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+
+        include: {
+          translations: true,
+        },
+      },
 
       items: {
         orderBy: [
@@ -143,29 +154,20 @@ export async function getAdminMenuCategories() {
     position: category.position,
     isVisible: category.isVisible,
 
+    subcategories: category.subcategories.map(
+      mapAdminSubcategory
+    ),
+
     translations: mapTranslationRecords(
       category.translations,
       ["label", "title"]
-    ),
-
-    subcategories: category.subcategories.map(
-      (subcategory) => ({
-        id: subcategory.id,
-        position: subcategory.position,
-        isVisible: subcategory.isVisible,
-
-        translations: mapTranslationRecords(
-          subcategory.translations,
-          ["name"]
-        ),
-      })
     ),
 
     items: category.items.map((item) => ({
       id: item.id,
       subcategoryId: item.subcategoryId,
       imagePath: item.imagePath,
-      priceCents: item.priceCents,
+      priceText: item.priceText,
       position: item.position,
       isVisible: item.isVisible,
 
@@ -216,7 +218,7 @@ export async function updateAdminMenuItem(
 
       data: {
         imagePath: input.imagePath,
-        priceCents: input.priceCents,
+        priceText: input.priceText,
         isVisible: input.isVisible,
         subcategoryId: input.subcategoryId,
       },
@@ -263,7 +265,7 @@ export async function updateAdminMenuItem(
       id: updatedItem.id,
       subcategoryId: updatedItem.subcategoryId,
       imagePath: updatedItem.imagePath,
-      priceCents: updatedItem.priceCents,
+      priceText: updatedItem.priceText,
       position: updatedItem.position,
       isVisible: updatedItem.isVisible,
 
@@ -406,7 +408,7 @@ export async function createAdminMenuItem(input) {
           categoryId: input.categoryId,
           subcategoryId: input.subcategoryId,
           imagePath: input.imagePath,
-          priceCents: input.priceCents,
+          priceText: input.priceText,
           position: nextPosition,
           isVisible: input.isVisible,
         },
@@ -442,7 +444,7 @@ export async function createAdminMenuItem(input) {
       categoryId: item.categoryId,
       subcategoryId: item.subcategoryId,
       imagePath: item.imagePath,
-      priceCents: item.priceCents,
+      priceText: item.priceText,
       position: item.position,
       isVisible: item.isVisible,
 

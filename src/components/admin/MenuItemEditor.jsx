@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import styles from "../../styles/Admin.module.css";
+import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 
 const languages = [
   {
@@ -25,58 +26,6 @@ const allowedImageTypes = new Set([
   "image/webp",
 ]);
 
-function formatPriceInput(priceCents) {
-  if (priceCents === null) {
-    return "";
-  }
-
-  return (priceCents / 100)
-    .toFixed(2)
-    .replace(".", ",");
-}
-
-function parsePriceInput(price) {
-  const normalizedPrice = price.trim();
-
-  if (normalizedPrice === "") {
-    return {
-      value: null,
-    };
-  }
-
-  if (
-    !/^\d+(?:[.,]\d{1,2})?$/.test(
-      normalizedPrice
-    )
-  ) {
-    return {
-      error:
-        "Introduz um preço válido, por exemplo 12,50.",
-    };
-  }
-
-  const [euros, decimalPart = ""] =
-    normalizedPrice.split(/[.,]/);
-
-  const priceCents =
-    Number(euros) * 100 +
-    Number(decimalPart.padEnd(2, "0"));
-
-  if (
-    !Number.isSafeInteger(priceCents) ||
-    priceCents > 1000000
-  ) {
-    return {
-      error:
-        "O preço não pode ultrapassar 10 000 euros.",
-    };
-  }
-
-  return {
-    value: priceCents,
-  };
-}
-
 function createEmptyTranslation() {
   return {
     name: "",
@@ -87,10 +36,13 @@ function createEmptyTranslation() {
 export default function MenuItemEditor({
   item = null,
   categoryId,
+  subcategories = [],
+  initialSubcategoryId = null,
   onCancel,
   onSaved,
   onDeleted,
 }) {
+
   const isCreating = item === null;
 
   const formIdentifier = isCreating
@@ -99,10 +51,13 @@ export default function MenuItemEditor({
 
   const [formValues, setFormValues] = useState(
     () => ({
-      imagePath: item?.imagePath ?? "",
-      price: formatPriceInput(
-        item?.priceCents ?? null
+      subcategoryId: String(
+        item?.subcategoryId ??
+        initialSubcategoryId ??
+        ""
       ),
+      imagePath: item?.imagePath ?? "",
+      priceText: item?.priceText ?? "",
 
       isVisible: item?.isVisible ?? true,
 
@@ -120,6 +75,19 @@ export default function MenuItemEditor({
     })
   );
 
+  const [availableSubcategories, setAvailableSubcategories] =
+    useState(() => subcategories);
+
+  const [
+    isCreatingSubcategory,
+    setIsCreatingSubcategory,
+  ] = useState(false);
+
+  const [
+    editingSubcategoryId,
+    setEditingSubcategoryId,
+  ] = useState(null);
+
   const [errorMessage, setErrorMessage] =
     useState("");
 
@@ -130,6 +98,12 @@ export default function MenuItemEditor({
     isConfirmingDelete,
     setIsConfirmingDelete,
   ] = useState(false);
+
+  const [
+    isConfirmingImageRemoval,
+    setIsConfirmingImageRemoval,
+  ] = useState(false);
+
 
   const [isDeleting, setIsDeleting] =
     useState(false);
@@ -145,8 +119,11 @@ export default function MenuItemEditor({
     isUploadingImage;
 
   const isFormLocked =
-    isBusy || isConfirmingDelete;
-
+    isBusy ||
+    isConfirmingDelete ||
+    isConfirmingImageRemoval ||
+    isCreatingSubcategory ||
+    editingSubcategoryId !== null;
 
   function updateTranslation(
     language,
@@ -240,15 +217,6 @@ export default function MenuItemEditor({
     event.preventDefault();
     setErrorMessage("");
 
-    const parsedPrice = parsePriceInput(
-      formValues.price
-    );
-
-    if (parsedPrice.error) {
-      setErrorMessage(parsedPrice.error);
-      return;
-    }
-
     const endpoint = isCreating
       ? "/api/admin/menu/items"
       : `/api/admin/menu/items/${item.id}`;
@@ -274,9 +242,15 @@ export default function MenuItemEditor({
             }
             : {}),
 
+          subcategoryId:
+            formValues.subcategoryId === ""
+              ? null
+              : Number(formValues.subcategoryId),
           imagePath:
             formValues.imagePath.trim() || null,
-          priceCents: parsedPrice.value,
+          // ENVIO PARA A API
+          priceText:
+            formValues.priceText.trim() || null,
           isVisible: formValues.isVisible,
           translations: formValues.translations,
         }),
@@ -444,6 +418,231 @@ export default function MenuItemEditor({
           );
         })}
       </div>
+      <div className={styles.itemSubcategories}>
+        <div className={styles.itemSubcategoriesHeading}>
+          <div>
+            <strong>Subcategoria</strong>
+            <p>
+              Seleciona a subcategoria deste prato.
+            </p>
+          </div>
+
+          <button
+            className={styles.subcategoryAddButton}
+            type="button"
+            disabled={isFormLocked}
+            onClick={() => setIsCreatingSubcategory(true)}
+          >
+            + Adicionar subcategoria
+          </button>
+        </div>
+
+        <div className={styles.itemSubcategoryOptions}>
+          <label className={styles.itemSubcategoryOption}>
+            <input
+              type="radio"
+              name={`item-${formIdentifier}-subcategory`}
+              value=""
+              disabled={isFormLocked}
+              checked={formValues.subcategoryId === ""}
+              onChange={() =>
+                setFormValues((currentValues) => ({
+                  ...currentValues,
+                  subcategoryId: "",
+                }))
+              }
+            />
+
+            <span>Sem subcategoria</span>
+          </label>
+
+          {availableSubcategories.map((subcategory) => {
+            const name =
+              subcategory.translations.pt.name ||
+              subcategory.translations.es.name ||
+              subcategory.translations.en.name ||
+              `Subcategoria ${subcategory.position}`;
+
+            return (
+              <div
+                className={styles.itemSubcategoryOption}
+                key={subcategory.id}
+              >
+                <label>
+                  <input
+                    type="radio"
+                    name={`item-${formIdentifier}-subcategory`}
+                    value={subcategory.id}
+                    disabled={isFormLocked}
+                    checked={
+                      formValues.subcategoryId ===
+                      String(subcategory.id)
+                    }
+                    onChange={() =>
+                      setFormValues((currentValues) => ({
+                        ...currentValues,
+                        subcategoryId: String(
+                          subcategory.id
+                        ),
+                      }))
+                    }
+                  />
+
+                  <span>{name}</span>
+                </label>
+
+                <button
+                  className={styles.subcategoryEditButton}
+                  type="button"
+                  disabled={isFormLocked}
+                  onClick={() =>
+                    setEditingSubcategoryId(
+                      subcategory.id
+                    )
+                  }
+                >
+                  Editar
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {editingSubcategoryId !== null && (
+          <MenuSubcategoryEditor
+            embedded
+            subcategory={
+              availableSubcategories.find(
+                (subcategory) =>
+                  subcategory.id ===
+                  editingSubcategoryId
+              )
+            }
+            categoryId={categoryId}
+            onCancel={() =>
+              setEditingSubcategoryId(null)
+            }
+            onSaved={async (updatedSubcategory) => {
+              setAvailableSubcategories(
+                (currentSubcategories) =>
+                  currentSubcategories.map(
+                    (subcategory) =>
+                      subcategory.id ===
+                        updatedSubcategory.id
+                        ? updatedSubcategory
+                        : subcategory
+                  )
+              );
+
+              setEditingSubcategoryId(null);
+            }}
+            onDeleted={async () => {
+              const deletedId =
+                editingSubcategoryId;
+
+              setAvailableSubcategories(
+                (currentSubcategories) =>
+                  currentSubcategories.filter(
+                    (subcategory) =>
+                      subcategory.id !== deletedId
+                  )
+              );
+
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                subcategoryId:
+                  currentValues.subcategoryId ===
+                    String(deletedId)
+                    ? ""
+                    : currentValues.subcategoryId,
+              }));
+
+              setEditingSubcategoryId(null);
+            }}
+          />
+        )}
+
+        {isCreatingSubcategory && (
+          <MenuSubcategoryEditor
+            embedded
+            subcategory={null}
+            categoryId={categoryId}
+            onCancel={() =>
+              setIsCreatingSubcategory(false)
+            }
+            onSaved={async (subcategory) => {
+              setAvailableSubcategories(
+                (currentSubcategories) => [
+                  ...currentSubcategories,
+                  subcategory,
+                ]
+              );
+
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                subcategoryId: String(
+                  subcategory.id
+                ),
+              }));
+
+              setIsCreatingSubcategory(false);
+            }}
+          />
+        )}
+
+        {isCreatingSubcategory && (
+          <MenuSubcategoryEditor
+            embedded
+            subcategory={null}
+            categoryId={categoryId}
+            onCancel={() =>
+              setIsCreatingSubcategory(false)
+            }
+            onSaved={async (subcategory) => {
+              setAvailableSubcategories(
+                (currentSubcategories) => [
+                  ...currentSubcategories,
+                  subcategory,
+                ]
+              );
+
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                subcategoryId: String(
+                  subcategory.id
+                ),
+              }));
+
+              setIsCreatingSubcategory(false);
+            }}
+          />
+        )}
+        {isCreatingSubcategory && (
+          <MenuSubcategoryEditor
+            embedded
+            subcategory={null}
+            categoryId={categoryId}
+            onCancel={() =>
+              setIsCreatingSubcategory(false)
+            }
+            onSaved={async (subcategory) => {
+              setAvailableSubcategories(
+                (currentSubcategories) => [
+                  ...currentSubcategories,
+                  subcategory,
+                ]
+              );
+
+              setFormValues((currentValues) => ({
+                ...currentValues,
+                subcategoryId: String(subcategory.id),
+              }));
+
+              setIsCreatingSubcategory(false);
+            }}
+          />
+        )}
+      </div>
 
       <div className={styles.imageUploadField}>
         <span className={styles.editorField}>
@@ -491,37 +690,82 @@ export default function MenuItemEditor({
             type="button"
             disabled={isFormLocked}
             onClick={() =>
-              setFormValues((currentValues) => ({
-                ...currentValues,
-                imagePath: "",
-              }))
+              setIsConfirmingImageRemoval(true)
             }
           >
             Remover imagem do prato
           </button>
         )}
       </div>
+      {isConfirmingImageRemoval && (
+        <div
+          className={styles.deleteConfirmation}
+          role="alert"
+        >
+          <strong>
+            Remover a imagem do prato?
+          </strong>
+
+          <p>
+            A imagem será removida quando guardares
+            o prato.
+          </p>
+
+          <div
+            className={
+              styles.deleteConfirmationActions
+            }
+          >
+            <button
+              className={styles.cancelButton}
+              type="button"
+              disabled={isBusy}
+              onClick={() =>
+                setIsConfirmingImageRemoval(false)
+              }
+            >
+              Manter imagem
+            </button>
+
+            <button
+              className={styles.confirmDeleteButton}
+              type="button"
+              disabled={isBusy}
+              onClick={() => {
+                setFormValues((currentValues) => ({
+                  ...currentValues,
+                  imagePath: "",
+                }));
+
+                setIsConfirmingImageRemoval(false);
+              }}
+            >
+              Remover imagem
+            </button>
+          </div>
+        </div>
+      )}
       <div className={styles.editorOptions}>
         <label className={styles.priceField}>
-          <span>Preço em euros</span>
+          <span>Preço / informação de preço</span>
 
           <input
             className={styles.editorInput}
             type="text"
-            inputMode="decimal"
-            placeholder="Ex.: 12,50"
+            maxLength={200}
+            placeholder="Ex.: Meia dose: 8 € · Dose: 14 €"
             disabled={isFormLocked}
-            value={formValues.price}
+            value={formValues.priceText}
             onChange={(event) =>
               setFormValues((currentValues) => ({
                 ...currentValues,
-                price: event.target.value,
+                priceText: event.target.value,
               }))
             }
           />
 
           <small>
-            Deixa vazio para apresentar “Pendente”.
+            Podes escrever um preço simples ou várias opções.
           </small>
         </label>
 

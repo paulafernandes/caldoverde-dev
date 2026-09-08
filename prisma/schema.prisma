@@ -69,7 +69,7 @@ model MenuItem {
   categoryId    Int
   subcategoryId Int?
   imagePath     String?
-  priceCents    Int?
+  priceText     String?
   position      Int                   @default(0)
   isVisible     Boolean               @default(true)
   createdAt     DateTime              @default(now())

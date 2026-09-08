@@ -49,7 +49,9 @@ export default function Footer() {
                 {text.phoneLabel}
               </span>
 
-              <span>{text.phonePending}</span>
+              <a href="tel:+34603269410">
+                {text.phone}
+              </a>
             </div>
 
             <div className="footer-contact-item">
@@ -57,7 +59,14 @@ export default function Footer() {
                 {text.addressLabel}
               </span>
 
-              <address>{text.addressPending}</address>
+              <address>
+                {text.addressLines.map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </address>
             </div>
           </div>
 
@@ -69,7 +78,14 @@ export default function Footer() {
                 {text.hoursLabel}
               </span>
 
-              <span>{text.hoursPending}</span>
+              <div>
+                {text.hours.map((line) => (
+                  <span key={line}>
+                    {line}
+                    <br />
+                  </span>
+                ))}
+              </div>
             </div>
 
             {/* <p className="footer-reservation-text">
