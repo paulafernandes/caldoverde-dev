@@ -1,8 +1,8 @@
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
 import styles from "../../styles/Admin.module.css";
 import Image from "next/image";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
+import { adminFetch } from "../../lib/adminFetch";
 
 const languages = [
   {
@@ -43,6 +43,8 @@ function createEmptyTranslation() {
 
 export default function MenuCategoryEditor({
   category = null,
+  initialFormValues = null,
+  onFormValuesChange,
   onCancel,
   onSaved,
   onDeleted,
@@ -57,24 +59,30 @@ export default function MenuCategoryEditor({
     : category.id;
 
   const [formValues, setFormValues] = useState(
-    () => ({
-      imagePath: category?.imagePath ?? "",
+    () => {
+      if (isCreating && initialFormValues) {
+        return initialFormValues;
+      }
 
-      isVisible:
-        category?.isVisible ?? false,
+      return {
+        imagePath: category?.imagePath ?? "",
 
-      translations: category
-        ? {
-          pt: { ...category.translations.pt },
-          es: { ...category.translations.es },
-          en: { ...category.translations.en },
-        }
-        : {
-          pt: createEmptyTranslation(),
-          es: createEmptyTranslation(),
-          en: createEmptyTranslation(),
-        },
-    })
+        isVisible:
+          category?.isVisible ?? false,
+
+        translations: category
+          ? {
+            pt: { ...category.translations.pt },
+            es: { ...category.translations.es },
+            en: { ...category.translations.en },
+          }
+          : {
+            pt: createEmptyTranslation(),
+            es: createEmptyTranslation(),
+            en: createEmptyTranslation(),
+          },
+      };
+    }
   );
 
   const [errorMessage, setErrorMessage] =
@@ -116,7 +124,7 @@ export default function MenuCategoryEditor({
     setIsCreatingSubcategory,
   ] = useState(startCreatingSubcategory);
 
-    const [
+  const [
     movingSubcategoryId,
     setMovingSubcategoryId,
   ] = useState(null);
@@ -129,6 +137,15 @@ export default function MenuCategoryEditor({
     editingSubcategoryId ||
     movingSubcategoryId !== null
 
+  useEffect(() => {
+    if (isCreating) {
+      onFormValuesChange?.(formValues);
+    }
+  }, [
+    formValues,
+    isCreating,
+    onFormValuesChange,
+  ]);
 
   function updateTranslation(
     language,
@@ -181,7 +198,7 @@ export default function MenuCategoryEditor({
     setIsUploadingImage(true);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/uploads",
         {
           method: "POST",
@@ -194,6 +211,10 @@ export default function MenuCategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível carregar a imagem."
@@ -246,7 +267,7 @@ export default function MenuCategoryEditor({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await adminFetch(endpoint, {
         method,
 
         headers: {
@@ -266,6 +287,10 @@ export default function MenuCategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         const validationMessage =
           result.details?.[0]?.message;
 
@@ -298,7 +323,7 @@ export default function MenuCategoryEditor({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         `/api/admin/menu/categories/${category.id}`,
         {
           method: "DELETE",
@@ -310,6 +335,10 @@ export default function MenuCategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível eliminar a categoria."
@@ -338,7 +367,7 @@ export default function MenuCategoryEditor({
     setMovingSubcategoryId(subcategoryId);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/subcategories/order",
         {
           method: "PATCH",
@@ -359,6 +388,10 @@ export default function MenuCategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível alterar a ordem da subcategoria."

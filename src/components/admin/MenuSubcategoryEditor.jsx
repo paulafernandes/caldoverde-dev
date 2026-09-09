@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import styles from "../../styles/Admin.module.css";
+import { adminFetch } from "../../lib/adminFetch";
 
 const languages = [
   {
@@ -104,7 +105,7 @@ export default function MenuSubcategoryEditor({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await adminFetch(endpoint, {
         method,
 
         headers: {
@@ -128,6 +129,10 @@ export default function MenuSubcategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         const validationMessage =
           result.details?.[0]?.message;
 
@@ -157,7 +162,7 @@ export default function MenuSubcategoryEditor({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         `/api/admin/menu/subcategories/${subcategory.id}`,
         {
           method: "DELETE",
@@ -169,6 +174,10 @@ export default function MenuSubcategoryEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível eliminar a subcategoria."
@@ -180,18 +189,18 @@ export default function MenuSubcategoryEditor({
 
       setIsDeleting(false);
       await onDeleted();
-} catch (error) {
-  console.error(
-    "Erro ao guardar subcategoria:",
-    error
-  );
+    } catch (error) {
+      console.error(
+        "Erro ao guardar subcategoria:",
+        error
+      );
 
-  setErrorMessage(
-    "Não foi possível concluir a operação."
-  );
+      setErrorMessage(
+        "Não foi possível concluir a operação."
+      );
 
-  setIsSubmitting(false);
-}
+      setIsSubmitting(false);
+    }
   }
 
   const subcategoryName =

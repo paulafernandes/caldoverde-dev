@@ -20,16 +20,16 @@ const openGraphLocales = {
 
 const aboutImageAltTexts = {
   pt: {
-    memories: "Fotografia antiga da avó Prazeres",
-    portrait: "Retrato da avó Prazeres",
+    memories: "Alexandre com a avó Prazeres",
+    portrait: "Alexandre com a avó Prazeres",
   },
   es: {
-    memories: "Fotografía antigua de la abuela Prazeres",
-    portrait: "Retrato de la abuela Prazeres",
+    memories: "Fotografía antigua de Alexandre con la abuela Prazeres",
+    portrait: "Retrato de Alexandre con la abuela Prazeres",
   },
   en: {
-    memories: "Old photograph of Grandmother Prazeres",
-    portrait: "Portrait of Grandmother Prazeres",
+    memories: "Old photograph of Alexandre with Grandmother Prazeres",
+    portrait: "Portrait of Alexandre with Grandmother Prazeres",
   },
 };
 
@@ -155,7 +155,7 @@ export default function AboutPage() {
     "
               >
                 <Image
-                  src="/assets/images/bg/avo-prazeres-memorias.png"
+                  src="/assets/images/bg/alexandre_avo_prazeres.png"
                   alt={aboutImageAltTexts[lang].memories}
                   title={aboutImageAltTexts[lang].memories}
                   width={941}

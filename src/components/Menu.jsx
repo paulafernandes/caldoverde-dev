@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
 import Image from "next/image";
@@ -12,6 +12,8 @@ const priceLocales = {
 export default function Menu({
   menuCategories = [],
 }) {
+  const menuListRef = useRef(null);
+
   const [activeCategoryId, setActiveCategoryId] =
     useState(menuCategories[0]?.id ?? null);
 
@@ -24,6 +26,22 @@ export default function Menu({
     ) ??
     menuCategories[0] ??
     null;
+
+  useEffect(() => {
+    const isMobile =
+      window.matchMedia("(max-width: 900px)").matches;
+
+    if (!isMobile) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      menuListRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }, [activeCategoryId]);
 
   return (
     <section className="menu-group" id="ementa">
@@ -84,48 +102,47 @@ export default function Menu({
                   )}
                 />
               </div>
+              <div
+                className="menu-list"
+                ref={menuListRef}>
+                {activeCategory.sections.map((section) => (
+                  <div
+                    className="menu-group"
+                    key={section.id}
+                  >
+                    <h3>
+                      {section.title[language]}
+                    </h3>
 
-              <div className="menu-list">
-                <div className="menu-list">
-                  {activeCategory.sections.map((section) => (
-                    <div
-                      className="menu-group"
-                      key={section.id}
-                    >
-                      <h3>
-                        {section.title[language]}
-                      </h3>
+                    <ul>
+                      {section.items.map((item) => (
+                        <li
+                          key={item.id}
+                          className="menu-dish"
+                        >
+                          <div className="menu-dish-heading">
+                            <h4>{item.name[language]}</h4>
 
-                      <ul>
-                        {section.items.map((item) => (
-                          <li
-                            key={item.id}
-                            className="menu-dish"
-                          >
-                            <div className="menu-dish-heading">
-                              <h4>{item.name[language]}</h4>
+                            <span
+                              className="menu-dish-separator"
+                              aria-hidden="true"
+                            />
 
-                              <span
-                                className="menu-dish-separator"
-                                aria-hidden="true"
-                              />
+                            <span className="menu-dish-price">
+                              {item.price === null
+                                ? text.pricePending
+                                : item.price}
+                            </span>
+                          </div>
 
-                              <span className="menu-dish-price">
-                                {item.price === null
-                                  ? text.pricePending
-                                  : item.price}
-                              </span>
-                            </div>
-
-                            <p>
-                              {item.description[language]}
-                            </p>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+                          <p>
+                            {item.description[language]}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </div>
           </>

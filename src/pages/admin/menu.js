@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import { authClient } from "../../lib/authClient";
 import { getAdminMenuCategories } from "../../server/adminMenuService";
@@ -8,8 +8,8 @@ import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import MenuItemEditor from "../../components/admin/MenuItemEditor";
 import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
-import MenuSubcategoryEditor from "../../components/admin/MenuSubcategoryEditor";
 import Image from "next/image";
+import { adminFetch } from "../../lib/adminFetch";
 
 const languages = ["pt", "es", "en"];
 
@@ -51,6 +51,18 @@ export default function AdminMenuPage({
   const [saveMessage, setSaveMessage] =
     useState("");
 
+  const [
+    isSessionExpired,
+    setIsSessionExpired,
+  ] = useState(false);
+
+  const [reauthEmail, setReauthEmail] = useState("");
+  const [reauthPassword, setReauthPassword] = useState("");
+  const [reauthError, setReauthError] = useState("");
+  const [isReauthenticating, setIsReauthenticating] =
+    useState(false);
+  const [showReauthForm, setShowReauthForm] =
+    useState(false);
   const [isSigningOut, setIsSigningOut] =
     useState(false);
 
@@ -81,6 +93,9 @@ export default function AdminMenuPage({
     setNewSubcategoryCategoryId,
   ] = useState(null);
 
+  const [newCategoryDraft, setNewCategoryDraft] =
+    useState(null);
+
   const hasOpenEditor =
     isCreatingCategory ||
     editingItemId !== null ||
@@ -89,23 +104,31 @@ export default function AdminMenuPage({
     creatingSubcategoryCategoryId !== null ||
     editingSubcategoryId !== null;
 
-  function toggleSubcategoryCreator(categoryId) {
-    setIsCreatingCategory(false);
-    setCreatingItem(null);
-    setEditingItemId(null);
-    setEditingCategoryId(null);
-    setSaveMessage("");
-    setActionError("");
-    setEditingSubcategoryId(null);
+  const [newItemDraft, setNewItemDraft] =
+    useState(null);
 
-    setCreatingSubcategoryCategoryId(
-      (currentCategoryId) =>
-        currentCategoryId === categoryId
-          ? null
-          : categoryId
+  useEffect(() => {
+    function handleSessionExpired() {
+      setIsSessionExpired(true);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    window.addEventListener(
+      "admin-session-expired",
+      handleSessionExpired
     );
-  }
 
+    return () => {
+      window.removeEventListener(
+        "admin-session-expired",
+        handleSessionExpired
+      );
+    };
+  }, []);
 
   function toggleCategory(categoryId) {
     setIsCreatingCategory(false);
@@ -206,7 +229,7 @@ export default function AdminMenuPage({
     setMovingSubcategoryId(subcategoryId);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/subcategories/order",
         {
           method: "PATCH",
@@ -257,6 +280,7 @@ export default function AdminMenuPage({
   }
 
   async function handleItemCreated(categoryId) {
+    setNewItemDraft(null);
     setCreatingItem(null);
     setEditingItemId(null);
     setEditingCategoryId(null);
@@ -380,7 +404,7 @@ export default function AdminMenuPage({
     setMovingItemId(itemId);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/items/order",
         {
           method: "PATCH",
@@ -440,7 +464,7 @@ export default function AdminMenuPage({
     setMovingCategoryId(categoryId);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/categories/order",
         {
           method: "PATCH",
@@ -516,6 +540,34 @@ export default function AdminMenuPage({
     await router.replace("/admin/login");
   }
 
+  async function handleReauthenticate(event) {
+    event.preventDefault();
+
+    setReauthError("");
+    setIsReauthenticating(true);
+
+    const { error } = await authClient.signIn.email({
+      email: reauthEmail.trim(),
+      password: reauthPassword,
+    });
+
+    if (error) {
+      setReauthError(
+        error.message ??
+        "Não foi possível iniciar sessão."
+      );
+
+      setIsReauthenticating(false);
+      return;
+    }
+
+    setIsSessionExpired(false);
+    setShowReauthForm(false);
+    setReauthPassword("");
+    setReauthError("");
+    setIsReauthenticating(false);
+  }
+
   function toggleCategoryCreator() {
     setEditingItemId(null);
     setEditingCategoryId(null);
@@ -533,6 +585,7 @@ export default function AdminMenuPage({
     category,
     options = {}
   ) {
+    setNewCategoryDraft(null);
     setIsCreatingCategory(false);
     setEditingItemId(null);
     setCreatingItem(null);
@@ -655,6 +708,105 @@ export default function AdminMenuPage({
                 : "Adicionar categoria"}
             </button>
           </div>
+          {
+            isSessionExpired && (
+              <div
+                className={styles.sessionExpiredNotice}
+                role="alert"
+              >
+                <strong>A sessão expirou.</strong>
+
+                <p>
+                  As alterações do formulário continuam preservadas.
+                  Volta a iniciar sessão para continuar.
+                </p>
+
+                {!showReauthForm ? (
+                  <button
+                    className={styles.saveButton}
+                    type="button"
+                    onClick={() =>
+                      setShowReauthForm(true)
+                    }
+                  >
+                    Voltar a iniciar sessão
+                  </button>
+                ) : (
+                  <form
+                    className={styles.reauthForm}
+                    onSubmit={handleReauthenticate}
+                  >
+                    <label>
+                      <span>Email</span>
+
+                      <input
+                        className={styles.editorInput}
+                        type="email"
+                        autoComplete="username"
+                        required
+                        disabled={isReauthenticating}
+                        value={reauthEmail}
+                        onChange={(event) =>
+                          setReauthEmail(
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    <label>
+                      <span>Password</span>
+
+                      <input
+                        className={styles.editorInput}
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                        disabled={isReauthenticating}
+                        value={reauthPassword}
+                        onChange={(event) =>
+                          setReauthPassword(
+                            event.target.value
+                          )
+                        }
+                      />
+                    </label>
+
+                    {reauthError && (
+                      <p className={styles.errorMessage}>
+                        {reauthError}
+                      </p>
+                    )}
+
+                    <div className={styles.reauthActions}>
+                      <button
+                        className={styles.cancelButton}
+                        type="button"
+                        disabled={isReauthenticating}
+                        onClick={() => {
+                          setShowReauthForm(false);
+                          setReauthPassword("");
+                          setReauthError("");
+                        }}
+                      >
+                        Cancelar
+                      </button>
+
+                      <button
+                        className={styles.saveButton}
+                        type="submit"
+                        disabled={isReauthenticating}
+                      >
+                        {isReauthenticating
+                          ? "A iniciar sessão..."
+                          : "Iniciar sessão"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            )
+          }
 
           {saveMessage && (
             <p
@@ -681,9 +833,12 @@ export default function AdminMenuPage({
             >
               <MenuCategoryEditor
                 category={null}
-                onCancel={() =>
-                  setIsCreatingCategory(false)
-                }
+                initialFormValues={newCategoryDraft}
+                onFormValuesChange={setNewCategoryDraft}
+                onCancel={() => {
+                  setNewCategoryDraft(null);
+                  setIsCreatingCategory(false);
+                }}
                 onSaved={handleCategoryCreated}
                 onSubcategoryCreationFinished={() =>
                   setNewSubcategoryCategoryId(null)
@@ -1014,9 +1169,12 @@ export default function AdminMenuPage({
                                 initialSubcategoryId={
                                   creatingItem?.subcategoryId ?? null
                                 }
-                                onCancel={() =>
-                                  setCreatingItem(null)
-                                }
+                                initialFormValues={newItemDraft}
+                                onFormValuesChange={setNewItemDraft}
+                                onCancel={() => {
+                                  setNewItemDraft(null);
+                                  setCreatingItem(null);
+                                }}
                                 onSaved={() =>
                                   handleItemCreated(category.id)
                                 }

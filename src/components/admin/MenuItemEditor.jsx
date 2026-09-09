@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../../styles/Admin.module.css";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
+import { adminFetch } from "../../lib/adminFetch";
 
 const languages = [
   {
@@ -38,42 +39,12 @@ export default function MenuItemEditor({
   categoryId,
   subcategories = [],
   initialSubcategoryId = null,
+  initialFormValues = null,
+  onFormValuesChange,
   onCancel,
   onSaved,
   onDeleted,
 }) {
-
-  const isCreating = item === null;
-
-  const formIdentifier = isCreating
-    ? `new-${categoryId}`
-    : item.id;
-
-  const [formValues, setFormValues] = useState(
-    () => ({
-      subcategoryId: String(
-        item?.subcategoryId ??
-        initialSubcategoryId ??
-        ""
-      ),
-      imagePath: item?.imagePath ?? "",
-      priceText: item?.priceText ?? "",
-
-      isVisible: item?.isVisible ?? true,
-
-      translations: item
-        ? {
-          pt: { ...item.translations.pt },
-          es: { ...item.translations.es },
-          en: { ...item.translations.en },
-        }
-        : {
-          pt: createEmptyTranslation(),
-          es: createEmptyTranslation(),
-          en: createEmptyTranslation(),
-        },
-    })
-  );
 
   const [availableSubcategories, setAvailableSubcategories] =
     useState(() => subcategories);
@@ -83,10 +54,43 @@ export default function MenuItemEditor({
     setIsCreatingSubcategory,
   ] = useState(false);
 
-  const [
-    editingSubcategoryId,
-    setEditingSubcategoryId,
-  ] = useState(null);
+  const isCreating = item === null;
+
+  const formIdentifier = isCreating
+    ? `new-${categoryId}`
+    : item.id;
+
+  const [formValues, setFormValues] = useState(
+    () => {
+      if (isCreating && initialFormValues) {
+        return initialFormValues;
+      }
+
+      return {
+        subcategoryId: String(
+          item?.subcategoryId ??
+          initialSubcategoryId ??
+          ""
+        ),
+        imagePath: item?.imagePath ?? "",
+        priceText: item?.priceText ?? "",
+        isVisible: item?.isVisible ?? true,
+
+        translations: item
+          ? {
+            pt: { ...item.translations.pt },
+            es: { ...item.translations.es },
+            en: { ...item.translations.en },
+          }
+          : {
+            pt: createEmptyTranslation(),
+            es: createEmptyTranslation(),
+            en: createEmptyTranslation(),
+          },
+      };
+    }
+  );
+
 
   const [errorMessage, setErrorMessage] =
     useState("");
@@ -122,8 +126,17 @@ export default function MenuItemEditor({
     isBusy ||
     isConfirmingDelete ||
     isConfirmingImageRemoval ||
-    isCreatingSubcategory ||
-    editingSubcategoryId !== null;
+    isCreatingSubcategory;
+
+  useEffect(() => {
+    if (isCreating) {
+      onFormValuesChange?.(formValues);
+    }
+  }, [
+    formValues,
+    isCreating,
+    onFormValuesChange,
+  ]);
 
   function updateTranslation(
     language,
@@ -178,7 +191,7 @@ export default function MenuItemEditor({
     setIsUploadingImage(true);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         "/api/admin/menu/uploads",
         {
           method: "POST",
@@ -191,6 +204,10 @@ export default function MenuItemEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível carregar a imagem."
@@ -228,7 +245,7 @@ export default function MenuItemEditor({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await adminFetch(endpoint, {
         method,
 
         headers: {
@@ -261,6 +278,10 @@ export default function MenuItemEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         const validationMessage =
           result.details?.[0]?.message;
 
@@ -277,6 +298,10 @@ export default function MenuItemEditor({
       setIsSubmitting(false);
       await onSaved(result.item);
     } catch {
+      console.error(
+        "Erro ao guardar prato:",
+        error
+      );
       setErrorMessage(
         "Não foi possível comunicar com o servidor."
       );
@@ -290,7 +315,7 @@ export default function MenuItemEditor({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(
+      const response = await adminFetch(
         `/api/admin/menu/items/${item.id}`,
         {
           method: "DELETE",
@@ -302,6 +327,10 @@ export default function MenuItemEditor({
         .catch(() => ({}));
 
       if (!response.ok) {
+        if (response.status === 401) {
+          setIsSubmitting(false);
+          return;
+        }
         setErrorMessage(
           result.error ??
           "Não foi possível eliminar o prato."
@@ -314,6 +343,10 @@ export default function MenuItemEditor({
       setIsDeleting(false);
       await onDeleted();
     } catch {
+      console.error(
+        "Erro ao guardar prato:",
+        error
+      );
       setErrorMessage(
         "Não foi possível comunicar com o servidor."
       );
@@ -490,78 +523,11 @@ export default function MenuItemEditor({
 
                   <span>{name}</span>
                 </label>
-
-                <button
-                  className={styles.subcategoryEditButton}
-                  type="button"
-                  disabled={isFormLocked}
-                  onClick={() =>
-                    setEditingSubcategoryId(
-                      subcategory.id
-                    )
-                  }
-                >
-                  Editar
-                </button>
               </div>
             );
           })}
         </div>
 
-        {editingSubcategoryId !== null && (
-          <MenuSubcategoryEditor
-            embedded
-            subcategory={
-              availableSubcategories.find(
-                (subcategory) =>
-                  subcategory.id ===
-                  editingSubcategoryId
-              )
-            }
-            categoryId={categoryId}
-            onCancel={() =>
-              setEditingSubcategoryId(null)
-            }
-            onSaved={async (updatedSubcategory) => {
-              setAvailableSubcategories(
-                (currentSubcategories) =>
-                  currentSubcategories.map(
-                    (subcategory) =>
-                      subcategory.id ===
-                        updatedSubcategory.id
-                        ? updatedSubcategory
-                        : subcategory
-                  )
-              );
-
-              setEditingSubcategoryId(null);
-            }}
-            onDeleted={async () => {
-              const deletedId =
-                editingSubcategoryId;
-
-              setAvailableSubcategories(
-                (currentSubcategories) =>
-                  currentSubcategories.filter(
-                    (subcategory) =>
-                      subcategory.id !== deletedId
-                  )
-              );
-
-              setFormValues((currentValues) => ({
-                ...currentValues,
-                subcategoryId:
-                  currentValues.subcategoryId ===
-                    String(deletedId)
-                    ? ""
-                    : currentValues.subcategoryId,
-              }));
-
-              setEditingSubcategoryId(null);
-            }}
-          />
-        )}
-
         {isCreatingSubcategory && (
           <MenuSubcategoryEditor
             embedded
@@ -583,59 +549,6 @@ export default function MenuItemEditor({
                 subcategoryId: String(
                   subcategory.id
                 ),
-              }));
-
-              setIsCreatingSubcategory(false);
-            }}
-          />
-        )}
-
-        {isCreatingSubcategory && (
-          <MenuSubcategoryEditor
-            embedded
-            subcategory={null}
-            categoryId={categoryId}
-            onCancel={() =>
-              setIsCreatingSubcategory(false)
-            }
-            onSaved={async (subcategory) => {
-              setAvailableSubcategories(
-                (currentSubcategories) => [
-                  ...currentSubcategories,
-                  subcategory,
-                ]
-              );
-
-              setFormValues((currentValues) => ({
-                ...currentValues,
-                subcategoryId: String(
-                  subcategory.id
-                ),
-              }));
-
-              setIsCreatingSubcategory(false);
-            }}
-          />
-        )}
-        {isCreatingSubcategory && (
-          <MenuSubcategoryEditor
-            embedded
-            subcategory={null}
-            categoryId={categoryId}
-            onCancel={() =>
-              setIsCreatingSubcategory(false)
-            }
-            onSaved={async (subcategory) => {
-              setAvailableSubcategories(
-                (currentSubcategories) => [
-                  ...currentSubcategories,
-                  subcategory,
-                ]
-              );
-
-              setFormValues((currentValues) => ({
-                ...currentValues,
-                subcategoryId: String(subcategory.id),
               }));
 
               setIsCreatingSubcategory(false);
@@ -844,7 +757,7 @@ export default function MenuItemEditor({
           <button
             className={styles.deleteButton}
             type="button"
-            disabled={isBusy}
+            disabled={isFormLocked}
             onClick={() =>
               setIsConfirmingDelete(true)
             }

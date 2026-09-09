@@ -777,15 +777,34 @@ img {
   color: var(--color-primary-dark);
   background-color: #ffffff;
   border: 1px solid #dedbd4;
+  border-color: rgb(11 45 33 / 25%);
+  border-radius: 10px;
   cursor: pointer;
 
-  font-size: 14px;
-  font-weight: 700;
+  font-family: "Jost", sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: normal;
 
   transition:
     color 0.25s ease,
     background-color 0.25s ease,
     border-color 0.25s ease;
+}
+
+/* Botões em telemóvel */
+
+@media (max-width: 650px) {
+
+  .hero-button,
+  .about-button,
+  .footer-reservation-button {
+    font-size: 16px;
+  }
+
+  .menu-tab-button {
+    font-size: 14px;
+  }
 }
 
 .menu-tab-button:hover,
@@ -959,13 +978,6 @@ img {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-  }
-
-  .menu-tab-button {
-    min-width: 0;
-    width: 100%;
-    padding: 10px;
-    font-size: 12px;
   }
 
   .menu-tab-button:last-child:nth-child(odd) {
@@ -1339,20 +1351,6 @@ img {
   outline-offset: 3px;
 }
 
-/* Botões das categorias da ementa */
-
-.menu-tab-button {
-  color: var(--color-primary-dark);
-  background-color: #ffffff;
-  border-color: rgb(11 45 33 / 25%);
-  border-radius: 10px;
-
-  font-family: "Jost", sans-serif;
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: normal;
-}
-
 .menu-tab-button:hover:not(.is-active) {
   color: var(--color-accent);
   background-color: var(--color-primary);
@@ -1386,21 +1384,6 @@ img {
 @media (max-width: 1050px) {
   .reservation-button {
     font-size: 16px;
-  }
-}
-
-/* Botões em telemóvel */
-
-@media (max-width: 650px) {
-
-  .hero-button,
-  .about-button,
-  .footer-reservation-button {
-    font-size: 16px;
-  }
-
-  .menu-tab-button {
-    font-size: 14px;
   }
 }
 

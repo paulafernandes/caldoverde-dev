@@ -12,6 +12,11 @@ export const auth = betterAuth({
     provider: "sqlite",
   }),
 
+  session: {
+    expiresIn: 60 * 60, // 1 hora
+    updateAge: 60 * 30, // renova após 30 min de atividade
+  },
+
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
