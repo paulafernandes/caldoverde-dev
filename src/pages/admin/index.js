@@ -1,0 +1,69 @@
+import Head from "next/head";
+import Link from "next/link";
+
+import AdminLayout from "../../components/admin/AdminLayout";
+import { getAdminSession } from "../../server/getAdminSession";
+import styles from "../../styles/Admin.module.css";
+
+export default function AdminDashboard({ admin }) {
+  return (
+    <>
+      <Head>
+        <title>Administração | Caldo Verde</title>
+
+        <meta
+          name="robots"
+          content="noindex, nofollow"
+        />
+      </Head>
+
+      <AdminLayout admin={admin}>
+        <section className={styles.dashboardHeading}>
+          <div>
+            <h1>Administração</h1>
+
+            <p>
+              Bem-vinda, {admin.name}.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <Link
+            href="/admin/menu"
+            className={styles.adminDashboardCard}
+          >
+            <strong>Gestão da ementa</strong>
+
+            <span>
+              Gerir categorias, subcategorias, pratos,
+              traduções e preços.
+            </span>
+          </Link>
+        </section>
+      </AdminLayout>
+    </>
+  );
+}
+
+export async function getServerSideProps({ req }) {
+  const session = await getAdminSession(req);
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/admin/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      admin: {
+        name: session.user.name,
+        email: session.user.email,
+      },
+    },
+  };
+}

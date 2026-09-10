@@ -1476,3 +1476,33 @@ label.itemSubcategoryOption {
   font-weight: 800;
   text-decoration: none;
 }
+
+.adminDashboardCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+  padding: 22px;
+  border: 1px solid #d8d3c7;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #203229;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.adminDashboardCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(32, 50, 41, 0.1);
+}
+
+.adminDashboardCard strong {
+  font-size: 1.05rem;
+}
+
+.adminDashboardCard span {
+  line-height: 1.5;
+  color: #5d675f;
+}

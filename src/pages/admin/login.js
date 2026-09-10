@@ -35,7 +35,7 @@ export default function AdminLogin() {
       return;
     }
 
-    await router.replace("/admin/menu");
+    await router.replace("/admin");
   }
 
   return (
@@ -64,7 +64,7 @@ export default function AdminLogin() {
           </h1>
 
           <p className={styles.subtitle}>
-            Inicia sessão para gerir a ementa.
+            Inicia sessão para aceder à administração.
           </p>
 
           <form
@@ -136,7 +136,7 @@ export async function getServerSideProps({ req }) {
   if (session) {
     return {
       redirect: {
-        destination: "/admin/menu",
+        destination: "/admin/",
         permanent: false,
       },
     };
