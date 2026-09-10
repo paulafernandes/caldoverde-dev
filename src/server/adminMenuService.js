@@ -160,7 +160,7 @@ export async function getAdminMenuCategories() {
 
     translations: mapTranslationRecords(
       category.translations,
-      ["label", "title"]
+      ["label", "title", "highlightText"]
     ),
 
     items: category.items.map((item) => ({
@@ -323,6 +323,8 @@ export async function updateAdminMenuCategory(
         update: {
           label: translation.label,
           title: translation.title,
+          highlightText:
+            translation.highlightText || null,
         },
 
         create: {
@@ -330,6 +332,8 @@ export async function updateAdminMenuCategory(
           language,
           label: translation.label,
           title: translation.title,
+          highlightText:
+            translation.highlightText || null,
         },
       });
     }
@@ -354,7 +358,7 @@ export async function updateAdminMenuCategory(
 
       translations: mapTranslationRecords(
         updatedCategory.translations,
-        ["label", "title"]
+        ["label", "title", "highlightText"]
       ),
     };
   });
@@ -756,6 +760,8 @@ export async function createAdminMenuCategory(
           language,
           label: translation.label,
           title: translation.title,
+          highlightText:
+            translation.highlightText || null,
         },
       });
     }
@@ -780,7 +786,7 @@ export async function createAdminMenuCategory(
 
       translations: mapTranslationRecords(
         category.translations,
-        ["label", "title"]
+        ["label", "title", "highlightText"]
       ),
 
       subcategories: [],

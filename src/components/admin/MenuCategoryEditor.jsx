@@ -38,6 +38,7 @@ function createEmptyTranslation() {
   return {
     label: "",
     title: "",
+    highlightText: "",
   };
 }
 
@@ -452,6 +453,9 @@ export default function MenuCategoryEditor({
           const titleId =
             `category-${formIdentifier}-${language.code}-title`;
 
+          const highlightTextId =
+            `category-${formIdentifier}-${language.code}-highlightText`;
+
           return (
             <fieldset
               className={styles.translationEditor}
@@ -499,6 +503,27 @@ export default function MenuCategoryEditor({
                   updateTranslation(
                     language.code,
                     "title",
+                    event.target.value
+                  )
+                }
+              />
+              <label
+                className={styles.editorField}
+                htmlFor={highlightTextId}
+              >
+                Texto em destaque (opcional)
+              </label>
+
+              <textarea
+                className={styles.editorInput}
+                id={highlightTextId}
+                maxLength={300}
+                rows={2}
+                value={translation.highlightText ?? ""}
+                onChange={(event) =>
+                  updateTranslation(
+                    language.code,
+                    "highlightText",
                     event.target.value
                   )
                 }

@@ -122,6 +122,14 @@ const menuCategoryTranslationSchema = z
         120,
         "O título não pode ultrapassar 120 caracteres."
       ),
+
+    highlightText: z
+      .string()
+      .trim()
+      .max(
+        300,
+        "O texto em destaque não pode ultrapassar 300 caracteres."
+      ),
   })
   .superRefine((translation, context) => {
     const hasLabel = translation.label.length > 0;

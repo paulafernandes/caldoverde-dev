@@ -37,6 +37,25 @@ function mapTranslations(translations, field) {
   );
 }
 
+function mapOptionalTranslations(
+  translations,
+  field
+) {
+  const valuesByLanguage = Object.fromEntries(
+    translations.map((translation) => [
+      translation.language,
+      translation[field] ?? "",
+    ])
+  );
+
+  return Object.fromEntries(
+    supportedLanguages.map((language) => [
+      language,
+      valuesByLanguage[language] ?? "",
+    ])
+  );
+}
+
 function mapPublicItem(item) {
   return {
     id: item.id,
@@ -152,6 +171,7 @@ export async function getPublicMenuCategories() {
     const categoryTitle = mapTranslations(
       category.translations,
       "title"
+
     );
 
     const sections = [
@@ -192,6 +212,11 @@ export async function getPublicMenuCategories() {
       ),
 
       title: categoryTitle,
+
+      highlightText: mapOptionalTranslations(
+        category.translations,
+        "highlightText"
+      ),
 
       image:
         category.imagePath ||

@@ -28,12 +28,13 @@ model MenuCategory {
 }
 
 model MenuCategoryTranslation {
-  id         Int          @id @default(autoincrement())
-  categoryId Int
-  language   String
-  label      String
-  title      String
-  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id            Int          @id @default(autoincrement())
+  categoryId    Int
+  language      String
+  label         String
+  title         String
+  highlightText String?
+  category      MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, language])
   @@index([language])

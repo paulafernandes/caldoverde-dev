@@ -105,11 +105,17 @@ export default function Menu({
               <div
                 className="menu-list"
                 ref={menuListRef}>
+                {activeCategory.highlightText?.[language] && (
+                  <div className="menu-highlight">
+                    {activeCategory.highlightText[language]}
+                  </div>
+                )}
                 {activeCategory.sections.map((section) => (
                   <div
                     className="menu-group"
                     key={section.id}
                   >
+
                     <h3>
                       {section.title[language]}
                     </h3>
