@@ -10,6 +10,7 @@ import MenuItemEditor from "../../components/admin/MenuItemEditor";
 import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
 import Image from "next/image";
 import { adminFetch } from "../../lib/adminFetch";
+import AdminLayout from "../../components/admin/AdminLayout";
 
 const languages = ["pt", "es", "en"];
 
@@ -62,8 +63,6 @@ export default function AdminMenuPage({
   const [isReauthenticating, setIsReauthenticating] =
     useState(false);
   const [showReauthForm, setShowReauthForm] =
-    useState(false);
-  const [isSigningOut, setIsSigningOut] =
     useState(false);
 
   const totalItems = menuCategories.reduce(
@@ -534,12 +533,6 @@ export default function AdminMenuPage({
     );
   }
 
-  async function handleSignOut() {
-    setIsSigningOut(true);
-    await authClient.signOut();
-    await router.replace("/admin/login");
-  }
-
   async function handleReauthenticate(event) {
     event.preventDefault();
 
@@ -639,37 +632,7 @@ export default function AdminMenuPage({
         />
       </Head>
 
-      <main className={styles.adminDashboard}>
-        <div className={styles.adminShell}>
-          <header className={styles.topbar}>
-            <div className={styles.brand}>
-              <span
-                className={styles.brandMark}
-                aria-hidden="true"
-              >
-                CV
-              </span>
-
-              <div className={styles.brandText}>
-                <strong>
-                  Caldo Verde · Administração
-                </strong>
-
-                <span>{admin.email}</span>
-              </div>
-            </div>
-
-            <button
-              className={styles.logoutButton}
-              type="button"
-              disabled={isSigningOut}
-              onClick={handleSignOut}
-            >
-              {isSigningOut
-                ? "A sair..."
-                : "Terminar sessão"}
-            </button>
-          </header>
+      <AdminLayout admin={admin}>
 
           <section className={styles.dashboardHeading}>
             <div>
@@ -1364,8 +1327,7 @@ export default function AdminMenuPage({
                 })}
             </div>
           )}
-        </div>
-      </main>
+       </AdminLayout>
     </>
   );
 }
