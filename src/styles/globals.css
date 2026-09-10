@@ -865,6 +865,7 @@ img {
   font-weight: 600;
   line-height: 1.5;
   text-align: center;
+  white-space: pre-line;
 }
 
 .menu-group>h3 {
