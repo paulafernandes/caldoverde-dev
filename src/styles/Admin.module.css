@@ -1506,3 +1506,100 @@ label.itemSubcategoryOption {
   line-height: 1.5;
   color: #5d675f;
 }
+
+.userFormCard {
+  max-width: 620px;
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid #d8d3c7;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.userFormCard h2 {
+  margin-top: 0;
+}
+
+.userFormActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.confirmationCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding: 20px 22px;
+  border: 1px solid #d8d3c7;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.confirmationCard h2 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.confirmationCard p {
+  margin: 0;
+  color: #5d675f;
+}
+
+@media (max-width: 700px) {
+  .confirmationCard {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.dangerButton {
+  padding: 10px 16px;
+  border: 1px solid #a83232;
+  border-radius: 8px;
+  background: #a83232;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: #8f2929;
+  border-color: #8f2929;
+}
+
+.dangerButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dangerOutlineButton {
+  padding: 10px 16px;
+  border: 1px solid #a83232;
+  border-radius: 8px;
+  background: transparent;
+  color: #a83232;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dangerOutlineButton:hover:not(:disabled) {
+  background: #a83232;
+  color: #ffffff;
+}
+
+.dangerOutlineButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
