@@ -314,72 +314,6 @@ export default function AdminUsers({ admin }) {
           )}
         </section>
 
-        {isCreating && (
-          <section className={styles.userFormCard}>
-            <h2>Novo utilizador</h2>
-
-            <form className={styles.form} onSubmit={handleCreateUser}>
-              <div className={styles.field}>
-                <label htmlFor="new-user-name">Nome</label>
-
-                <input
-                  id="new-user-name"
-                  name="name"
-                  type="text"
-                  value={newUser.name}
-                  onChange={handleNewUserChange}
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="new-user-email">Email</label>
-
-                <input
-                  id="new-user-email"
-                  name="email"
-                  type="email"
-                  value={newUser.email}
-                  onChange={handleNewUserChange}
-                  required
-                />
-              </div>
-
-              <div className={styles.field}>
-                <label htmlFor="new-user-password">Palavra-passe inicial</label>
-
-                <input
-                  id="new-user-password"
-                  name="password"
-                  type="password"
-                  value={newUser.password}
-                  onChange={handleNewUserChange}
-                  minLength={12}
-                  required
-                />
-              </div>
-
-              <div className={styles.userFormActions}>
-                <button
-                  type="submit"
-                  className={styles.button}
-                  disabled={isSaving}
-                >
-                  {isSaving ? "A criar..." : "Criar utilizador"}
-                </button>
-
-                <button
-                  type="button"
-                  className={styles.editButton}
-                  disabled={isSaving}
-                  onClick={handleCancelCreate}
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          </section>
-        )}
         {isSessionExpired && (
           <div className={styles.sessionExpiredNotice} role="alert">
             <strong>A sessão expirou.</strong>
@@ -462,6 +396,73 @@ export default function AdminUsers({ admin }) {
             )}
           </div>
         )}
+        {isCreating && (
+          <section className={styles.userFormCard}>
+            <h2>Novo utilizador</h2>
+
+            <form className={styles.form} onSubmit={handleCreateUser}>
+              <div className={styles.field}>
+                <label htmlFor="new-user-name">Nome</label>
+
+                <input
+                  id="new-user-name"
+                  name="name"
+                  type="text"
+                  value={newUser.name}
+                  onChange={handleNewUserChange}
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="new-user-email">Email</label>
+
+                <input
+                  id="new-user-email"
+                  name="email"
+                  type="email"
+                  value={newUser.email}
+                  onChange={handleNewUserChange}
+                  required
+                />
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="new-user-password">Palavra-passe inicial</label>
+
+                <input
+                  id="new-user-password"
+                  name="password"
+                  type="password"
+                  value={newUser.password}
+                  onChange={handleNewUserChange}
+                  minLength={12}
+                  required
+                />
+              </div>
+
+              <div className={styles.userFormActions}>
+                <button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isSaving}
+                >
+                  {isSaving ? "A criar..." : "Criar utilizador"}
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  disabled={isSaving}
+                  onClick={handleCancelCreate}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
+
         {error && <p className={styles.error}>{error}</p>}
         {statusUser && (
           <div className={styles.confirmationCard}>
