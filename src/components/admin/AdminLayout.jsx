@@ -54,7 +54,16 @@ export default function AdminLayout({
               : "Terminar sessão"}
           </button>
         </header>
-
+        {router.pathname !== "/admin" && (
+          <div className={styles.adminBackNavigation}>
+            <Link
+              href="/admin"
+              className={styles.adminBackButton}
+            >
+              ← Voltar
+            </Link>
+          </div>
+        )}
         {children}
       </div>
     </main>

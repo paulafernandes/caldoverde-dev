@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
+import { authClient } from "../../lib/authClient";
 
 export default function AdminUsers({ admin }) {
   const [users, setUsers] = useState([]);
@@ -15,6 +16,21 @@ export default function AdminUsers({ admin }) {
   const [changingStatusUserId, setChangingStatusUserId] =
     useState(null);
   const [statusUser, setStatusUser] = useState(null);
+  const [
+    isSessionExpired,
+    setIsSessionExpired,
+  ] = useState(false);
+
+  const [reauthEmail, setReauthEmail] =
+    useState(admin.email);
+  const [reauthPassword, setReauthPassword] =
+    useState("");
+  const [reauthError, setReauthError] =
+    useState("");
+  const [isReauthenticating, setIsReauthenticating] =
+    useState(false);
+  const [showReauthForm, setShowReauthForm] =
+    useState(false);
 
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +94,30 @@ export default function AdminUsers({ admin }) {
     });
   }
 
+  useEffect(() => {
+    function handleSessionExpired() {
+      setIsSessionExpired(true);
+      setError("");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    window.addEventListener(
+      "admin-session-expired",
+      handleSessionExpired
+    );
+
+    return () => {
+      window.removeEventListener(
+        "admin-session-expired",
+        handleSessionExpired
+      );
+    };
+  }, []);
+
   async function handleCreateUser(event) {
     event.preventDefault();
 
@@ -92,6 +132,10 @@ export default function AdminUsers({ admin }) {
         },
         body: JSON.stringify(newUser),
       });
+
+      if (handleUnauthorizedResponse(response)) {
+        return;
+      }
 
       const data = await response.json();
 
@@ -152,6 +196,10 @@ export default function AdminUsers({ admin }) {
         }
       );
 
+      if (handleUnauthorizedResponse(response)) {
+        return;
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -207,6 +255,10 @@ export default function AdminUsers({ admin }) {
         }
       );
 
+      if (handleUnauthorizedResponse(response)) {
+        return;
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -232,7 +284,46 @@ export default function AdminUsers({ admin }) {
       setChangingStatusUserId(null);
     }
   }
+  function handleUnauthorizedResponse(response) {
+    if (response.status !== 401) {
+      return false;
+    }
 
+    window.dispatchEvent(
+      new Event("admin-session-expired")
+    );
+
+    return true;
+  }
+
+  async function handleReauthenticate(event) {
+    event.preventDefault();
+
+    setReauthError("");
+    setIsReauthenticating(true);
+
+    const { error: signInError } =
+      await authClient.signIn.email({
+        email: reauthEmail.trim(),
+        password: reauthPassword,
+      });
+
+    if (signInError) {
+      setReauthError(
+        signInError.message ??
+        "Não foi possível iniciar sessão."
+      );
+
+      setIsReauthenticating(false);
+      return;
+    }
+
+    setIsSessionExpired(false);
+    setShowReauthForm(false);
+    setReauthPassword("");
+    setReauthError("");
+    setIsReauthenticating(false);
+  }
   return (
     <>
       <Head>
@@ -342,7 +433,103 @@ export default function AdminUsers({ admin }) {
             </form>
           </section>
         )}
+        {isSessionExpired && (
+          <div
+            className={styles.sessionExpiredNotice}
+            role="alert"
+          >
+            <strong>A sessão expirou.</strong>
 
+            <p>
+              As alterações do formulário continuam preservadas.
+              Volta a iniciar sessão para continuar.
+            </p>
+
+            {!showReauthForm ? (
+              <button
+                className={styles.saveButton}
+                type="button"
+                onClick={() =>
+                  setShowReauthForm(true)
+                }
+              >
+                Voltar a iniciar sessão
+              </button>
+            ) : (
+              <form
+                className={styles.reauthForm}
+                onSubmit={handleReauthenticate}
+              >
+                <label>
+                  <span>Email</span>
+
+                  <input
+                    className={styles.editorInput}
+                    type="email"
+                    autoComplete="username"
+                    required
+                    disabled={isReauthenticating}
+                    value={reauthEmail}
+                    onChange={(event) =>
+                      setReauthEmail(
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                <label>
+                  <span>Password</span>
+
+                  <input
+                    className={styles.editorInput}
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    disabled={isReauthenticating}
+                    value={reauthPassword}
+                    onChange={(event) =>
+                      setReauthPassword(
+                        event.target.value
+                      )
+                    }
+                  />
+                </label>
+
+                {reauthError && (
+                  <p className={styles.errorMessage}>
+                    {reauthError}
+                  </p>
+                )}
+
+                <div className={styles.reauthActions}>
+                  <button
+                    className={styles.cancelButton}
+                    type="button"
+                    disabled={isReauthenticating}
+                    onClick={() => {
+                      setShowReauthForm(false);
+                      setReauthPassword("");
+                      setReauthError("");
+                    }}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    className={styles.saveButton}
+                    type="submit"
+                    disabled={isReauthenticating}
+                  >
+                    {isReauthenticating
+                      ? "A iniciar sessão..."
+                      : "Iniciar sessão"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
         {error && (
           <p className={styles.error}>
             {error}
@@ -495,18 +682,23 @@ export default function AdminUsers({ admin }) {
                             Editar
                           </button>
 
-                          <button
-                            type="button"
-                            className={styles.editButton}
-                            disabled={changingStatusUserId === user.id}
-                            onClick={() => handleRequestUserStatusChange(user)}
-                          >
-                            {changingStatusUserId === user.id
-                              ? "A processar..."
-                              : user.banned
-                                ? "Reativar"
-                                : "Desativar"}
-                          </button>
+                          {user.id !== admin.id && (
+                            <button
+                              type="button"
+                              className={styles.editButton}
+                              disabled={changingStatusUserId === user.id}
+                              onClick={() =>
+                                handleRequestUserStatusChange(user)
+                              }
+                            >
+                              {changingStatusUserId === user.id
+                                ? "A processar..."
+                                : user.banned
+                                  ? "Reativar"
+                                  : "Desativar"}
+                            </button>
+                          )}
+
                         </div>
                       )}
                     </td>
@@ -536,6 +728,7 @@ export async function getServerSideProps({ req }) {
   return {
     props: {
       admin: {
+        id: session.user.id,
         name: session.user.name,
         email: session.user.email,
       },

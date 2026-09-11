@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import AdminLayout from "../../components/admin/AdminLayout";
 import { authClient } from "../../lib/authClient";
@@ -23,6 +23,91 @@ export default function AdminAccount({ admin }) {
     useState("");
   const [passwordSuccess, setPasswordSuccess] =
     useState("");
+  const [
+    isSessionExpired,
+    setIsSessionExpired,
+  ] = useState(false);
+
+  const [reauthEmail, setReauthEmail] =
+    useState(admin.email);
+  const [reauthPassword, setReauthPassword] =
+    useState("");
+  const [reauthError, setReauthError] =
+    useState("");
+  const [isReauthenticating, setIsReauthenticating] =
+    useState(false);
+  const [showReauthForm, setShowReauthForm] =
+    useState(false);
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      setIsSessionExpired(true);
+      setError("");
+      setPasswordError("");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    }
+
+    window.addEventListener(
+      "admin-session-expired",
+      handleSessionExpired
+    );
+
+    return () => {
+      window.removeEventListener(
+        "admin-session-expired",
+        handleSessionExpired
+      );
+    };
+  }, []);
+
+  function handleUnauthorizedError(authError) {
+    if (
+      authError?.status === 401 ||
+      authError?.statusCode === 401 ||
+      authError?.message === "Unauthorized"
+    ) {
+      window.dispatchEvent(
+        new Event("admin-session-expired")
+      );
+
+      return true;
+    }
+
+    return false;
+  }
+
+  async function handleReauthenticate(event) {
+    event.preventDefault();
+
+    setReauthError("");
+    setIsReauthenticating(true);
+
+    const { error: signInError } =
+      await authClient.signIn.email({
+        email: reauthEmail.trim(),
+        password: reauthPassword,
+      });
+
+    if (signInError) {
+      setReauthError(
+        signInError.message ??
+        "Não foi possível iniciar sessão."
+      );
+
+      setIsReauthenticating(false);
+      return;
+    }
+
+    setIsSessionExpired(false);
+    setShowReauthForm(false);
+    setReauthPassword("");
+    setReauthError("");
+    setIsReauthenticating(false);
+  }
 
   async function handleUpdateProfile(event) {
     event.preventDefault();
@@ -38,6 +123,10 @@ export default function AdminAccount({ admin }) {
         });
 
       if (updateError) {
+        if (handleUnauthorizedError(updateError)) {
+          return;
+        }
+
         throw new Error(
           updateError.message ||
           "Não foi possível atualizar a conta."
@@ -76,6 +165,10 @@ export default function AdminAccount({ admin }) {
         });
 
       if (changeError) {
+        if (handleUnauthorizedError(changeError)) {
+          return;
+        }
+
         throw new Error(
           changeError.message ||
           "Não foi possível alterar a palavra-passe."
@@ -116,7 +209,99 @@ export default function AdminAccount({ admin }) {
             </p>
           </div>
         </section>
+        {isSessionExpired && (
+          <div
+            className={styles.sessionExpiredNotice}
+            role="alert"
+          >
+            <strong>A sessão expirou.</strong>
 
+            <p>
+              As alterações dos formulários continuam preservadas.
+              Volta a iniciar sessão para continuar.
+            </p>
+
+            {!showReauthForm ? (
+              <button
+                className={styles.saveButton}
+                type="button"
+                onClick={() =>
+                  setShowReauthForm(true)
+                }
+              >
+                Voltar a iniciar sessão
+              </button>
+            ) : (
+              <form
+                className={styles.reauthForm}
+                onSubmit={handleReauthenticate}
+              >
+                <label>
+                  <span>Email</span>
+
+                  <input
+                    className={styles.editorInput}
+                    type="email"
+                    autoComplete="username"
+                    required
+                    disabled={isReauthenticating}
+                    value={reauthEmail}
+                    onChange={(event) =>
+                      setReauthEmail(event.target.value)
+                    }
+                  />
+                </label>
+
+                <label>
+                  <span>Password</span>
+
+                  <input
+                    className={styles.editorInput}
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    disabled={isReauthenticating}
+                    value={reauthPassword}
+                    onChange={(event) =>
+                      setReauthPassword(event.target.value)
+                    }
+                  />
+                </label>
+
+                {reauthError && (
+                  <p className={styles.errorMessage}>
+                    {reauthError}
+                  </p>
+                )}
+
+                <div className={styles.reauthActions}>
+                  <button
+                    className={styles.cancelButton}
+                    type="button"
+                    disabled={isReauthenticating}
+                    onClick={() => {
+                      setShowReauthForm(false);
+                      setReauthPassword("");
+                      setReauthError("");
+                    }}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    className={styles.saveButton}
+                    type="submit"
+                    disabled={isReauthenticating}
+                  >
+                    {isReauthenticating
+                      ? "A iniciar sessão..."
+                      : "Iniciar sessão"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        )}
         <section className={styles.userFormCard}>
           <h2>Dados da conta</h2>
 
@@ -177,7 +362,7 @@ export default function AdminAccount({ admin }) {
           </form>
         </section>
         <section className={styles.userFormCard}>
-          <h2>Segurança</h2>
+          <h2>Alterar a palavra-passe</h2>
 
           <form
             className={styles.form}

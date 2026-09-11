@@ -28,16 +28,15 @@ export default function AdminDashboard({ admin }) {
           </div>
         </section>
 
-        <section>
+        <section className={styles.dashboardCards}>
           <Link
-            href="/admin/menu"
+            href="/admin/account"
             className={styles.adminDashboardCard}
           >
-            <strong>Gestão da ementa</strong>
+            <strong>A minha conta</strong>
 
             <span>
-              Gerir categorias, subcategorias, pratos,
-              traduções e preços.
+              Alterar o nome e a palavra-passe da tua conta.
             </span>
           </Link>
 
@@ -48,19 +47,20 @@ export default function AdminDashboard({ admin }) {
             <strong>Utilizadores</strong>
 
             <span>
-              Criar, editar, desativar e reativar
-              utilizadores da administração.
+              Criar, editar, desativar e reativar utilizadores da
+              administração.
             </span>
           </Link>
 
           <Link
-            href="/admin/account"
+            href="/admin/menu"
             className={styles.adminDashboardCard}
           >
-            <strong>Minha conta</strong>
+            <strong>Menu</strong>
 
             <span>
-              Alterar o nome e a palavra-passe da tua conta.
+              Gerir categorias, subcategorias, pratos, traduções e
+              preços.
             </span>
           </Link>
         </section>
