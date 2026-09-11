@@ -40,6 +40,29 @@ export default function AdminDashboard({ admin }) {
               traduções e preços.
             </span>
           </Link>
+
+          <Link
+            href="/admin/users"
+            className={styles.adminDashboardCard}
+          >
+            <strong>Utilizadores</strong>
+
+            <span>
+              Criar, editar, desativar e reativar
+              utilizadores da administração.
+            </span>
+          </Link>
+
+          <Link
+            href="/admin/account"
+            className={styles.adminDashboardCard}
+          >
+            <strong>Minha conta</strong>
+
+            <span>
+              Alterar o nome e a palavra-passe da tua conta.
+            </span>
+          </Link>
         </section>
       </AdminLayout>
     </>
