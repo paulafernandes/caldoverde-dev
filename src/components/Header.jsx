@@ -58,9 +58,7 @@ export default function Header() {
           <p>{text.welcome}</p>
 
           <div className="top-bar-contact">
-            <a href="mailto:info@caldoverde.es">
-              info@caldoverde.es
-            </a>
+            <a href="mailto:info@caldoverde.es">info@caldoverde.es</a>
 
             <span>{text.address}</span>
           </div>
@@ -74,7 +72,6 @@ export default function Header() {
             className="header-logo"
             onClick={closeMenu}
           >
-
             <Image
               src="/assets/images/logo_andorinha.png"
               alt={imageText.logo}
@@ -85,16 +82,11 @@ export default function Header() {
 
           <button
             type="button"
-            className={`mobile-menu-button ${isMenuOpen ? "is-active" : ""
-              }`}
+            className={`mobile-menu-button ${isMenuOpen ? "is-active" : ""}`}
             aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={isMenuOpen}
             aria-controls="main-navigation"
-            onClick={() =>
-              setIsMenuOpen(
-                (previousValue) => !previousValue
-              )
-            }
+            onClick={() => setIsMenuOpen((previousValue) => !previousValue)}
           >
             <span />
             <span />
@@ -103,8 +95,7 @@ export default function Header() {
 
           <nav
             id="main-navigation"
-            className={`main-navigation ${isMenuOpen ? "is-open" : ""
-              }`}
+            className={`main-navigation ${isMenuOpen ? "is-open" : ""}`}
             aria-label="Navegação principal"
           >
             <a
@@ -115,31 +106,19 @@ export default function Header() {
               {text.home}
             </a>
 
-            <a
-              href={`/${language}/#restaurante`}
-              onClick={closeMenu}
-            >
+            <a href={`/${language}/#restaurante`} onClick={closeMenu}>
               {text.about}
             </a>
 
-            <Link
-              href={`/${language}/about`}
-              onClick={closeMenu}
-            >
+            <Link href={`/${language}/about`} onClick={closeMenu}>
               {text.aboutUs}
             </Link>
 
-            <a
-              href={`/${language}/#ementa`}
-              onClick={closeMenu}
-            >
+            <a href={`/${language}/#ementa`} onClick={closeMenu}>
               {text.menu}
             </a>
 
-            <a
-              href={`/${language}/#contactos`}
-              onClick={closeMenu}
-            >
+            <a href={`/${language}/#contactos`} onClick={closeMenu}>
               {text.contact}
             </a>
             <div
@@ -151,20 +130,15 @@ export default function Header() {
                 <button
                   key={option.code}
                   type="button"
-                  className={`language-button ${language === option.code
-                    ? "is-active"
-                    : ""
-                    }`}
+                  className={`language-button ${
+                    language === option.code ? "is-active" : ""
+                  }`}
                   aria-label={option.label}
                   aria-pressed={language === option.code}
                   title={option.label}
-                  onClick={() =>
-                    selectLanguage(option.code)
-                  }
+                  onClick={() => selectLanguage(option.code)}
                 >
-                  <span aria-hidden="true">
-                    {option.flag}
-                  </span>
+                  <span aria-hidden="true">{option.flag}</span>
                 </button>
               ))}
             </div>

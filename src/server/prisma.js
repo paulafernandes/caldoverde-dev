@@ -17,9 +17,7 @@ function createPrismaClient() {
 
 const globalForPrisma = globalThis;
 
-const prisma =
-  globalForPrisma.__caldoVerdePrisma ??
-  createPrismaClient();
+const prisma = globalForPrisma.__caldoVerdePrisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.__caldoVerdePrisma = prisma;

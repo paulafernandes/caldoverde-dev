@@ -14,10 +14,7 @@ function createSlug(value) {
   return slug || "categoria";
 }
 
-async function createUniqueCategorySlug(
-  transaction,
-  label
-) {
+async function createUniqueCategorySlug(transaction, label) {
   const baseSlug = createSlug(label);
 
   let slug = baseSlug;
@@ -41,10 +38,7 @@ async function createUniqueCategorySlug(
   return slug;
 }
 
-function mapTranslationRecords(
-  translations,
-  fields
-) {
+function mapTranslationRecords(translations, fields) {
   return Object.fromEntries(
     supportedLanguages.map((language) => {
       const translation = translations.find(
@@ -52,10 +46,7 @@ function mapTranslationRecords(
       );
 
       const values = Object.fromEntries(
-        fields.map((field) => [
-          field,
-          translation?.[field] ?? "",
-        ])
+        fields.map((field) => [field, translation?.[field] ?? ""])
       );
 
       return [language, values];
@@ -70,10 +61,7 @@ function mapAdminSubcategory(subcategory) {
     position: subcategory.position,
     isVisible: subcategory.isVisible,
 
-    translations: mapTranslationRecords(
-      subcategory.translations,
-      ["name"]
-    ),
+    translations: mapTranslationRecords(subcategory.translations, ["name"]),
   };
 }
 
@@ -86,17 +74,16 @@ async function subcategoryBelongsToCategory(
     return true;
   }
 
-  const subcategory =
-    await transaction.menuSubcategory.findFirst({
-      where: {
-        id: subcategoryId,
-        categoryId,
-      },
+  const subcategory = await transaction.menuSubcategory.findFirst({
+    where: {
+      id: subcategoryId,
+      categoryId,
+    },
 
-      select: {
-        id: true,
-      },
-    });
+    select: {
+      id: true,
+    },
+  });
 
   return Boolean(subcategory);
 }
@@ -154,14 +141,13 @@ export async function getAdminMenuCategories() {
     position: category.position,
     isVisible: category.isVisible,
 
-    subcategories: category.subcategories.map(
-      mapAdminSubcategory
-    ),
+    subcategories: category.subcategories.map(mapAdminSubcategory),
 
-    translations: mapTranslationRecords(
-      category.translations,
-      ["label", "title", "highlightText"]
-    ),
+    translations: mapTranslationRecords(category.translations, [
+      "label",
+      "title",
+      "highlightText",
+    ]),
 
     items: category.items.map((item) => ({
       id: item.id,
@@ -171,41 +157,36 @@ export async function getAdminMenuCategories() {
       position: item.position,
       isVisible: item.isVisible,
 
-      translations: mapTranslationRecords(
-        item.translations,
-        ["name", "description"]
-      ),
+      translations: mapTranslationRecords(item.translations, [
+        "name",
+        "description",
+      ]),
     })),
   }));
 }
 
-export async function updateAdminMenuItem(
-  itemId,
-  input
-) {
+export async function updateAdminMenuItem(itemId, input) {
   return prisma.$transaction(async (transaction) => {
-    const existingItem =
-      await transaction.menuItem.findUnique({
-        where: {
-          id: itemId,
-        },
+    const existingItem = await transaction.menuItem.findUnique({
+      where: {
+        id: itemId,
+      },
 
-        select: {
-          id: true,
-          categoryId: true,
-        },
-      });
+      select: {
+        id: true,
+        categoryId: true,
+      },
+    });
 
     if (!existingItem) {
       return null;
     }
 
-    const hasValidSubcategory =
-      await subcategoryBelongsToCategory(
-        transaction,
-        input.subcategoryId,
-        existingItem.categoryId
-      );
+    const hasValidSubcategory = await subcategoryBelongsToCategory(
+      transaction,
+      input.subcategoryId,
+      existingItem.categoryId
+    );
 
     if (!hasValidSubcategory) {
       return false;
@@ -225,8 +206,7 @@ export async function updateAdminMenuItem(
     });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuItemTranslation.upsert({
         where: {
@@ -250,16 +230,15 @@ export async function updateAdminMenuItem(
       });
     }
 
-    const updatedItem =
-      await transaction.menuItem.findUnique({
-        where: {
-          id: itemId,
-        },
+    const updatedItem = await transaction.menuItem.findUnique({
+      where: {
+        id: itemId,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
     return {
       id: updatedItem.id,
@@ -269,29 +248,25 @@ export async function updateAdminMenuItem(
       position: updatedItem.position,
       isVisible: updatedItem.isVisible,
 
-      translations: mapTranslationRecords(
-        updatedItem.translations,
-        ["name", "description"]
-      ),
+      translations: mapTranslationRecords(updatedItem.translations, [
+        "name",
+        "description",
+      ]),
     };
   });
 }
 
-export async function updateAdminMenuCategory(
-  categoryId,
-  input
-) {
+export async function updateAdminMenuCategory(categoryId, input) {
   return prisma.$transaction(async (transaction) => {
-    const existingCategory =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: categoryId,
-        },
+    const existingCategory = await transaction.menuCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
 
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!existingCategory) {
       return null;
@@ -309,8 +284,7 @@ export async function updateAdminMenuCategory(
     });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuCategoryTranslation.upsert({
         where: {
@@ -323,8 +297,7 @@ export async function updateAdminMenuCategory(
         update: {
           label: translation.label,
           title: translation.title,
-          highlightText:
-            translation.highlightText || null,
+          highlightText: translation.highlightText || null,
         },
 
         create: {
@@ -332,22 +305,20 @@ export async function updateAdminMenuCategory(
           language,
           label: translation.label,
           title: translation.title,
-          highlightText:
-            translation.highlightText || null,
+          highlightText: translation.highlightText || null,
         },
       });
     }
 
-    const updatedCategory =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: categoryId,
-        },
+    const updatedCategory = await transaction.menuCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
     return {
       id: updatedCategory.id,
@@ -356,71 +327,66 @@ export async function updateAdminMenuCategory(
       position: updatedCategory.position,
       isVisible: updatedCategory.isVisible,
 
-      translations: mapTranslationRecords(
-        updatedCategory.translations,
-        ["label", "title", "highlightText"]
-      ),
+      translations: mapTranslationRecords(updatedCategory.translations, [
+        "label",
+        "title",
+        "highlightText",
+      ]),
     };
   });
 }
 
 export async function createAdminMenuItem(input) {
   return prisma.$transaction(async (transaction) => {
-    const category =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: input.categoryId,
-        },
+    const category = await transaction.menuCategory.findUnique({
+      where: {
+        id: input.categoryId,
+      },
 
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!category) {
       return null;
     }
 
-    const hasValidSubcategory =
-      await subcategoryBelongsToCategory(
-        transaction,
-        input.subcategoryId,
-        input.categoryId
-      );
+    const hasValidSubcategory = await subcategoryBelongsToCategory(
+      transaction,
+      input.subcategoryId,
+      input.categoryId
+    );
 
     if (!hasValidSubcategory) {
       return false;
     }
 
-    const positionResult =
-      await transaction.menuItem.aggregate({
-        where: {
-          categoryId: input.categoryId,
-        },
+    const positionResult = await transaction.menuItem.aggregate({
+      where: {
+        categoryId: input.categoryId,
+      },
 
-        _max: {
-          position: true,
-        },
-      });
+      _max: {
+        position: true,
+      },
+    });
 
-    const nextPosition =
-      (positionResult._max.position ?? 0) + 1;
+    const nextPosition = (positionResult._max.position ?? 0) + 1;
 
-    const createdItem =
-      await transaction.menuItem.create({
-        data: {
-          categoryId: input.categoryId,
-          subcategoryId: input.subcategoryId,
-          imagePath: input.imagePath,
-          priceText: input.priceText,
-          position: nextPosition,
-          isVisible: input.isVisible,
-        },
-      });
+    const createdItem = await transaction.menuItem.create({
+      data: {
+        categoryId: input.categoryId,
+        subcategoryId: input.subcategoryId,
+        imagePath: input.imagePath,
+        priceText: input.priceText,
+        position: nextPosition,
+        isVisible: input.isVisible,
+      },
+    });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuItemTranslation.create({
         data: {
@@ -432,16 +398,15 @@ export async function createAdminMenuItem(input) {
       });
     }
 
-    const item =
-      await transaction.menuItem.findUnique({
-        where: {
-          id: createdItem.id,
-        },
+    const item = await transaction.menuItem.findUnique({
+      where: {
+        id: createdItem.id,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
     return {
       id: item.id,
@@ -452,27 +417,26 @@ export async function createAdminMenuItem(input) {
       position: item.position,
       isVisible: item.isVisible,
 
-      translations: mapTranslationRecords(
-        item.translations,
-        ["name", "description"]
-      ),
+      translations: mapTranslationRecords(item.translations, [
+        "name",
+        "description",
+      ]),
     };
   });
 }
 
 export async function deleteAdminMenuItem(itemId) {
   return prisma.$transaction(async (transaction) => {
-    const existingItem =
-      await transaction.menuItem.findUnique({
-        where: {
-          id: itemId,
-        },
+    const existingItem = await transaction.menuItem.findUnique({
+      where: {
+        id: itemId,
+      },
 
-        select: {
-          id: true,
-          categoryId: true,
-        },
-      });
+      select: {
+        id: true,
+        categoryId: true,
+      },
+    });
 
     if (!existingItem) {
       return false;
@@ -484,31 +448,26 @@ export async function deleteAdminMenuItem(itemId) {
       },
     });
 
-    const remainingItems =
-      await transaction.menuItem.findMany({
-        where: {
-          categoryId: existingItem.categoryId,
+    const remainingItems = await transaction.menuItem.findMany({
+      where: {
+        categoryId: existingItem.categoryId,
+      },
+
+      orderBy: [
+        {
+          position: "asc",
         },
-
-        orderBy: [
-          {
-            position: "asc",
-          },
-          {
-            id: "asc",
-          },
-        ],
-
-        select: {
-          id: true,
+        {
+          id: "asc",
         },
-      });
+      ],
 
-    for (
-      let index = 0;
-      index < remainingItems.length;
-      index += 1
-    ) {
+      select: {
+        id: true,
+      },
+    });
+
+    for (let index = 0; index < remainingItems.length; index += 1) {
       await transaction.menuItem.update({
         where: {
           id: remainingItems[index].id,
@@ -524,48 +483,43 @@ export async function deleteAdminMenuItem(itemId) {
   });
 }
 
-export async function moveAdminMenuItem(
-  itemId,
-  direction
-) {
+export async function moveAdminMenuItem(itemId, direction) {
   return prisma.$transaction(async (transaction) => {
-    const item =
-      await transaction.menuItem.findUnique({
-        where: {
-          id: itemId,
-        },
+    const item = await transaction.menuItem.findUnique({
+      where: {
+        id: itemId,
+      },
 
-        select: {
-          id: true,
-          categoryId: true,
-          subcategoryId: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        categoryId: true,
+        subcategoryId: true,
+        position: true,
+      },
+    });
 
     if (!item) {
       return null;
     }
 
-    const adjacentItem =
-      await transaction.menuItem.findFirst({
-        where: {
-          categoryId: item.categoryId,
-          subcategoryId: item.subcategoryId,
+    const adjacentItem = await transaction.menuItem.findFirst({
+      where: {
+        categoryId: item.categoryId,
+        subcategoryId: item.subcategoryId,
 
-          position:
-            direction === "up"
-              ? {
+        position:
+          direction === "up"
+            ? {
                 lt: item.position,
               }
-              : {
+            : {
                 gt: item.position,
               },
-        },
+      },
 
-        orderBy:
-          direction === "up"
-            ? [
+      orderBy:
+        direction === "up"
+          ? [
               {
                 position: "desc",
               },
@@ -573,7 +527,7 @@ export async function moveAdminMenuItem(
                 id: "desc",
               },
             ]
-            : [
+          : [
               {
                 position: "asc",
               },
@@ -582,11 +536,11 @@ export async function moveAdminMenuItem(
               },
             ],
 
-        select: {
-          id: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        position: true,
+      },
+    });
 
     if (!adjacentItem) {
       return {
@@ -622,43 +576,38 @@ export async function moveAdminMenuItem(
   });
 }
 
-export async function moveAdminMenuCategory(
-  categoryId,
-  direction
-) {
+export async function moveAdminMenuCategory(categoryId, direction) {
   return prisma.$transaction(async (transaction) => {
-    const category =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: categoryId,
-        },
+    const category = await transaction.menuCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
 
-        select: {
-          id: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        position: true,
+      },
+    });
 
     if (!category) {
       return null;
     }
 
-    const adjacentCategory =
-      await transaction.menuCategory.findFirst({
-        where: {
-          position:
-            direction === "up"
-              ? {
+    const adjacentCategory = await transaction.menuCategory.findFirst({
+      where: {
+        position:
+          direction === "up"
+            ? {
                 lt: category.position,
               }
-              : {
+            : {
                 gt: category.position,
               },
-        },
+      },
 
-        orderBy:
-          direction === "up"
-            ? [
+      orderBy:
+        direction === "up"
+          ? [
               {
                 position: "desc",
               },
@@ -666,7 +615,7 @@ export async function moveAdminMenuCategory(
                 id: "desc",
               },
             ]
-            : [
+          : [
               {
                 position: "asc",
               },
@@ -675,11 +624,11 @@ export async function moveAdminMenuCategory(
               },
             ],
 
-        select: {
-          id: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        position: true,
+      },
+    });
 
     if (!adjacentCategory) {
       return {
@@ -715,44 +664,34 @@ export async function moveAdminMenuCategory(
   });
 }
 
-export async function createAdminMenuCategory(
-  input
-) {
+export async function createAdminMenuCategory(input) {
   return prisma.$transaction(async (transaction) => {
     const slugSource =
       input.translations.pt.label ||
       input.translations.es.label ||
       input.translations.en.label;
 
-    const slug =
-      await createUniqueCategorySlug(
-        transaction,
-        slugSource
-      );
+    const slug = await createUniqueCategorySlug(transaction, slugSource);
 
-    const positionResult =
-      await transaction.menuCategory.aggregate({
-        _max: {
-          position: true,
-        },
-      });
+    const positionResult = await transaction.menuCategory.aggregate({
+      _max: {
+        position: true,
+      },
+    });
 
-    const nextPosition =
-      (positionResult._max.position ?? 0) + 1;
+    const nextPosition = (positionResult._max.position ?? 0) + 1;
 
-    const createdCategory =
-      await transaction.menuCategory.create({
-        data: {
-          slug,
-          imagePath: input.imagePath,
-          position: nextPosition,
-          isVisible: input.isVisible,
-        },
-      });
+    const createdCategory = await transaction.menuCategory.create({
+      data: {
+        slug,
+        imagePath: input.imagePath,
+        position: nextPosition,
+        isVisible: input.isVisible,
+      },
+    });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuCategoryTranslation.create({
         data: {
@@ -760,22 +699,20 @@ export async function createAdminMenuCategory(
           language,
           label: translation.label,
           title: translation.title,
-          highlightText:
-            translation.highlightText || null,
+          highlightText: translation.highlightText || null,
         },
       });
     }
 
-    const category =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: createdCategory.id,
-        },
+    const category = await transaction.menuCategory.findUnique({
+      where: {
+        id: createdCategory.id,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
     return {
       id: category.id,
@@ -784,10 +721,11 @@ export async function createAdminMenuCategory(
       position: category.position,
       isVisible: category.isVisible,
 
-      translations: mapTranslationRecords(
-        category.translations,
-        ["label", "title", "highlightText"]
-      ),
+      translations: mapTranslationRecords(category.translations, [
+        "label",
+        "title",
+        "highlightText",
+      ]),
 
       subcategories: [],
       items: [],
@@ -795,26 +733,23 @@ export async function createAdminMenuCategory(
   });
 }
 
-export async function deleteAdminMenuCategory(
-  categoryId
-) {
+export async function deleteAdminMenuCategory(categoryId) {
   return prisma.$transaction(async (transaction) => {
-    const category =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: categoryId,
-        },
+    const category = await transaction.menuCategory.findUnique({
+      where: {
+        id: categoryId,
+      },
 
-        select: {
-          id: true,
+      select: {
+        id: true,
 
-          _count: {
-            select: {
-              items: true,
-            },
+        _count: {
+          select: {
+            items: true,
           },
         },
-      });
+      },
+    });
 
     if (!category) {
       return {
@@ -835,27 +770,22 @@ export async function deleteAdminMenuCategory(
       },
     });
 
-    const remainingCategories =
-      await transaction.menuCategory.findMany({
-        orderBy: [
-          {
-            position: "asc",
-          },
-          {
-            id: "asc",
-          },
-        ],
-
-        select: {
-          id: true,
+    const remainingCategories = await transaction.menuCategory.findMany({
+      orderBy: [
+        {
+          position: "asc",
         },
-      });
+        {
+          id: "asc",
+        },
+      ],
 
-    for (
-      let index = 0;
-      index < remainingCategories.length;
-      index += 1
-    ) {
+      select: {
+        id: true,
+      },
+    });
+
+    for (let index = 0; index < remainingCategories.length; index += 1) {
       await transaction.menuCategory.update({
         where: {
           id: remainingCategories[index].id,
@@ -873,51 +803,44 @@ export async function deleteAdminMenuCategory(
   });
 }
 
-export async function createAdminMenuSubcategory(
-  input
-) {
+export async function createAdminMenuSubcategory(input) {
   return prisma.$transaction(async (transaction) => {
-    const category =
-      await transaction.menuCategory.findUnique({
-        where: {
-          id: input.categoryId,
-        },
+    const category = await transaction.menuCategory.findUnique({
+      where: {
+        id: input.categoryId,
+      },
 
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!category) {
       return null;
     }
 
-    const positionResult =
-      await transaction.menuSubcategory.aggregate({
-        where: {
-          categoryId: input.categoryId,
-        },
+    const positionResult = await transaction.menuSubcategory.aggregate({
+      where: {
+        categoryId: input.categoryId,
+      },
 
-        _max: {
-          position: true,
-        },
-      });
+      _max: {
+        position: true,
+      },
+    });
 
-    const nextPosition =
-      (positionResult._max.position ?? 0) + 1;
+    const nextPosition = (positionResult._max.position ?? 0) + 1;
 
-    const createdSubcategory =
-      await transaction.menuSubcategory.create({
-        data: {
-          categoryId: input.categoryId,
-          position: nextPosition,
-          isVisible: input.isVisible,
-        },
-      });
+    const createdSubcategory = await transaction.menuSubcategory.create({
+      data: {
+        categoryId: input.categoryId,
+        position: nextPosition,
+        isVisible: input.isVisible,
+      },
+    });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuSubcategoryTranslation.create({
         data: {
@@ -928,36 +851,31 @@ export async function createAdminMenuSubcategory(
       });
     }
 
-    const subcategory =
-      await transaction.menuSubcategory.findUnique({
-        where: {
-          id: createdSubcategory.id,
-        },
+    const subcategory = await transaction.menuSubcategory.findUnique({
+      where: {
+        id: createdSubcategory.id,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
     return mapAdminSubcategory(subcategory);
   });
 }
 
-export async function updateAdminMenuSubcategory(
-  subcategoryId,
-  input
-) {
+export async function updateAdminMenuSubcategory(subcategoryId, input) {
   return prisma.$transaction(async (transaction) => {
-    const existingSubcategory =
-      await transaction.menuSubcategory.findUnique({
-        where: {
-          id: subcategoryId,
-        },
+    const existingSubcategory = await transaction.menuSubcategory.findUnique({
+      where: {
+        id: subcategoryId,
+      },
 
-        select: {
-          id: true,
-        },
-      });
+      select: {
+        id: true,
+      },
+    });
 
     if (!existingSubcategory) {
       return null;
@@ -974,8 +892,7 @@ export async function updateAdminMenuSubcategory(
     });
 
     for (const language of supportedLanguages) {
-      const translation =
-        input.translations[language];
+      const translation = input.translations[language];
 
       await transaction.menuSubcategoryTranslation.upsert({
         where: {
@@ -997,38 +914,32 @@ export async function updateAdminMenuSubcategory(
       });
     }
 
-    const updatedSubcategory =
-      await transaction.menuSubcategory.findUnique({
-        where: {
-          id: subcategoryId,
-        },
+    const updatedSubcategory = await transaction.menuSubcategory.findUnique({
+      where: {
+        id: subcategoryId,
+      },
 
-        include: {
-          translations: true,
-        },
-      });
+      include: {
+        translations: true,
+      },
+    });
 
-    return mapAdminSubcategory(
-      updatedSubcategory
-    );
+    return mapAdminSubcategory(updatedSubcategory);
   });
 }
 
-export async function deleteAdminMenuSubcategory(
-  subcategoryId
-) {
+export async function deleteAdminMenuSubcategory(subcategoryId) {
   return prisma.$transaction(async (transaction) => {
-    const subcategory =
-      await transaction.menuSubcategory.findUnique({
-        where: {
-          id: subcategoryId,
-        },
+    const subcategory = await transaction.menuSubcategory.findUnique({
+      where: {
+        id: subcategoryId,
+      },
 
-        select: {
-          id: true,
-          categoryId: true,
-        },
-      });
+      select: {
+        id: true,
+        categoryId: true,
+      },
+    });
 
     if (!subcategory) {
       return {
@@ -1042,31 +953,26 @@ export async function deleteAdminMenuSubcategory(
       },
     });
 
-    const remainingSubcategories =
-      await transaction.menuSubcategory.findMany({
-        where: {
-          categoryId: subcategory.categoryId,
+    const remainingSubcategories = await transaction.menuSubcategory.findMany({
+      where: {
+        categoryId: subcategory.categoryId,
+      },
+
+      orderBy: [
+        {
+          position: "asc",
         },
-
-        orderBy: [
-          {
-            position: "asc",
-          },
-          {
-            id: "asc",
-          },
-        ],
-
-        select: {
-          id: true,
+        {
+          id: "asc",
         },
-      });
+      ],
 
-    for (
-      let index = 0;
-      index < remainingSubcategories.length;
-      index += 1
-    ) {
+      select: {
+        id: true,
+      },
+    });
+
+    for (let index = 0; index < remainingSubcategories.length; index += 1) {
       await transaction.menuSubcategory.update({
         where: {
           id: remainingSubcategories[index].id,
@@ -1084,46 +990,41 @@ export async function deleteAdminMenuSubcategory(
   });
 }
 
-export async function moveAdminMenuSubcategory(
-  subcategoryId,
-  direction
-) {
+export async function moveAdminMenuSubcategory(subcategoryId, direction) {
   return prisma.$transaction(async (transaction) => {
-    const subcategory =
-      await transaction.menuSubcategory.findUnique({
-        where: {
-          id: subcategoryId,
-        },
+    const subcategory = await transaction.menuSubcategory.findUnique({
+      where: {
+        id: subcategoryId,
+      },
 
-        select: {
-          id: true,
-          categoryId: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        categoryId: true,
+        position: true,
+      },
+    });
 
     if (!subcategory) {
       return null;
     }
 
-    const adjacentSubcategory =
-      await transaction.menuSubcategory.findFirst({
-        where: {
-          categoryId: subcategory.categoryId,
+    const adjacentSubcategory = await transaction.menuSubcategory.findFirst({
+      where: {
+        categoryId: subcategory.categoryId,
 
-          position:
-            direction === "up"
-              ? {
+        position:
+          direction === "up"
+            ? {
                 lt: subcategory.position,
               }
-              : {
+            : {
                 gt: subcategory.position,
               },
-        },
+      },
 
-        orderBy:
-          direction === "up"
-            ? [
+      orderBy:
+        direction === "up"
+          ? [
               {
                 position: "desc",
               },
@@ -1131,7 +1032,7 @@ export async function moveAdminMenuSubcategory(
                 id: "desc",
               },
             ]
-            : [
+          : [
               {
                 position: "asc",
               },
@@ -1140,11 +1041,11 @@ export async function moveAdminMenuSubcategory(
               },
             ],
 
-        select: {
-          id: true,
-          position: true,
-        },
-      });
+      select: {
+        id: true,
+        position: true,
+      },
+    });
 
     if (!adjacentSubcategory) {
       return {

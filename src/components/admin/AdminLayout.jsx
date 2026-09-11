@@ -5,13 +5,9 @@ import { useState } from "react";
 import { authClient } from "../../lib/authClient";
 import styles from "../../styles/Admin.module.css";
 
-export default function AdminLayout({
-  admin,
-  children,
-}) {
+export default function AdminLayout({ admin, children }) {
   const router = useRouter();
-  const [isSigningOut, setIsSigningOut] =
-    useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -35,9 +31,7 @@ export default function AdminLayout({
             </Link>
 
             <div className={styles.brandText}>
-              <strong>
-                Caldo Verde · Administração
-              </strong>
+              <strong>Caldo Verde · Administração</strong>
 
               <span>{admin.email}</span>
             </div>
@@ -49,17 +43,12 @@ export default function AdminLayout({
             disabled={isSigningOut}
             onClick={handleSignOut}
           >
-            {isSigningOut
-              ? "A sair..."
-              : "Terminar sessão"}
+            {isSigningOut ? "A sair..." : "Terminar sessão"}
           </button>
         </header>
         {router.pathname !== "/admin" && (
           <div className={styles.adminBackNavigation}>
-            <Link
-              href="/admin"
-              className={styles.adminBackButton}
-            >
+            <Link href="/admin" className={styles.adminBackButton}>
               ← Voltar
             </Link>
           </div>

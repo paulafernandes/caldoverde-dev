@@ -2,12 +2,8 @@ import {
   deleteAdminMenuSubcategory,
   updateAdminMenuSubcategory,
 } from "../../../../../server/adminMenuService";
-import {
-  updateMenuSubcategorySchema,
-} from "../../../../../server/adminMenuValidation";
-import {
-  getAdminSession,
-} from "../../../../../server/getAdminSession";
+import { updateMenuSubcategorySchema } from "../../../../../server/adminMenuValidation";
+import { getAdminSession } from "../../../../../server/getAdminSession";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -16,17 +12,11 @@ function formatValidationErrors(error) {
   }));
 }
 
-export default async function handler(
-  request,
-  response
-) {
+export default async function handler(request, response) {
   const allowedMethods = ["PATCH", "DELETE"];
 
   if (!allowedMethods.includes(request.method)) {
-    response.setHeader(
-      "Allow",
-      allowedMethods.join(", ")
-    );
+    response.setHeader("Allow", allowedMethods.join(", "));
 
     return response.status(405).json({
       error: "Método não permitido.",
@@ -41,30 +31,21 @@ export default async function handler(
     });
   }
 
-  const rawSubcategoryId = Array.isArray(
-    request.query.id
-  )
+  const rawSubcategoryId = Array.isArray(request.query.id)
     ? request.query.id[0]
     : request.query.id;
 
   const subcategoryId = Number(rawSubcategoryId);
 
-  if (
-    !Number.isInteger(subcategoryId) ||
-    subcategoryId <= 0
-  ) {
+  if (!Number.isInteger(subcategoryId) || subcategoryId <= 0) {
     return response.status(400).json({
-      error:
-        "Identificador da subcategoria inválido.",
+      error: "Identificador da subcategoria inválido.",
     });
   }
 
   if (request.method === "DELETE") {
     try {
-      const result =
-        await deleteAdminMenuSubcategory(
-          subcategoryId
-        );
+      const result = await deleteAdminMenuSubcategory(subcategoryId);
 
       if (result.status === "not-found") {
         return response.status(404).json({
@@ -76,20 +57,15 @@ export default async function handler(
         success: true,
       });
     } catch (error) {
-      console.error(
-        "Erro ao eliminar a subcategoria:",
-        error
-      );
+      console.error("Erro ao eliminar a subcategoria:", error);
 
       return response.status(500).json({
-        error:
-          "Não foi possível eliminar a subcategoria.",
+        error: "Não foi possível eliminar a subcategoria.",
       });
     }
   }
 
-  const contentType =
-    request.headers["content-type"] ?? "";
+  const contentType = request.headers["content-type"] ?? "";
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
@@ -97,28 +73,21 @@ export default async function handler(
     });
   }
 
-  const validation =
-    updateMenuSubcategorySchema.safeParse(
-      request.body
-    );
+  const validation = updateMenuSubcategorySchema.safeParse(request.body);
 
   if (!validation.success) {
     return response.status(400).json({
-      error:
-        "Os dados da subcategoria são inválidos.",
+      error: "Os dados da subcategoria são inválidos.",
 
-      details: formatValidationErrors(
-        validation.error
-      ),
+      details: formatValidationErrors(validation.error),
     });
   }
 
   try {
-    const subcategory =
-      await updateAdminMenuSubcategory(
-        subcategoryId,
-        validation.data
-      );
+    const subcategory = await updateAdminMenuSubcategory(
+      subcategoryId,
+      validation.data
+    );
 
     if (!subcategory) {
       return response.status(404).json({
@@ -130,14 +99,10 @@ export default async function handler(
       subcategory,
     });
   } catch (error) {
-    console.error(
-      "Erro ao atualizar a subcategoria:",
-      error
-    );
+    console.error("Erro ao atualizar a subcategoria:", error);
 
     return response.status(500).json({
-      error:
-        "Não foi possível atualizar a subcategoria.",
+      error: "Não foi possível atualizar a subcategoria.",
     });
   }
 }

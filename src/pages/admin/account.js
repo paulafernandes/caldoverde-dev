@@ -11,33 +11,19 @@ export default function AdminAccount({ admin }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [currentPassword, setCurrentPassword] =
-    useState("");
-  const [newPassword, setNewPassword] =
-    useState("");
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
-  const [isChangingPassword, setIsChangingPassword] =
-    useState(false);
-  const [passwordError, setPasswordError] =
-    useState("");
-  const [passwordSuccess, setPasswordSuccess] =
-    useState("");
-  const [
-    isSessionExpired,
-    setIsSessionExpired,
-  ] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
-  const [reauthEmail, setReauthEmail] =
-    useState(admin.email);
-  const [reauthPassword, setReauthPassword] =
-    useState("");
-  const [reauthError, setReauthError] =
-    useState("");
-  const [isReauthenticating, setIsReauthenticating] =
-    useState(false);
-  const [showReauthForm, setShowReauthForm] =
-    useState(false);
+  const [reauthEmail, setReauthEmail] = useState(admin.email);
+  const [reauthPassword, setReauthPassword] = useState("");
+  const [reauthError, setReauthError] = useState("");
+  const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const [showReauthForm, setShowReauthForm] = useState(false);
 
   useEffect(() => {
     function handleSessionExpired() {
@@ -51,16 +37,10 @@ export default function AdminAccount({ admin }) {
       });
     }
 
-    window.addEventListener(
-      "admin-session-expired",
-      handleSessionExpired
-    );
+    window.addEventListener("admin-session-expired", handleSessionExpired);
 
     return () => {
-      window.removeEventListener(
-        "admin-session-expired",
-        handleSessionExpired
-      );
+      window.removeEventListener("admin-session-expired", handleSessionExpired);
     };
   }, []);
 
@@ -70,9 +50,7 @@ export default function AdminAccount({ admin }) {
       authError?.statusCode === 401 ||
       authError?.message === "Unauthorized"
     ) {
-      window.dispatchEvent(
-        new Event("admin-session-expired")
-      );
+      window.dispatchEvent(new Event("admin-session-expired"));
 
       return true;
     }
@@ -86,17 +64,13 @@ export default function AdminAccount({ admin }) {
     setReauthError("");
     setIsReauthenticating(true);
 
-    const { error: signInError } =
-      await authClient.signIn.email({
-        email: reauthEmail.trim(),
-        password: reauthPassword,
-      });
+    const { error: signInError } = await authClient.signIn.email({
+      email: reauthEmail.trim(),
+      password: reauthPassword,
+    });
 
     if (signInError) {
-      setReauthError(
-        signInError.message ??
-        "Não foi possível iniciar sessão."
-      );
+      setReauthError(signInError.message ?? "Não foi possível iniciar sessão.");
 
       setIsReauthenticating(false);
       return;
@@ -117,10 +91,9 @@ export default function AdminAccount({ admin }) {
     setSuccess("");
 
     try {
-      const { error: updateError } =
-        await authClient.updateUser({
-          name: name.trim(),
-        });
+      const { error: updateError } = await authClient.updateUser({
+        name: name.trim(),
+      });
 
       if (updateError) {
         if (handleUnauthorizedError(updateError)) {
@@ -128,8 +101,7 @@ export default function AdminAccount({ admin }) {
         }
 
         throw new Error(
-          updateError.message ||
-          "Não foi possível atualizar a conta."
+          updateError.message || "Não foi possível atualizar a conta."
         );
       }
 
@@ -148,21 +120,18 @@ export default function AdminAccount({ admin }) {
     setPasswordSuccess("");
 
     if (newPassword !== confirmPassword) {
-      setPasswordError(
-        "A confirmação da nova palavra-passe não coincide."
-      );
+      setPasswordError("A confirmação da nova palavra-passe não coincide.");
       return;
     }
 
     setIsChangingPassword(true);
 
     try {
-      const { error: changeError } =
-        await authClient.changePassword({
-          currentPassword,
-          newPassword,
-          revokeOtherSessions: true,
-        });
+      const { error: changeError } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true,
+      });
 
       if (changeError) {
         if (handleUnauthorizedError(changeError)) {
@@ -170,8 +139,7 @@ export default function AdminAccount({ admin }) {
         }
 
         throw new Error(
-          changeError.message ||
-          "Não foi possível alterar a palavra-passe."
+          changeError.message || "Não foi possível alterar a palavra-passe."
         );
       }
 
@@ -179,9 +147,7 @@ export default function AdminAccount({ admin }) {
       setNewPassword("");
       setConfirmPassword("");
 
-      setPasswordSuccess(
-        "Palavra-passe alterada com sucesso."
-      );
+      setPasswordSuccess("Palavra-passe alterada com sucesso.");
     } catch (err) {
       setPasswordError(err.message);
     } finally {
@@ -193,10 +159,7 @@ export default function AdminAccount({ admin }) {
       <Head>
         <title>Minha conta | Caldo Verde</title>
 
-        <meta
-          name="robots"
-          content="noindex, nofollow"
-        />
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <AdminLayout admin={admin}>
@@ -204,30 +167,23 @@ export default function AdminAccount({ admin }) {
           <div>
             <h1>Minha conta</h1>
 
-            <p>
-              Gerir os teus dados de acesso à administração.
-            </p>
+            <p>Gerir os teus dados de acesso à administração.</p>
           </div>
         </section>
         {isSessionExpired && (
-          <div
-            className={styles.sessionExpiredNotice}
-            role="alert"
-          >
+          <div className={styles.sessionExpiredNotice} role="alert">
             <strong>A sessão expirou.</strong>
 
             <p>
-              As alterações dos formulários continuam preservadas.
-              Volta a iniciar sessão para continuar.
+              As alterações dos formulários continuam preservadas. Volta a
+              iniciar sessão para continuar.
             </p>
 
             {!showReauthForm ? (
               <button
                 className={styles.saveButton}
                 type="button"
-                onClick={() =>
-                  setShowReauthForm(true)
-                }
+                onClick={() => setShowReauthForm(true)}
               >
                 Voltar a iniciar sessão
               </button>
@@ -246,9 +202,7 @@ export default function AdminAccount({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthEmail}
-                    onChange={(event) =>
-                      setReauthEmail(event.target.value)
-                    }
+                    onChange={(event) => setReauthEmail(event.target.value)}
                   />
                 </label>
 
@@ -262,16 +216,12 @@ export default function AdminAccount({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthPassword}
-                    onChange={(event) =>
-                      setReauthPassword(event.target.value)
-                    }
+                    onChange={(event) => setReauthPassword(event.target.value)}
                   />
                 </label>
 
                 {reauthError && (
-                  <p className={styles.errorMessage}>
-                    {reauthError}
-                  </p>
+                  <p className={styles.errorMessage}>{reauthError}</p>
                 )}
 
                 <div className={styles.reauthActions}>
@@ -305,30 +255,21 @@ export default function AdminAccount({ admin }) {
         <section className={styles.userFormCard}>
           <h2>Dados da conta</h2>
 
-          <form
-            className={styles.form}
-            onSubmit={handleUpdateProfile}
-          >
+          <form className={styles.form} onSubmit={handleUpdateProfile}>
             <div className={styles.field}>
-              <label htmlFor="account-name">
-                Nome
-              </label>
+              <label htmlFor="account-name">Nome</label>
 
               <input
                 id="account-name"
                 type="text"
                 value={name}
-                onChange={(event) =>
-                  setName(event.target.value)
-                }
+                onChange={(event) => setName(event.target.value)}
                 required
               />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="account-email">
-                Email
-              </label>
+              <label htmlFor="account-email">Email</label>
 
               <input
                 id="account-email"
@@ -338,15 +279,9 @@ export default function AdminAccount({ admin }) {
               />
             </div>
 
-            {error && (
-              <p className={styles.error}>
-                {error}
-              </p>
-            )}
+            {error && <p className={styles.error}>{error}</p>}
 
-            {success && (
-              <p>{success}</p>
-            )}
+            {success && <p>{success}</p>}
 
             <div className={styles.userFormActions}>
               <button
@@ -354,9 +289,7 @@ export default function AdminAccount({ admin }) {
                 className={styles.button}
                 disabled={isSaving}
               >
-                {isSaving
-                  ? "A guardar..."
-                  : "Guardar alterações"}
+                {isSaving ? "A guardar..." : "Guardar alterações"}
               </button>
             </div>
           </form>
@@ -364,39 +297,28 @@ export default function AdminAccount({ admin }) {
         <section className={styles.userFormCard}>
           <h2>Alterar a palavra-passe</h2>
 
-          <form
-            className={styles.form}
-            onSubmit={handleChangePassword}
-          >
+          <form className={styles.form} onSubmit={handleChangePassword}>
             <div className={styles.field}>
-              <label htmlFor="current-password">
-                Palavra-passe atual
-              </label>
+              <label htmlFor="current-password">Palavra-passe atual</label>
 
               <input
                 id="current-password"
                 type="password"
                 value={currentPassword}
-                onChange={(event) =>
-                  setCurrentPassword(event.target.value)
-                }
+                onChange={(event) => setCurrentPassword(event.target.value)}
                 autoComplete="current-password"
                 required
               />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="new-password">
-                Nova palavra-passe
-              </label>
+              <label htmlFor="new-password">Nova palavra-passe</label>
 
               <input
                 id="new-password"
                 type="password"
                 value={newPassword}
-                onChange={(event) =>
-                  setNewPassword(event.target.value)
-                }
+                onChange={(event) => setNewPassword(event.target.value)}
                 autoComplete="new-password"
                 minLength={12}
                 required
@@ -412,24 +334,16 @@ export default function AdminAccount({ admin }) {
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(event) =>
-                  setConfirmPassword(event.target.value)
-                }
+                onChange={(event) => setConfirmPassword(event.target.value)}
                 autoComplete="new-password"
                 minLength={12}
                 required
               />
             </div>
 
-            {passwordError && (
-              <p className={styles.error}>
-                {passwordError}
-              </p>
-            )}
+            {passwordError && <p className={styles.error}>{passwordError}</p>}
 
-            {passwordSuccess && (
-              <p>{passwordSuccess}</p>
-            )}
+            {passwordSuccess && <p>{passwordSuccess}</p>}
 
             <div className={styles.userFormActions}>
               <button
@@ -437,9 +351,7 @@ export default function AdminAccount({ admin }) {
                 className={styles.button}
                 disabled={isChangingPassword}
               >
-                {isChangingPassword
-                  ? "A alterar..."
-                  : "Alterar palavra-passe"}
+                {isChangingPassword ? "A alterar..." : "Alterar palavra-passe"}
               </button>
             </div>
           </form>

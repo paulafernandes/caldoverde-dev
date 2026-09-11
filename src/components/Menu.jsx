@@ -9,27 +9,23 @@ const priceLocales = {
   en: "en-GB",
 };
 
-export default function Menu({
-  menuCategories = [],
-}) {
+export default function Menu({ menuCategories = [] }) {
   const menuListRef = useRef(null);
 
-  const [activeCategoryId, setActiveCategoryId] =
-    useState(menuCategories[0]?.id ?? null);
+  const [activeCategoryId, setActiveCategoryId] = useState(
+    menuCategories[0]?.id ?? null
+  );
 
   const { language } = useLanguage();
   const text = translations[language].menu;
 
   const activeCategory =
-    menuCategories.find(
-      (category) => category.id === activeCategoryId
-    ) ??
+    menuCategories.find((category) => category.id === activeCategoryId) ??
     menuCategories[0] ??
     null;
 
   useEffect(() => {
-    const isMobile =
-      window.matchMedia("(max-width: 900px)").matches;
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
 
     if (!isMobile) {
       return;
@@ -47,9 +43,7 @@ export default function Menu({
     <section className="menu-group" id="ementa">
       <div className="menu-container">
         <div className="menu-heading">
-          <p className="menu-subtitle">
-            {text.subtitle}
-          </p>
+          <p className="menu-subtitle">{text.subtitle}</p>
 
           <h2>{text.title}</h2>
         </div>
@@ -62,8 +56,7 @@ export default function Menu({
               aria-label={text.categoriesLabel}
             >
               {menuCategories.map((category) => {
-                const isActive =
-                  category.id === activeCategory.id;
+                const isActive = category.id === activeCategory.id;
 
                 return (
                   <button
@@ -71,13 +64,10 @@ export default function Menu({
                     id={`tab-${category.id}`}
                     type="button"
                     role="tab"
-                    className={`menu-tab-button ${isActive ? "is-active" : ""
-                      }`}
+                    className={`menu-tab-button ${isActive ? "is-active" : ""}`}
                     aria-selected={isActive}
                     aria-controls={`panel-${category.id}`}
-                    onClick={() =>
-                      setActiveCategoryId(category.id)
-                    }
+                    onClick={() => setActiveCategoryId(category.id)}
                   >
                     {category.label[language]}
                   </button>
@@ -97,35 +87,22 @@ export default function Menu({
                   alt={activeCategory.title[language]}
                   fill
                   sizes="(max-width: 900px) 100vw, 50vw"
-                  unoptimized={activeCategory.image.startsWith(
-                    "/uploads/"
-                  )}
+                  unoptimized={activeCategory.image.startsWith("/uploads/")}
                 />
               </div>
-              <div
-                className="menu-list"
-                ref={menuListRef}>
+              <div className="menu-list" ref={menuListRef}>
                 {activeCategory.highlightText?.[language] && (
                   <div className="menu-highlight">
                     {activeCategory.highlightText[language]}
                   </div>
                 )}
                 {activeCategory.sections.map((section) => (
-                  <div
-                    className="menu-group"
-                    key={section.id}
-                  >
-
-                    <h3>
-                      {section.title[language]}
-                    </h3>
+                  <div className="menu-group" key={section.id}>
+                    <h3>{section.title[language]}</h3>
 
                     <ul>
                       {section.items.map((item) => (
-                        <li
-                          key={item.id}
-                          className="menu-dish"
-                        >
+                        <li key={item.id} className="menu-dish">
                           <div className="menu-dish-heading">
                             <h4>{item.name[language]}</h4>
 
@@ -141,9 +118,7 @@ export default function Menu({
                             </span>
                           </div>
 
-                          <p>
-                            {item.description[language]}
-                          </p>
+                          <p>{item.description[language]}</p>
                         </li>
                       ))}
                     </ul>

@@ -7,10 +7,7 @@ export async function getAdminSession(request) {
     headers: fromNodeHeaders(request.headers),
   });
 
-  if (
-    !session ||
-    session.user.role !== "admin"
-  ) {
+  if (!session || session.user.role !== "admin") {
     return null;
   }
 

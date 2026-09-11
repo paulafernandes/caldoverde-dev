@@ -13,24 +13,15 @@ export default function AdminUsers({ admin }) {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [changingStatusUserId, setChangingStatusUserId] =
-    useState(null);
+  const [changingStatusUserId, setChangingStatusUserId] = useState(null);
   const [statusUser, setStatusUser] = useState(null);
-  const [
-    isSessionExpired,
-    setIsSessionExpired,
-  ] = useState(false);
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
-  const [reauthEmail, setReauthEmail] =
-    useState(admin.email);
-  const [reauthPassword, setReauthPassword] =
-    useState("");
-  const [reauthError, setReauthError] =
-    useState("");
-  const [isReauthenticating, setIsReauthenticating] =
-    useState(false);
-  const [showReauthForm, setShowReauthForm] =
-    useState(false);
+  const [reauthEmail, setReauthEmail] = useState(admin.email);
+  const [reauthPassword, setReauthPassword] = useState("");
+  const [reauthError, setReauthError] = useState("");
+  const [isReauthenticating, setIsReauthenticating] = useState(false);
+  const [showReauthForm, setShowReauthForm] = useState(false);
 
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -105,16 +96,10 @@ export default function AdminUsers({ admin }) {
       });
     }
 
-    window.addEventListener(
-      "admin-session-expired",
-      handleSessionExpired
-    );
+    window.addEventListener("admin-session-expired", handleSessionExpired);
 
     return () => {
-      window.removeEventListener(
-        "admin-session-expired",
-        handleSessionExpired
-      );
+      window.removeEventListener("admin-session-expired", handleSessionExpired);
     };
   }, []);
 
@@ -140,15 +125,11 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Não foi possível criar o utilizador."
-        );
+        throw new Error(data.error || "Não foi possível criar o utilizador.");
       }
 
       setUsers((current) =>
-        [...current, data.user].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        )
+        [...current, data.user].sort((a, b) => a.name.localeCompare(b.name))
       );
 
       setNewUser({
@@ -183,18 +164,15 @@ export default function AdminUsers({ admin }) {
     setError("");
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${userId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: editingName,
-          }),
-        }
-      );
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: editingName,
+        }),
+      });
 
       if (handleUnauthorizedResponse(response)) {
         return;
@@ -213,14 +191,12 @@ export default function AdminUsers({ admin }) {
           .map((user) =>
             user.id === userId
               ? {
-                ...user,
-                name: editingName.trim(),
-              }
+                  ...user,
+                  name: editingName.trim(),
+                }
               : user
           )
-          .sort((a, b) =>
-            a.name.localeCompare(b.name)
-          )
+          .sort((a, b) => a.name.localeCompare(b.name))
       );
       setEditingUserId(null);
       setEditingName("");
@@ -239,21 +215,15 @@ export default function AdminUsers({ admin }) {
     setStatusUser(null);
   }
   async function handleChangeUserStatus(user) {
-    const action = user.banned
-      ? "activate"
-      : "deactivate";
-
+    const action = user.banned ? "activate" : "deactivate";
 
     setChangingStatusUserId(user.id);
     setError("");
 
     try {
-      const response = await fetch(
-        `/api/admin/users/${user.id}/${action}`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await fetch(`/api/admin/users/${user.id}/${action}`, {
+        method: "POST",
+      });
 
       if (handleUnauthorizedResponse(response)) {
         return;
@@ -263,8 +233,7 @@ export default function AdminUsers({ admin }) {
 
       if (!response.ok) {
         throw new Error(
-          data.error ||
-          "Não foi possível alterar o estado do utilizador."
+          data.error || "Não foi possível alterar o estado do utilizador."
         );
       }
 
@@ -272,9 +241,9 @@ export default function AdminUsers({ admin }) {
         current.map((currentUser) =>
           currentUser.id === user.id
             ? {
-              ...currentUser,
-              banned: !user.banned,
-            }
+                ...currentUser,
+                banned: !user.banned,
+              }
             : currentUser
         )
       );
@@ -289,9 +258,7 @@ export default function AdminUsers({ admin }) {
       return false;
     }
 
-    window.dispatchEvent(
-      new Event("admin-session-expired")
-    );
+    window.dispatchEvent(new Event("admin-session-expired"));
 
     return true;
   }
@@ -302,17 +269,13 @@ export default function AdminUsers({ admin }) {
     setReauthError("");
     setIsReauthenticating(true);
 
-    const { error: signInError } =
-      await authClient.signIn.email({
-        email: reauthEmail.trim(),
-        password: reauthPassword,
-      });
+    const { error: signInError } = await authClient.signIn.email({
+      email: reauthEmail.trim(),
+      password: reauthPassword,
+    });
 
     if (signInError) {
-      setReauthError(
-        signInError.message ??
-        "Não foi possível iniciar sessão."
-      );
+      setReauthError(signInError.message ?? "Não foi possível iniciar sessão.");
 
       setIsReauthenticating(false);
       return;
@@ -329,10 +292,7 @@ export default function AdminUsers({ admin }) {
       <Head>
         <title>Utilizadores | Caldo Verde</title>
 
-        <meta
-          name="robots"
-          content="noindex, nofollow"
-        />
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <AdminLayout admin={admin}>
@@ -340,9 +300,7 @@ export default function AdminUsers({ admin }) {
           <div>
             <h1>Utilizadores</h1>
 
-            <p>
-              Gerir os utilizadores com acesso à administração.
-            </p>
+            <p>Gerir os utilizadores com acesso à administração.</p>
           </div>
 
           {!isCreating && (
@@ -360,14 +318,9 @@ export default function AdminUsers({ admin }) {
           <section className={styles.userFormCard}>
             <h2>Novo utilizador</h2>
 
-            <form
-              className={styles.form}
-              onSubmit={handleCreateUser}
-            >
+            <form className={styles.form} onSubmit={handleCreateUser}>
               <div className={styles.field}>
-                <label htmlFor="new-user-name">
-                  Nome
-                </label>
+                <label htmlFor="new-user-name">Nome</label>
 
                 <input
                   id="new-user-name"
@@ -380,9 +333,7 @@ export default function AdminUsers({ admin }) {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="new-user-email">
-                  Email
-                </label>
+                <label htmlFor="new-user-email">Email</label>
 
                 <input
                   id="new-user-email"
@@ -395,9 +346,7 @@ export default function AdminUsers({ admin }) {
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="new-user-password">
-                  Palavra-passe inicial
-                </label>
+                <label htmlFor="new-user-password">Palavra-passe inicial</label>
 
                 <input
                   id="new-user-password"
@@ -416,9 +365,7 @@ export default function AdminUsers({ admin }) {
                   className={styles.button}
                   disabled={isSaving}
                 >
-                  {isSaving
-                    ? "A criar..."
-                    : "Criar utilizador"}
+                  {isSaving ? "A criar..." : "Criar utilizador"}
                 </button>
 
                 <button
@@ -434,24 +381,19 @@ export default function AdminUsers({ admin }) {
           </section>
         )}
         {isSessionExpired && (
-          <div
-            className={styles.sessionExpiredNotice}
-            role="alert"
-          >
+          <div className={styles.sessionExpiredNotice} role="alert">
             <strong>A sessão expirou.</strong>
 
             <p>
-              As alterações do formulário continuam preservadas.
-              Volta a iniciar sessão para continuar.
+              As alterações do formulário continuam preservadas. Volta a iniciar
+              sessão para continuar.
             </p>
 
             {!showReauthForm ? (
               <button
                 className={styles.saveButton}
                 type="button"
-                onClick={() =>
-                  setShowReauthForm(true)
-                }
+                onClick={() => setShowReauthForm(true)}
               >
                 Voltar a iniciar sessão
               </button>
@@ -470,11 +412,7 @@ export default function AdminUsers({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthEmail}
-                    onChange={(event) =>
-                      setReauthEmail(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setReauthEmail(event.target.value)}
                   />
                 </label>
 
@@ -488,18 +426,12 @@ export default function AdminUsers({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthPassword}
-                    onChange={(event) =>
-                      setReauthPassword(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setReauthPassword(event.target.value)}
                   />
                 </label>
 
                 {reauthError && (
-                  <p className={styles.errorMessage}>
-                    {reauthError}
-                  </p>
+                  <p className={styles.errorMessage}>{reauthError}</p>
                 )}
 
                 <div className={styles.reauthActions}>
@@ -530,11 +462,7 @@ export default function AdminUsers({ admin }) {
             )}
           </div>
         )}
-        {error && (
-          <p className={styles.error}>
-            {error}
-          </p>
-        )}
+        {error && <p className={styles.error}>{error}</p>}
         {statusUser && (
           <div className={styles.confirmationCard}>
             <div>
@@ -555,13 +483,9 @@ export default function AdminUsers({ admin }) {
               <button
                 type="button"
                 className={
-                  statusUser.banned
-                    ? styles.button
-                    : styles.dangerButton
+                  statusUser.banned ? styles.button : styles.dangerButton
                 }
-                disabled={
-                  changingStatusUserId === statusUser.id
-                }
+                disabled={changingStatusUserId === statusUser.id}
                 onClick={async () => {
                   await handleChangeUserStatus(statusUser);
                   setStatusUser(null);
@@ -577,9 +501,7 @@ export default function AdminUsers({ admin }) {
               <button
                 type="button"
                 className={styles.editButton}
-                disabled={
-                  changingStatusUserId === statusUser.id
-                }
+                disabled={changingStatusUserId === statusUser.id}
                 onClick={handleCancelUserStatusChange}
               >
                 Cancelar
@@ -622,9 +544,7 @@ export default function AdminUsers({ admin }) {
                     <td>{user.email}</td>
 
                     <td>
-                      {user.role === "admin"
-                        ? "Administrador"
-                        : user.role}
+                      {user.role === "admin" ? "Administrador" : user.role}
                     </td>
 
                     <td>
@@ -635,9 +555,7 @@ export default function AdminUsers({ admin }) {
                             : styles.statusVisible
                         }
                       >
-                        {user.banned
-                          ? "Desativado"
-                          : "Ativo"}
+                        {user.banned ? "Desativado" : "Ativo"}
                       </span>
                     </td>
 
@@ -645,9 +563,7 @@ export default function AdminUsers({ admin }) {
                       {editingUserId === user.id ? (
                         <form
                           className={styles.userFormActions}
-                          onSubmit={(event) =>
-                            handleUpdateUser(event, user.id)
-                          }
+                          onSubmit={(event) => handleUpdateUser(event, user.id)}
                         >
                           <button
                             type="submit"
@@ -658,9 +574,7 @@ export default function AdminUsers({ admin }) {
                             }
                             disabled={isUpdating}
                           >
-                            {isUpdating
-                              ? "A guardar..."
-                              : "Guardar"}
+                            {isUpdating ? "A guardar..." : "Guardar"}
                           </button>
 
                           <button
@@ -698,7 +612,6 @@ export default function AdminUsers({ admin }) {
                                   : "Desativar"}
                             </button>
                           )}
-
                         </div>
                       )}
                     </td>

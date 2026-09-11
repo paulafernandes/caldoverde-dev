@@ -24,7 +24,5 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
   },
 
-  plugins: [
-    admin(),
-  ],
+  plugins: [admin()],
 });

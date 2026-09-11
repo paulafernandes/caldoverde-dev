@@ -1,12 +1,6 @@
-import {
-  createAdminMenuItem,
-} from "../../../../../server/adminMenuService";
-import {
-  createMenuItemSchema,
-} from "../../../../../server/adminMenuValidation";
-import {
-  getAdminSession,
-} from "../../../../../server/getAdminSession";
+import { createAdminMenuItem } from "../../../../../server/adminMenuService";
+import { createMenuItemSchema } from "../../../../../server/adminMenuValidation";
+import { getAdminSession } from "../../../../../server/getAdminSession";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -15,10 +9,7 @@ function formatValidationErrors(error) {
   }));
 }
 
-export default async function handler(
-  request,
-  response
-) {
+export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
 
@@ -35,8 +26,7 @@ export default async function handler(
     });
   }
 
-  const contentType =
-    request.headers["content-type"] ?? "";
+  const contentType = request.headers["content-type"] ?? "";
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
@@ -44,24 +34,18 @@ export default async function handler(
     });
   }
 
-  const validation =
-    createMenuItemSchema.safeParse(request.body);
+  const validation = createMenuItemSchema.safeParse(request.body);
 
   if (!validation.success) {
     return response.status(400).json({
       error: "Os dados do prato são inválidos.",
 
-      details: formatValidationErrors(
-        validation.error
-      ),
+      details: formatValidationErrors(validation.error),
     });
   }
 
   try {
-    const createdItem =
-      await createAdminMenuItem(
-        validation.data
-      );
+    const createdItem = await createAdminMenuItem(validation.data);
 
     if (createdItem === null) {
       return response.status(404).json({
@@ -71,15 +55,13 @@ export default async function handler(
 
     if (createdItem === false) {
       return response.status(400).json({
-        error:
-          "A subcategoria selecionada não pertence a esta categoria.",
+        error: "A subcategoria selecionada não pertence a esta categoria.",
       });
     }
 
     if (createdItem === false) {
       return response.status(400).json({
-        error:
-          "A subcategoria não pertence à categoria selecionada.",
+        error: "A subcategoria não pertence à categoria selecionada.",
       });
     }
 
@@ -87,10 +69,7 @@ export default async function handler(
       item: createdItem,
     });
   } catch (error) {
-    console.error(
-      "Erro ao criar o prato:",
-      error
-    );
+    console.error("Erro ao criar o prato:", error);
 
     return response.status(500).json({
       error: "Não foi possível criar o prato.",

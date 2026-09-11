@@ -34,46 +34,35 @@ export default function MenuSubcategoryEditor({
 }) {
   const isCreating = subcategory === null;
 
-  const formIdentifier = isCreating
-    ? `new-${categoryId}`
-    : subcategory.id;
+  const formIdentifier = isCreating ? `new-${categoryId}` : subcategory.id;
 
-  const [formValues, setFormValues] = useState(
-    () => ({
-      isVisible: subcategory?.isVisible ?? true,
+  const [formValues, setFormValues] = useState(() => ({
+    isVisible: subcategory?.isVisible ?? true,
 
-      translations: subcategory
-        ? {
+    translations: subcategory
+      ? {
           pt: { ...subcategory.translations.pt },
           es: { ...subcategory.translations.es },
           en: { ...subcategory.translations.en },
         }
-        : {
+      : {
           pt: createEmptyTranslation(),
           es: createEmptyTranslation(),
           en: createEmptyTranslation(),
         },
-    })
-  );
+  }));
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [
-    isConfirmingDelete,
-    setIsConfirmingDelete,
-  ] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
-  const [isDeleting, setIsDeleting] =
-    useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isBusy = isSubmitting || isDeleting;
 
-  const isFormLocked =
-    isBusy || isConfirmingDelete;
+  const isFormLocked = isBusy || isConfirmingDelete;
 
   function updateTranslation(language, value) {
     setFormValues((currentValues) => ({
@@ -98,9 +87,7 @@ export default function MenuSubcategoryEditor({
       ? "/api/admin/menu/subcategories"
       : `/api/admin/menu/subcategories/${subcategory.id}`;
 
-    const method = isCreating
-      ? "POST"
-      : "PATCH";
+    const method = isCreating ? "POST" : "PATCH";
 
     setIsSubmitting(true);
 
@@ -115,8 +102,8 @@ export default function MenuSubcategoryEditor({
         body: JSON.stringify({
           ...(isCreating
             ? {
-              categoryId,
-            }
+                categoryId,
+              }
             : {}),
 
           isVisible: formValues.isVisible,
@@ -124,22 +111,19 @@ export default function MenuSubcategoryEditor({
         }),
       });
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
           setIsSubmitting(false);
           return;
         }
-        const validationMessage =
-          result.details?.[0]?.message;
+        const validationMessage = result.details?.[0]?.message;
 
         setErrorMessage(
           validationMessage ??
-          result.error ??
-          "Não foi possível guardar a subcategoria."
+            result.error ??
+            "Não foi possível guardar a subcategoria."
         );
 
         setIsSubmitting(false);
@@ -149,9 +133,7 @@ export default function MenuSubcategoryEditor({
       setIsSubmitting(false);
       await onSaved(result.subcategory);
     } catch {
-      setErrorMessage(
-        "Não foi possível comunicar com o servidor."
-      );
+      setErrorMessage("Não foi possível comunicar com o servidor.");
 
       setIsSubmitting(false);
     }
@@ -169,9 +151,7 @@ export default function MenuSubcategoryEditor({
         }
       );
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -179,8 +159,7 @@ export default function MenuSubcategoryEditor({
           return;
         }
         setErrorMessage(
-          result.error ??
-          "Não foi possível eliminar a subcategoria."
+          result.error ?? "Não foi possível eliminar a subcategoria."
         );
 
         setIsDeleting(false);
@@ -190,14 +169,9 @@ export default function MenuSubcategoryEditor({
       setIsDeleting(false);
       await onDeleted();
     } catch (error) {
-      console.error(
-        "Erro ao guardar subcategoria:",
-        error
-      );
+      console.error("Erro ao guardar subcategoria:", error);
 
-      setErrorMessage(
-        "Não foi possível concluir a operação."
-      );
+      setErrorMessage("Não foi possível concluir a operação.");
 
       setIsSubmitting(false);
     }
@@ -214,9 +188,7 @@ export default function MenuSubcategoryEditor({
   return (
     <EditorContainer
       className={styles.itemEditor}
-      {...(!embedded
-        ? { onSubmit: handleSubmit }
-        : {})}
+      {...(!embedded ? { onSubmit: handleSubmit } : {})}
     >
       <div className={styles.editorHeading}>
         <div>
@@ -228,21 +200,15 @@ export default function MenuSubcategoryEditor({
                 : "Editar subcategoria"}
           </h3>
 
-          {!isCreating && isConfirmingDelete && (
-            <p>{subcategoryName}</p>
-          )}
+          {!isCreating && isConfirmingDelete && <p>{subcategoryName}</p>}
         </div>
       </div>
 
-      <div
-        className={styles.translationEditorList}
-      >
+      <div className={styles.translationEditorList}>
         {languages.map((language) => {
-          const translation =
-            formValues.translations[language.code];
+          const translation = formValues.translations[language.code];
 
-          const nameId =
-            `subcategory-${formIdentifier}-${language.code}-name`;
+          const nameId = `subcategory-${formIdentifier}-${language.code}-name`;
 
           return (
             <fieldset
@@ -252,10 +218,7 @@ export default function MenuSubcategoryEditor({
             >
               <legend>{language.label}</legend>
 
-              <label
-                className={styles.editorField}
-                htmlFor={nameId}
-              >
+              <label className={styles.editorField} htmlFor={nameId}>
                 Nome
               </label>
 
@@ -266,10 +229,7 @@ export default function MenuSubcategoryEditor({
                 maxLength={120}
                 value={translation.name}
                 onChange={(event) =>
-                  updateTranslation(
-                    language.code,
-                    event.target.value
-                  )
+                  updateTranslation(language.code, event.target.value)
                 }
               />
             </fieldset>
@@ -290,46 +250,30 @@ export default function MenuSubcategoryEditor({
           }
         />
 
-        <span>
-          Subcategoria visível no site público
-        </span>
+        <span>Subcategoria visível no site público</span>
       </label>
 
       {errorMessage && (
-        <p
-          className={styles.editorError}
-          role="alert"
-        >
+        <p className={styles.editorError} role="alert">
           {errorMessage}
         </p>
       )}
 
       {!isCreating && isConfirmingDelete && (
-        <div
-          className={styles.deleteConfirmation}
-          role="alert"
-        >
-          <strong>
-            Eliminar “{subcategoryName}”?
-          </strong>
+        <div className={styles.deleteConfirmation} role="alert">
+          <strong>Eliminar “{subcategoryName}”?</strong>
 
           <p>
-            Os pratos desta subcategoria não serão
-            eliminados. Ficarão sem subcategoria.
+            Os pratos desta subcategoria não serão eliminados. Ficarão sem
+            subcategoria.
           </p>
 
-          <div
-            className={
-              styles.deleteConfirmationActions
-            }
-          >
+          <div className={styles.deleteConfirmationActions}>
             <button
               className={styles.cancelButton}
               type="button"
               disabled={isBusy}
-              onClick={() =>
-                setIsConfirmingDelete(false)
-              }
+              onClick={() => setIsConfirmingDelete(false)}
             >
               Manter subcategoria
             </button>
@@ -340,9 +284,7 @@ export default function MenuSubcategoryEditor({
               disabled={isBusy}
               onClick={handleDelete}
             >
-              {isDeleting
-                ? "A eliminar..."
-                : "Eliminar permanentemente"}
+              {isDeleting ? "A eliminar..." : "Eliminar permanentemente"}
             </button>
           </div>
         </div>
@@ -354,9 +296,7 @@ export default function MenuSubcategoryEditor({
             className={styles.deleteButton}
             type="button"
             disabled={isBusy}
-            onClick={() =>
-              setIsConfirmingDelete(true)
-            }
+            onClick={() => setIsConfirmingDelete(true)}
           >
             Eliminar subcategoria
           </button>
@@ -374,7 +314,8 @@ export default function MenuSubcategoryEditor({
         <button
           className={styles.subcategoryAddButton}
           type={embedded ? "button" : "submit"}
-          onClick={embedded ? handleSubmit : undefined}        >
+          onClick={embedded ? handleSubmit : undefined}
+        >
           {isSubmitting
             ? "A guardar..."
             : isCreating

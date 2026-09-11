@@ -2,12 +2,8 @@ import {
   deleteAdminMenuItem,
   updateAdminMenuItem,
 } from "../../../../../server/adminMenuService";
-import {
-  updateMenuItemSchema,
-} from "../../../../../server/adminMenuValidation";
-import {
-  getAdminSession,
-} from "../../../../../server/getAdminSession";
+import { updateMenuItemSchema } from "../../../../../server/adminMenuValidation";
+import { getAdminSession } from "../../../../../server/getAdminSession";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -16,17 +12,11 @@ function formatValidationErrors(error) {
   }));
 }
 
-export default async function handler(
-  request,
-  response
-) {
+export default async function handler(request, response) {
   const allowedMethods = ["PATCH", "DELETE"];
 
   if (!allowedMethods.includes(request.method)) {
-    response.setHeader(
-      "Allow",
-      allowedMethods.join(", ")
-    );
+    response.setHeader("Allow", allowedMethods.join(", "));
 
     return response.status(405).json({
       error: "Método não permitido.",
@@ -47,10 +37,7 @@ export default async function handler(
 
   const itemId = Number(rawItemId);
 
-  if (
-    !Number.isInteger(itemId) ||
-    itemId <= 0
-  ) {
+  if (!Number.isInteger(itemId) || itemId <= 0) {
     return response.status(400).json({
       error: "Identificador do prato inválido.",
     });
@@ -58,8 +45,7 @@ export default async function handler(
 
   if (request.method === "DELETE") {
     try {
-      const wasDeleted =
-        await deleteAdminMenuItem(itemId);
+      const wasDeleted = await deleteAdminMenuItem(itemId);
 
       if (!wasDeleted) {
         return response.status(404).json({
@@ -71,20 +57,15 @@ export default async function handler(
         success: true,
       });
     } catch (error) {
-      console.error(
-        "Erro ao eliminar o prato:",
-        error
-      );
+      console.error("Erro ao eliminar o prato:", error);
 
       return response.status(500).json({
-        error:
-          "Não foi possível eliminar o prato.",
+        error: "Não foi possível eliminar o prato.",
       });
     }
   }
 
-  const contentType =
-    request.headers["content-type"] ?? "";
+  const contentType = request.headers["content-type"] ?? "";
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
@@ -92,24 +73,17 @@ export default async function handler(
     });
   }
 
-  const validation =
-    updateMenuItemSchema.safeParse(request.body);
+  const validation = updateMenuItemSchema.safeParse(request.body);
 
   if (!validation.success) {
     return response.status(400).json({
       error: "Os dados do prato são inválidos.",
-      details: formatValidationErrors(
-        validation.error
-      ),
+      details: formatValidationErrors(validation.error),
     });
   }
 
   try {
-    const updatedItem =
-      await updateAdminMenuItem(
-        itemId,
-        validation.data
-      );
+    const updatedItem = await updateAdminMenuItem(itemId, validation.data);
 
     if (updatedItem === null) {
       return response.status(404).json({
@@ -119,15 +93,13 @@ export default async function handler(
 
     if (updatedItem === false) {
       return response.status(400).json({
-        error:
-          "A subcategoria selecionada não pertence à categoria do prato.",
+        error: "A subcategoria selecionada não pertence à categoria do prato.",
       });
     }
 
     if (updatedItem === false) {
       return response.status(400).json({
-        error:
-          "A subcategoria não pertence à categoria do prato.",
+        error: "A subcategoria não pertence à categoria do prato.",
       });
     }
 
@@ -135,10 +107,7 @@ export default async function handler(
       item: updatedItem,
     });
   } catch (error) {
-    console.error(
-      "Erro ao atualizar o prato:",
-      error
-    );
+    console.error("Erro ao atualizar o prato:", error);
 
     return response.status(500).json({
       error: "Não foi possível atualizar o prato.",

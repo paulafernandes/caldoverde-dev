@@ -17,21 +17,16 @@ export function LanguageProvider({ children }) {
     document.documentElement.lang = language;
   }, [language]);
 
-  const changeLanguage = useCallback(
-    (newLanguage) => {
-      if (!supportedLanguages.includes(newLanguage)) {
-        return;
-      }
+  const changeLanguage = useCallback((newLanguage) => {
+    if (!supportedLanguages.includes(newLanguage)) {
+      return;
+    }
 
-      setLanguage(newLanguage);
-    },
-    []
-  );
+    setLanguage(newLanguage);
+  }, []);
 
   return (
-    <LanguageContext.Provider
-      value={{ language, changeLanguage }}
-    >
+    <LanguageContext.Provider value={{ language, changeLanguage }}>
       {children}
     </LanguageContext.Provider>
   );

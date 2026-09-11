@@ -48,71 +48,31 @@ export default function LanguageHome({ menuCategories }) {
 
         <RestaurantSchema url={canonicalUrl} />
 
-        <meta
-          name="description"
-          content={seoData.description}
-        />
+        <meta name="description" content={seoData.description} />
 
-        <link
-          rel="canonical"
-          href={canonicalUrl}
-        />
+        <link rel="canonical" href={canonicalUrl} />
 
-        <link
-          rel="alternate"
-          hrefLang="es"
-          href={`${SITE_URL}/es/`}
-        />
+        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es/`} />
 
-        <link
-          rel="alternate"
-          hrefLang="pt"
-          href={`${SITE_URL}/pt/`}
-        />
+        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt/`} />
 
-        <link
-          rel="alternate"
-          hrefLang="en"
-          href={`${SITE_URL}/en/`}
-        />
+        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en/`} />
 
-        <link
-          rel="alternate"
-          hrefLang="x-default"
-          href={`${SITE_URL}/es/`}
-        />
+        <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}/es/`} />
 
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <meta property="og:type" content="website" />
 
-        <meta
-          property="og:title"
-          content={seoData.title}
-        />
+        <meta property="og:title" content={seoData.title} />
 
-        <meta
-          property="og:description"
-          content={seoData.description}
-        />
+        <meta property="og:description" content={seoData.description} />
 
-        <meta
-          property="og:url"
-          content={canonicalUrl}
-        />
+        <meta property="og:url" content={canonicalUrl} />
 
-        <meta
-          property="og:site_name"
-          content="Caldo Verde"
-        />
+        <meta property="og:site_name" content="Caldo Verde" />
 
-        <meta
-          property="og:locale"
-          content={openGraphLocales[lang]}
-        />
+        <meta property="og:locale" content={openGraphLocales[lang]} />
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
@@ -142,8 +102,7 @@ export async function getServerSideProps({ params }) {
     };
   }
 
-  const menuCategories =
-    await getPublicMenuCategories();
+  const menuCategories = await getPublicMenuCategories();
 
   return {
     props: {

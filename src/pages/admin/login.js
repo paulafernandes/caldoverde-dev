@@ -12,10 +12,8 @@ export default function AdminLogin() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] =
-    useState("");
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -28,9 +26,7 @@ export default function AdminLogin() {
     });
 
     if (error) {
-      setErrorMessage(
-        "Email ou palavra-passe incorretos."
-      );
+      setErrorMessage("Email ou palavra-passe incorretos.");
       setIsSubmitting(false);
       return;
     }
@@ -42,10 +38,7 @@ export default function AdminLogin() {
     <>
       <Head>
         <title>Administração | Caldo Verde</title>
-        <meta
-          name="robots"
-          content="noindex, nofollow"
-        />
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <main className={styles.page}>
@@ -59,22 +52,15 @@ export default function AdminLogin() {
             priority
           />
 
-          <h1 className={styles.title}>
-            Administração
-          </h1>
+          <h1 className={styles.title}>Administração</h1>
 
           <p className={styles.subtitle}>
             Inicia sessão para aceder à administração.
           </p>
 
-          <form
-            className={styles.form}
-            onSubmit={handleSubmit}
-          >
+          <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.field}>
-              <label htmlFor="admin-email">
-                Email
-              </label>
+              <label htmlFor="admin-email">Email</label>
 
               <input
                 id="admin-email"
@@ -82,16 +68,12 @@ export default function AdminLogin() {
                 value={email}
                 autoComplete="email"
                 required
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
               />
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="admin-password">
-                Palavra-passe
-              </label>
+              <label htmlFor="admin-password">Palavra-passe</label>
 
               <input
                 id="admin-password"
@@ -99,17 +81,12 @@ export default function AdminLogin() {
                 value={password}
                 autoComplete="current-password"
                 required
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
               />
             </div>
 
             {errorMessage && (
-              <p
-                className={styles.error}
-                role="alert"
-              >
+              <p className={styles.error} role="alert">
                 {errorMessage}
               </p>
             )}
@@ -119,9 +96,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting
-                ? "A entrar..."
-                : "Entrar"}
+              {isSubmitting ? "A entrar..." : "Entrar"}
             </button>
           </form>
         </section>

@@ -64,33 +64,15 @@ export default function AboutPage() {
       <Head>
         <title>{seoData.title}</title>
 
-        <meta
-          name="description"
-          content={seoData.description}
-        />
+        <meta name="description" content={seoData.description} />
 
-        <link
-          rel="canonical"
-          href={canonicalUrl}
-        />
+        <link rel="canonical" href={canonicalUrl} />
 
-        <link
-          rel="alternate"
-          hrefLang="es"
-          href={`${SITE_URL}/es/about`}
-        />
+        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es/about`} />
 
-        <link
-          rel="alternate"
-          hrefLang="pt"
-          href={`${SITE_URL}/pt/about`}
-        />
+        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt/about`} />
 
-        <link
-          rel="alternate"
-          hrefLang="en"
-          href={`${SITE_URL}/en/about`}
-        />
+        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en/about`} />
 
         <link
           rel="alternate"
@@ -98,37 +80,19 @@ export default function AboutPage() {
           href={`${SITE_URL}/es/about`}
         />
 
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <meta property="og:type" content="website" />
 
-        <meta
-          property="og:title"
-          content={seoData.title}
-        />
+        <meta property="og:title" content={seoData.title} />
 
-        <meta
-          property="og:description"
-          content={seoData.description}
-        />
+        <meta property="og:description" content={seoData.description} />
 
-        <meta
-          property="og:url"
-          content={canonicalUrl}
-        />
+        <meta property="og:url" content={canonicalUrl} />
 
-        <meta
-          property="og:site_name"
-          content="Caldo Verde"
-        />
+        <meta property="og:site_name" content="Caldo Verde" />
 
-        <meta
-          property="og:locale"
-          content={openGraphLocales[lang]}
-        />
+        <meta property="og:locale" content={openGraphLocales[lang]} />
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
@@ -166,9 +130,7 @@ export default function AboutPage() {
 
               <p>{text.paragraphs[0]}</p>
 
-              <p className="about-page-lead">
-                {text.paragraphs[1]}
-              </p>
+              <p className="about-page-lead">{text.paragraphs[1]}</p>
 
               <p>{text.paragraphs[2]}</p>
 

@@ -16,18 +16,13 @@ export default function Banner() {
         preload="auto"
         aria-hidden="true"
       >
-        <source
-          src="/assets/video/slow_mo.mp4"
-          type="video/mp4"
-        />
+        <source src="/assets/video/slow_mo.mp4" type="video/mp4" />
       </video>
 
       <div className="hero-overlay" />
 
       <div className="hero-content">
-        <p className="hero-subtitle">
-          {text.subtitle}
-        </p>
+        <p className="hero-subtitle">{text.subtitle}</p>
 
         <h1>{text.title}</h1>
 

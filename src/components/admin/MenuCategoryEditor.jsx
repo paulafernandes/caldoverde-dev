@@ -21,16 +21,11 @@ const languages = [
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
-const allowedImageTypes = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function isAllowedImagePath(imagePath) {
   return (
-    imagePath.startsWith("/assets/images/") ||
-    imagePath.startsWith("/uploads/")
+    imagePath.startsWith("/assets/images/") || imagePath.startsWith("/uploads/")
   );
 }
 
@@ -55,80 +50,54 @@ export default function MenuCategoryEditor({
 }) {
   const isCreating = category === null;
 
-  const formIdentifier = isCreating
-    ? "new"
-    : category.id;
+  const formIdentifier = isCreating ? "new" : category.id;
 
-  const [formValues, setFormValues] = useState(
-    () => {
-      if (isCreating && initialFormValues) {
-        return initialFormValues;
-      }
+  const [formValues, setFormValues] = useState(() => {
+    if (isCreating && initialFormValues) {
+      return initialFormValues;
+    }
 
-      return {
-        imagePath: category?.imagePath ?? "",
+    return {
+      imagePath: category?.imagePath ?? "",
 
-        isVisible:
-          category?.isVisible ?? false,
+      isVisible: category?.isVisible ?? false,
 
-        translations: category
-          ? {
+      translations: category
+        ? {
             pt: { ...category.translations.pt },
             es: { ...category.translations.es },
             en: { ...category.translations.en },
           }
-          : {
+        : {
             pt: createEmptyTranslation(),
             es: createEmptyTranslation(),
             en: createEmptyTranslation(),
           },
-      };
-    }
+    };
+  });
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const isBusy = isSubmitting || isDeleting || isUploadingImage;
+
+  const [isConfirmingImageRemoval, setIsConfirmingImageRemoval] =
+    useState(false);
+
+  const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
+
+  const [isCreatingSubcategory, setIsCreatingSubcategory] = useState(
+    startCreatingSubcategory
   );
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
-
-  const [isSubmitting, setIsSubmitting] =
-    useState(false);
-
-  const [
-    isConfirmingDelete,
-    setIsConfirmingDelete,
-  ] = useState(false);
-
-  const [isDeleting, setIsDeleting] =
-    useState(false);
-
-  const [
-    isUploadingImage,
-    setIsUploadingImage,
-  ] = useState(false);
-
-  const isBusy =
-    isSubmitting ||
-    isDeleting ||
-    isUploadingImage;
-
-  const [
-    isConfirmingImageRemoval,
-    setIsConfirmingImageRemoval,
-  ] = useState(false);
-
-  const [
-    editingSubcategoryId,
-    setEditingSubcategoryId,
-  ] = useState(null);
-
-  const [
-    isCreatingSubcategory,
-    setIsCreatingSubcategory,
-  ] = useState(startCreatingSubcategory);
-
-  const [
-    movingSubcategoryId,
-    setMovingSubcategoryId,
-  ] = useState(null);
+  const [movingSubcategoryId, setMovingSubcategoryId] = useState(null);
 
   const isFormLocked =
     isBusy ||
@@ -136,23 +105,15 @@ export default function MenuCategoryEditor({
     isConfirmingImageRemoval ||
     isCreatingSubcategory ||
     editingSubcategoryId ||
-    movingSubcategoryId !== null
+    movingSubcategoryId !== null;
 
   useEffect(() => {
     if (isCreating) {
       onFormValuesChange?.(formValues);
     }
-  }, [
-    formValues,
-    isCreating,
-    onFormValuesChange,
-  ]);
+  }, [formValues, isCreating, onFormValuesChange]);
 
-  function updateTranslation(
-    language,
-    field,
-    value
-  ) {
+  function updateTranslation(language, field, value) {
     setFormValues((currentValues) => ({
       ...currentValues,
 
@@ -178,17 +139,13 @@ export default function MenuCategoryEditor({
     setErrorMessage("");
 
     if (!allowedImageTypes.has(image.type)) {
-      setErrorMessage(
-        "Seleciona uma imagem PNG, JPEG ou WebP."
-      );
+      setErrorMessage("Seleciona uma imagem PNG, JPEG ou WebP.");
       input.value = "";
       return;
     }
 
     if (image.size > MAX_IMAGE_SIZE) {
-      setErrorMessage(
-        "A imagem não pode ultrapassar 5 MB."
-      );
+      setErrorMessage("A imagem não pode ultrapassar 5 MB.");
       input.value = "";
       return;
     }
@@ -199,27 +156,19 @@ export default function MenuCategoryEditor({
     setIsUploadingImage(true);
 
     try {
-      const response = await adminFetch(
-        "/api/admin/menu/uploads",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await adminFetch("/api/admin/menu/uploads", {
+        method: "POST",
+        body: formData,
+      });
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(
-          result.error ??
-          "Não foi possível carregar a imagem."
-        );
+        setErrorMessage(result.error ?? "Não foi possível carregar a imagem.");
         return;
       }
 
@@ -228,9 +177,7 @@ export default function MenuCategoryEditor({
         imagePath: result.imagePath,
       }));
     } catch {
-      setErrorMessage(
-        "Não foi possível comunicar com o servidor."
-      );
+      setErrorMessage("Não foi possível comunicar com o servidor.");
     } finally {
       setIsUploadingImage(false);
       input.value = "";
@@ -241,19 +188,12 @@ export default function MenuCategoryEditor({
     event?.preventDefault();
     setErrorMessage("");
 
-    const submitIntent =
-      event.nativeEvent?.submitter?.value ?? "save";
+    const submitIntent = event.nativeEvent?.submitter?.value ?? "save";
 
-    const imagePath =
-      formValues.imagePath.trim();
+    const imagePath = formValues.imagePath.trim();
 
-    if (
-      imagePath &&
-      !isAllowedImagePath(imagePath)
-    ) {
-      setErrorMessage(
-        "A imagem deve estar em /assets/images/ ou /uploads/."
-      );
+    if (imagePath && !isAllowedImagePath(imagePath)) {
+      setErrorMessage("A imagem deve estar em /assets/images/ ou /uploads/.");
       return;
     }
 
@@ -261,9 +201,7 @@ export default function MenuCategoryEditor({
       ? "/api/admin/menu/categories"
       : `/api/admin/menu/categories/${category.id}`;
 
-    const method = isCreating
-      ? "POST"
-      : "PATCH";
+    const method = isCreating ? "POST" : "PATCH";
 
     setIsSubmitting(true);
 
@@ -280,25 +218,21 @@ export default function MenuCategoryEditor({
           isVisible: formValues.isVisible,
           translations: formValues.translations,
         }),
-      }
-      );
+      });
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
           setIsSubmitting(false);
           return;
         }
-        const validationMessage =
-          result.details?.[0]?.message;
+        const validationMessage = result.details?.[0]?.message;
 
         setErrorMessage(
           validationMessage ??
-          result.error ??
-          "Não foi possível guardar a categoria."
+            result.error ??
+            "Não foi possível guardar a categoria."
         );
 
         setIsSubmitting(false);
@@ -307,13 +241,10 @@ export default function MenuCategoryEditor({
 
       setIsSubmitting(false);
       await onSaved(result.category, {
-        addSubcategory:
-          submitIntent === "add-subcategory",
+        addSubcategory: submitIntent === "add-subcategory",
       });
     } catch {
-      setErrorMessage(
-        "Não foi possível comunicar com o servidor."
-      );
+      setErrorMessage("Não foi possível comunicar com o servidor.");
 
       setIsSubmitting(false);
     }
@@ -331,9 +262,7 @@ export default function MenuCategoryEditor({
         }
       );
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -341,8 +270,7 @@ export default function MenuCategoryEditor({
           return;
         }
         setErrorMessage(
-          result.error ??
-          "Não foi possível eliminar a categoria."
+          result.error ?? "Não foi possível eliminar a categoria."
         );
 
         setIsDeleting(false);
@@ -352,41 +280,31 @@ export default function MenuCategoryEditor({
       setIsDeleting(false);
       await onDeleted();
     } catch {
-      setErrorMessage(
-        "Não foi possível comunicar com o servidor."
-      );
+      setErrorMessage("Não foi possível comunicar com o servidor.");
 
       setIsDeleting(false);
     }
   }
 
-  async function handleMoveSubcategory(
-    subcategoryId,
-    direction
-  ) {
+  async function handleMoveSubcategory(subcategoryId, direction) {
     setErrorMessage("");
     setMovingSubcategoryId(subcategoryId);
 
     try {
-      const response = await adminFetch(
-        "/api/admin/menu/subcategories/order",
-        {
-          method: "PATCH",
+      const response = await adminFetch("/api/admin/menu/subcategories/order", {
+        method: "PATCH",
 
-          headers: {
-            "Content-Type": "application/json",
-          },
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-          body: JSON.stringify({
-            subcategoryId,
-            direction,
-          }),
-        }
-      );
+        body: JSON.stringify({
+          subcategoryId,
+          direction,
+        }),
+      });
 
-      const result = await response
-        .json()
-        .catch(() => ({}));
+      const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -394,8 +312,7 @@ export default function MenuCategoryEditor({
           return;
         }
         setErrorMessage(
-          result.error ??
-          "Não foi possível alterar a ordem da subcategoria."
+          result.error ?? "Não foi possível alterar a ordem da subcategoria."
         );
         return;
       }
@@ -406,20 +323,14 @@ export default function MenuCategoryEditor({
         );
       }
     } catch {
-      setErrorMessage(
-        "Não foi possível comunicar com o servidor."
-      );
+      setErrorMessage("Não foi possível comunicar com o servidor.");
     } finally {
       setMovingSubcategoryId(null);
     }
   }
 
   return (
-    <form
-      className={styles.itemEditor}
-      onSubmit={handleSubmit}
-
-    >
+    <form className={styles.itemEditor} onSubmit={handleSubmit}>
       <div className={styles.editorHeading}>
         <div>
           <h3>
@@ -440,21 +351,15 @@ export default function MenuCategoryEditor({
           )}
         </div>
       </div>
-      <div
-        className={styles.translationEditorList}
-      >
+      <div className={styles.translationEditorList}>
         {languages.map((language) => {
-          const translation =
-            formValues.translations[language.code];
+          const translation = formValues.translations[language.code];
 
-          const labelId =
-            `category-${formIdentifier}-${language.code}-label`;
+          const labelId = `category-${formIdentifier}-${language.code}-label`;
 
-          const titleId =
-            `category-${formIdentifier}-${language.code}-title`;
+          const titleId = `category-${formIdentifier}-${language.code}-title`;
 
-          const highlightTextId =
-            `category-${formIdentifier}-${language.code}-highlightText`;
+          const highlightTextId = `category-${formIdentifier}-${language.code}-highlightText`;
 
           return (
             <fieldset
@@ -464,10 +369,7 @@ export default function MenuCategoryEditor({
             >
               <legend>{language.label}</legend>
 
-              <label
-                className={styles.editorField}
-                htmlFor={labelId}
-              >
+              <label className={styles.editorField} htmlFor={labelId}>
                 Nome do separador
               </label>
 
@@ -478,18 +380,11 @@ export default function MenuCategoryEditor({
                 maxLength={120}
                 value={translation.label}
                 onChange={(event) =>
-                  updateTranslation(
-                    language.code,
-                    "label",
-                    event.target.value
-                  )
+                  updateTranslation(language.code, "label", event.target.value)
                 }
               />
 
-              <label
-                className={styles.editorField}
-                htmlFor={titleId}
-              >
+              <label className={styles.editorField} htmlFor={titleId}>
                 Título da categoria
               </label>
 
@@ -500,17 +395,10 @@ export default function MenuCategoryEditor({
                 maxLength={120}
                 value={translation.title}
                 onChange={(event) =>
-                  updateTranslation(
-                    language.code,
-                    "title",
-                    event.target.value
-                  )
+                  updateTranslation(language.code, "title", event.target.value)
                 }
               />
-              <label
-                className={styles.editorField}
-                htmlFor={highlightTextId}
-              >
+              <label className={styles.editorField} htmlFor={highlightTextId}>
                 Texto em destaque (opcional)
               </label>
 
@@ -537,35 +425,29 @@ export default function MenuCategoryEditor({
           <div>
             <strong>Subcategorias</strong>
 
-            <p>
-              Organiza os pratos desta categoria em secções.
-            </p>
+            <p>Organiza os pratos desta categoria em secções.</p>
           </div>
 
-          {!isCreating &&
-            !isCreatingSubcategory && (
-              <button
-                className={styles.subcategoryEditButton}
-                type="button"
-                disabled={
-                  isFormLocked ||
-                  editingSubcategoryId !== null
-                }
-                onClick={() => {
-                  setEditingSubcategoryId(null);
-                  setIsCreatingSubcategory(true);
-                }}
-              >
-                + Adicionar subcategoria
-              </button>
-            )}
+          {!isCreating && !isCreatingSubcategory && (
+            <button
+              className={styles.subcategoryEditButton}
+              type="button"
+              disabled={isFormLocked || editingSubcategoryId !== null}
+              onClick={() => {
+                setEditingSubcategoryId(null);
+                setIsCreatingSubcategory(true);
+              }}
+            >
+              + Adicionar subcategoria
+            </button>
+          )}
         </div>
 
         {isCreating ? (
           <>
             <p>
-              As subcategorias são opcionais. Podes
-              adicioná-las agora ou mais tarde.
+              As subcategorias são opcionais. Podes adicioná-las agora ou mais
+              tarde.
             </p>
 
             <button
@@ -579,148 +461,113 @@ export default function MenuCategoryEditor({
           </>
         ) : (
           <>
-            {category.subcategories.length === 0 &&
-              !isCreatingSubcategory && (
-                <p className={styles.emptyState}>
-                  Esta categoria ainda não tem subcategorias.
-                </p>
-              )}
+            {category.subcategories.length === 0 && !isCreatingSubcategory && (
+              <p className={styles.emptyState}>
+                Esta categoria ainda não tem subcategorias.
+              </p>
+            )}
 
-            {
-              category.subcategories.map(
-                (subcategory, subcategoryIndex) => {
-                  const subcategoryName =
-                    subcategory.translations.pt.name ||
-                    subcategory.translations.es.name ||
-                    subcategory.translations.en.name ||
-                    `Subcategoria #${subcategory.position}`;
+            {category.subcategories.map((subcategory, subcategoryIndex) => {
+              const subcategoryName =
+                subcategory.translations.pt.name ||
+                subcategory.translations.es.name ||
+                subcategory.translations.en.name ||
+                `Subcategoria #${subcategory.position}`;
 
-                  const isEditing =
-                    editingSubcategoryId ===
-                    subcategory.id;
+              const isEditing = editingSubcategoryId === subcategory.id;
 
-                  return (
-                    <div
-                      className={
-                        styles.categorySubcategory
-                      }
-                      key={subcategory.id}
-                    >
-                      {!isEditing && (
-                        <div
-                          className={
-                            styles.categorySubcategorySummary
+              return (
+                <div
+                  className={styles.categorySubcategory}
+                  key={subcategory.id}
+                >
+                  {!isEditing && (
+                    <div className={styles.categorySubcategorySummary}>
+                      <div
+                        className={styles.orderControls}
+                        aria-label={`Alterar ordem de ${subcategoryName}`}
+                      >
+                        <button
+                          className={styles.orderButton}
+                          type="button"
+                          title="Mover subcategoria para cima"
+                          aria-label={`Mover ${subcategoryName} para cima`}
+                          disabled={subcategoryIndex === 0 || isFormLocked}
+                          onClick={() =>
+                            handleMoveSubcategory(subcategory.id, "up")
                           }
                         >
-                          <div
-                            className={styles.orderControls}
-                            aria-label={`Alterar ordem de ${subcategoryName}`}
-                          >
-                            <button
-                              className={styles.orderButton}
-                              type="button"
-                              title="Mover subcategoria para cima"
-                              aria-label={`Mover ${subcategoryName} para cima`}
-                              disabled={
-                                subcategoryIndex === 0 ||
-                                isFormLocked
-                              }
-                              onClick={() =>
-                                handleMoveSubcategory(
-                                  subcategory.id,
-                                  "up"
-                                )
-                              }
-                            >
-                              ↑
-                            </button>
+                          ↑
+                        </button>
 
-                            <span className={styles.dishOrder}>
-                              {subcategory.position}
-                            </span>
+                        <span className={styles.dishOrder}>
+                          {subcategory.position}
+                        </span>
 
-                            <button
-                              className={styles.orderButton}
-                              type="button"
-                              title="Mover subcategoria para baixo"
-                              aria-label={`Mover ${subcategoryName} para baixo`}
-                              disabled={
-                                subcategoryIndex ===
-                                category.subcategories.length - 1 ||
-                                isFormLocked
-                              }
-                              onClick={() =>
-                                handleMoveSubcategory(
-                                  subcategory.id,
-                                  "down"
-                                )
-                              }
-                            >
-                              ↓
-                            </button>
-                          </div>
-                          <div>
-                            <strong>
-                              {subcategoryName}
-                            </strong>
-
-                            <span>
-                              {subcategory.isVisible
-                                ? "Visível"
-                                : "Oculta"}
-                            </span>
-                          </div>
-
-                          <button
-                            className={
-                              styles.subcategoryEditButton
-                            }
-                            type="button"
-                            disabled={
-                              isFormLocked ||
-                              isCreatingSubcategory ||
-                              editingSubcategoryId !==
-                              null
-                            }
-                            onClick={() =>
-                              setEditingSubcategoryId(
-                                subcategory.id
-                              )
-                            }
-                          >
-                            Editar
-                          </button>
-                        </div>
-                      )}
-
-                      {isEditing && (
-                        <MenuSubcategoryEditor
-                          embedded
-                          subcategory={subcategory}
-                          categoryId={category.id}
-                          onCancel={() =>
-                            setEditingSubcategoryId(null)
+                        <button
+                          className={styles.orderButton}
+                          type="button"
+                          title="Mover subcategoria para baixo"
+                          aria-label={`Mover ${subcategoryName} para baixo`}
+                          disabled={
+                            subcategoryIndex ===
+                              category.subcategories.length - 1 || isFormLocked
                           }
-                          onSaved={async () => {
-                            setEditingSubcategoryId(null);
+                          onClick={() =>
+                            handleMoveSubcategory(subcategory.id, "down")
+                          }
+                        >
+                          ↓
+                        </button>
+                      </div>
+                      <div>
+                        <strong>{subcategoryName}</strong>
 
-                            await onSubcategoriesChanged(
-                              "A subcategoria foi atualizada com sucesso."
-                            );
-                          }}
-                          onDeleted={async () => {
-                            setEditingSubcategoryId(null);
+                        <span>
+                          {subcategory.isVisible ? "Visível" : "Oculta"}
+                        </span>
+                      </div>
 
-                            await onSubcategoriesChanged(
-                              "A subcategoria foi eliminada com sucesso."
-                            );
-                          }}
-                        />
-                      )}
+                      <button
+                        className={styles.subcategoryEditButton}
+                        type="button"
+                        disabled={
+                          isFormLocked ||
+                          isCreatingSubcategory ||
+                          editingSubcategoryId !== null
+                        }
+                        onClick={() => setEditingSubcategoryId(subcategory.id)}
+                      >
+                        Editar
+                      </button>
                     </div>
-                  );
-                }
-              )}
+                  )}
+
+                  {isEditing && (
+                    <MenuSubcategoryEditor
+                      embedded
+                      subcategory={subcategory}
+                      categoryId={category.id}
+                      onCancel={() => setEditingSubcategoryId(null)}
+                      onSaved={async () => {
+                        setEditingSubcategoryId(null);
+
+                        await onSubcategoriesChanged(
+                          "A subcategoria foi atualizada com sucesso."
+                        );
+                      }}
+                      onDeleted={async () => {
+                        setEditingSubcategoryId(null);
+
+                        await onSubcategoriesChanged(
+                          "A subcategoria foi eliminada com sucesso."
+                        );
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
 
             {isCreatingSubcategory && (
               <MenuSubcategoryEditor
@@ -746,9 +593,7 @@ export default function MenuCategoryEditor({
         )}
       </div>
       <div className={styles.imageUploadField}>
-        <span className={styles.editorField}>
-          Imagem da categoria
-        </span>
+        <span className={styles.editorField}>Imagem da categoria</span>
 
         <div className={styles.categoryImageUploadRow}>
           <input
@@ -772,15 +617,10 @@ export default function MenuCategoryEditor({
           )}
         </div>
 
-        <small>
-          Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.
-        </small>
+        <small>Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.</small>
 
         {isUploadingImage && (
-          <span
-            className={styles.uploadStatus}
-            role="status"
-          >
+          <span className={styles.uploadStatus} role="status">
             A carregar imagem...
           </span>
         )}
@@ -789,40 +629,24 @@ export default function MenuCategoryEditor({
             className={styles.removeImageButton}
             type="button"
             disabled={isFormLocked}
-            onClick={() =>
-              setIsConfirmingImageRemoval(true)
-            }
+            onClick={() => setIsConfirmingImageRemoval(true)}
           >
             Remover imagem da categoria
           </button>
         )}
       </div>
       {isConfirmingImageRemoval && (
-        <div
-          className={styles.deleteConfirmation}
-          role="alert"
-        >
-          <strong>
-            Remover a imagem da categoria?
-          </strong>
+        <div className={styles.deleteConfirmation} role="alert">
+          <strong>Remover a imagem da categoria?</strong>
 
-          <p>
-            A imagem será removida quando guardares
-            a categoria.
-          </p>
+          <p>A imagem será removida quando guardares a categoria.</p>
 
-          <div
-            className={
-              styles.deleteConfirmationActions
-            }
-          >
+          <div className={styles.deleteConfirmationActions}>
             <button
               className={styles.cancelButton}
               type="button"
               disabled={isBusy}
-              onClick={() =>
-                setIsConfirmingImageRemoval(false)
-              }
+              onClick={() => setIsConfirmingImageRemoval(false)}
             >
               Manter imagem
             </button>
@@ -861,41 +685,26 @@ export default function MenuCategoryEditor({
         <span>Categoria visível no site público</span>
       </label>
       {errorMessage && (
-        <p
-          className={styles.editorError}
-          role="alert"
-        >
+        <p className={styles.editorError} role="alert">
           {errorMessage}
         </p>
       )}
 
       {!isCreating && isConfirmingDelete && (
-        <div
-          className={styles.deleteConfirmation}
-          role="alert"
-        >
-          <strong>
-            Eliminar “
-            {category.translations.pt.label}”?
-          </strong>
+        <div className={styles.deleteConfirmation} role="alert">
+          <strong>Eliminar “{category.translations.pt.label}”?</strong>
 
           <p>
-            Esta ação é permanente e só será
-            permitida se a categoria estiver vazia.
+            Esta ação é permanente e só será permitida se a categoria estiver
+            vazia.
           </p>
 
-          <div
-            className={
-              styles.deleteConfirmationActions
-            }
-          >
+          <div className={styles.deleteConfirmationActions}>
             <button
               className={styles.cancelButton}
               type="button"
               disabled={isBusy}
-              onClick={() =>
-                setIsConfirmingDelete(false)
-              }
+              onClick={() => setIsConfirmingDelete(false)}
             >
               Manter categoria
             </button>
@@ -906,9 +715,7 @@ export default function MenuCategoryEditor({
               disabled={isBusy}
               onClick={handleDelete}
             >
-              {isDeleting
-                ? "A eliminar..."
-                : "Eliminar permanentemente"}
+              {isDeleting ? "A eliminar..." : "Eliminar permanentemente"}
             </button>
           </div>
         </div>
@@ -920,9 +727,7 @@ export default function MenuCategoryEditor({
             className={styles.deleteButton}
             type="button"
             disabled={isFormLocked}
-            onClick={() =>
-              setIsConfirmingDelete(true)
-            }
+            onClick={() => setIsConfirmingDelete(true)}
           >
             Eliminar categoria
           </button>

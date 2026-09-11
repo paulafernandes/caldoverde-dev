@@ -11,15 +11,11 @@ export default function About() {
     <section className="about-section" id="restaurante">
       <div className="about-container">
         <div className="about-content">
-          <p className="about-subtitle">
-            {text.subtitle}
-          </p>
+          <p className="about-subtitle">{text.subtitle}</p>
 
           <h2>{text.title}</h2>
 
-          <p className="about-description">
-            {text.description}
-          </p>
+          <p className="about-description">{text.description}</p>
 
           <ul className="about-features">
             {text.features.map((feature) => (

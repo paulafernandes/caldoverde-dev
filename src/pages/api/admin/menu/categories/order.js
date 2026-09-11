@@ -1,12 +1,6 @@
-import {
-  moveAdminMenuCategory,
-} from "../../../../../server/adminMenuService";
-import {
-  moveMenuCategorySchema,
-} from "../../../../../server/adminMenuValidation";
-import {
-  getAdminSession,
-} from "../../../../../server/getAdminSession";
+import { moveAdminMenuCategory } from "../../../../../server/adminMenuService";
+import { moveMenuCategorySchema } from "../../../../../server/adminMenuValidation";
+import { getAdminSession } from "../../../../../server/getAdminSession";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -15,10 +9,7 @@ function formatValidationErrors(error) {
   }));
 }
 
-export default async function handler(
-  request,
-  response
-) {
+export default async function handler(request, response) {
   if (request.method !== "PATCH") {
     response.setHeader("Allow", "PATCH");
 
@@ -35,8 +26,7 @@ export default async function handler(
     });
   }
 
-  const contentType =
-    request.headers["content-type"] ?? "";
+  const contentType = request.headers["content-type"] ?? "";
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
@@ -44,28 +34,21 @@ export default async function handler(
     });
   }
 
-  const validation =
-    moveMenuCategorySchema.safeParse(
-      request.body
-    );
+  const validation = moveMenuCategorySchema.safeParse(request.body);
 
   if (!validation.success) {
     return response.status(400).json({
-      error:
-        "Os dados da ordenação são inválidos.",
+      error: "Os dados da ordenação são inválidos.",
 
-      details: formatValidationErrors(
-        validation.error
-      ),
+      details: formatValidationErrors(validation.error),
     });
   }
 
   try {
-    const result =
-      await moveAdminMenuCategory(
-        validation.data.categoryId,
-        validation.data.direction
-      );
+    const result = await moveAdminMenuCategory(
+      validation.data.categoryId,
+      validation.data.direction
+    );
 
     if (!result) {
       return response.status(404).json({
@@ -75,14 +58,10 @@ export default async function handler(
 
     return response.status(200).json(result);
   } catch (error) {
-    console.error(
-      "Erro ao ordenar a categoria:",
-      error
-    );
+    console.error("Erro ao ordenar a categoria:", error);
 
     return response.status(500).json({
-      error:
-        "Não foi possível alterar a ordem da categoria.",
+      error: "Não foi possível alterar a ordem da categoria.",
     });
   }
 }

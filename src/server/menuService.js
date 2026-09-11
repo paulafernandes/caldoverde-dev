@@ -2,8 +2,7 @@ import prisma from "./prisma";
 
 const supportedLanguages = ["pt", "es", "en"];
 
-const defaultCategoryImage =
-  "/assets/images/bg/azulejo_portugues.jpg";
+const defaultCategoryImage = "/assets/images/bg/azulejo_portugues.jpg";
 
 function mapTranslations(translations, field) {
   const valuesByLanguage = Object.fromEntries(
@@ -16,31 +15,22 @@ function mapTranslations(translations, field) {
   const fallback =
     supportedLanguages
       .map((language) => valuesByLanguage[language])
-      .find(
-        (value) =>
-          typeof value === "string" &&
-          value.trim().length > 0
-      ) ?? "";
+      .find((value) => typeof value === "string" && value.trim().length > 0) ??
+    "";
 
   return Object.fromEntries(
     supportedLanguages.map((language) => {
       const value = valuesByLanguage[language];
 
       const translatedValue =
-        typeof value === "string" &&
-          value.trim().length > 0
-          ? value
-          : fallback;
+        typeof value === "string" && value.trim().length > 0 ? value : fallback;
 
       return [language, translatedValue];
     })
   );
 }
 
-function mapOptionalTranslations(
-  translations,
-  field
-) {
+function mapOptionalTranslations(translations, field) {
   const valuesByLanguage = Object.fromEntries(
     translations.map((translation) => [
       translation.language,
@@ -60,15 +50,9 @@ function mapPublicItem(item) {
   return {
     id: item.id,
 
-    name: mapTranslations(
-      item.translations,
-      "name"
-    ),
+    name: mapTranslations(item.translations, "name"),
 
-    description: mapTranslations(
-      item.translations,
-      "description"
-    ),
+    description: mapTranslations(item.translations, "description"),
 
     price: item.priceText,
   };
@@ -168,48 +152,34 @@ export async function getPublicMenuCategories() {
   });
 
   return categories.map((category) => {
-    const categoryTitle = mapTranslations(
-      category.translations,
-      "title"
-
-    );
+    const categoryTitle = mapTranslations(category.translations, "title");
 
     const sections = [
       ...(category.items.length > 0
         ? [
-          {
-            id: `category-${category.id}`,
-            title: categoryTitle,
-            items: category.items.map(mapPublicItem),
-          },
-        ]
+            {
+              id: `category-${category.id}`,
+              title: categoryTitle,
+              items: category.items.map(mapPublicItem),
+            },
+          ]
         : []),
 
       ...category.subcategories
-        .filter(
-          (subcategory) =>
-            subcategory.items.length > 0
-        )
+        .filter((subcategory) => subcategory.items.length > 0)
         .map((subcategory) => ({
           id: `subcategory-${subcategory.id}`,
 
-          title: mapTranslations(
-            subcategory.translations,
-            "name"
-          ),
+          title: mapTranslations(subcategory.translations, "name"),
 
-          items:
-            subcategory.items.map(mapPublicItem),
+          items: subcategory.items.map(mapPublicItem),
         })),
     ];
 
     return {
       id: category.slug,
 
-      label: mapTranslations(
-        category.translations,
-        "label"
-      ),
+      label: mapTranslations(category.translations, "label"),
 
       title: categoryTitle,
 
@@ -218,9 +188,7 @@ export async function getPublicMenuCategories() {
         "highlightText"
       ),
 
-      image:
-        category.imagePath ||
-        defaultCategoryImage,
+      image: category.imagePath || defaultCategoryImage,
 
       sections,
     };

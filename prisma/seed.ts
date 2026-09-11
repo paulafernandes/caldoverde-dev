@@ -17,8 +17,7 @@ const adapter = new PrismaBetterSqlite3({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const existingCategoryCount =
-    await prisma.menuCategory.count();
+  const existingCategoryCount = await prisma.menuCategory.count();
 
   if (existingCategoryCount > 0) {
     throw new Error(
@@ -44,24 +43,22 @@ async function main() {
           },
 
           items: {
-            create: category.items.map(
-              (item, itemIndex) => ({
-                priceText:
-                  item.price === null
-                    ? null
-                    : `${String(item.price).replace(".", ",")} €`,
-                position: itemIndex + 1,
-                isVisible: true,
+            create: category.items.map((item, itemIndex) => ({
+              priceText:
+                item.price === null
+                  ? null
+                  : `${String(item.price).replace(".", ",")} €`,
+              position: itemIndex + 1,
+              isVisible: true,
 
-                translations: {
-                  create: languages.map((language) => ({
-                    language,
-                    name: item.name[language],
-                    description: item.description[language],
-                  })),
-                },
-              })
-            ),
+              translations: {
+                create: languages.map((language) => ({
+                  language,
+                  name: item.name[language],
+                  description: item.description[language],
+                })),
+              },
+            })),
           },
         },
       })
@@ -83,12 +80,8 @@ async function main() {
   console.log("Importação concluída:");
   console.log(`- ${categoryCount} categorias`);
   console.log(`- ${itemCount} pratos`);
-  console.log(
-    `- ${categoryTranslationCount} traduções de categorias`
-  );
-  console.log(
-    `- ${itemTranslationCount} traduções de pratos`
-  );
+  console.log(`- ${categoryTranslationCount} traduções de categorias`);
+  console.log(`- ${itemTranslationCount} traduções de pratos`);
 }
 
 main()

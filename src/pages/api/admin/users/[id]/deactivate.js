@@ -44,10 +44,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.error(
-      "Erro ao desativar utilizador:",
-      error
-    );
+    console.error("Erro ao desativar utilizador:", error);
 
     return res.status(400).json({
       error: "Não foi possível desativar o utilizador.",
