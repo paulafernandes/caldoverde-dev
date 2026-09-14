@@ -5,8 +5,10 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { authClient } from "../../lib/authClient";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 export default function AdminAccount({ admin }) {
+  const { t } = useAdminLanguage();
   const [name, setName] = useState(admin.name);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
@@ -24,6 +26,9 @@ export default function AdminAccount({ admin }) {
   const [reauthError, setReauthError] = useState("");
   const [isReauthenticating, setIsReauthenticating] = useState(false);
   const [showReauthForm, setShowReauthForm] = useState(false);
+  const [profileFieldErrors, setProfileFieldErrors] = useState({});
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
+  const [reauthFieldErrors, setReauthFieldErrors] = useState({});
 
   useEffect(() => {
     function handleSessionExpired() {
@@ -43,6 +48,60 @@ export default function AdminAccount({ admin }) {
       window.removeEventListener("admin-session-expired", handleSessionExpired);
     };
   }, []);
+  function validateReauthForm() {
+    const errors = {};
+    const trimmedEmail = reauthEmail.trim();
+
+    if (!trimmedEmail) {
+      errors.email = "validation.emailRequired";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "validation.emailInvalid";
+    }
+
+    if (!reauthPassword) {
+      errors.password = "validation.passwordRequired";
+    }
+
+    setReauthFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
+
+  function validateProfileForm() {
+    const errors = {};
+
+    if (!name.trim()) {
+      errors.name = "validation.nameRequired";
+    }
+
+    setProfileFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
+
+  function validatePasswordForm() {
+    const errors = {};
+
+    if (!currentPassword) {
+      errors.currentPassword = "validation.currentPasswordRequired";
+    }
+
+    if (!newPassword) {
+      errors.newPassword = "validation.newPasswordRequired";
+    } else if (newPassword.length < 12) {
+      errors.newPassword = "validation.passwordMinLength";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "validation.confirmPasswordRequired";
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword = "account.passwordMismatch";
+    }
+
+    setPasswordFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
 
   function handleUnauthorizedError(authError) {
     if (
@@ -62,6 +121,9 @@ export default function AdminAccount({ admin }) {
     event.preventDefault();
 
     setReauthError("");
+    if (!validateReauthForm()) {
+      return;
+    }
     setIsReauthenticating(true);
 
     const { error: signInError } = await authClient.signIn.email({
@@ -70,7 +132,7 @@ export default function AdminAccount({ admin }) {
     });
 
     if (signInError) {
-      setReauthError(signInError.message ?? "Não foi possível iniciar sessão.");
+      setReauthError("session.signInFailed");
 
       setIsReauthenticating(false);
       return;
@@ -86,6 +148,9 @@ export default function AdminAccount({ admin }) {
   async function handleUpdateProfile(event) {
     event.preventDefault();
 
+    if (!validateProfileForm()) {
+      return;
+    }
     setIsSaving(true);
     setError("");
     setSuccess("");
@@ -100,13 +165,11 @@ export default function AdminAccount({ admin }) {
           return;
         }
 
-        throw new Error(
-          updateError.message || "Não foi possível atualizar a conta."
-        );
+        throw new Error("account.updateFailed");
       }
 
       setName(name.trim());
-      setSuccess("Nome atualizado com sucesso.");
+      setSuccess("account.updateSuccess");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -119,11 +182,9 @@ export default function AdminAccount({ admin }) {
     setPasswordError("");
     setPasswordSuccess("");
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError("A confirmação da nova palavra-passe não coincide.");
+    if (!validatePasswordForm()) {
       return;
     }
-
     setIsChangingPassword(true);
 
     try {
@@ -134,20 +195,22 @@ export default function AdminAccount({ admin }) {
       });
 
       if (changeError) {
+        if (changeError.code === "INVALID_PASSWORD") {
+          throw new Error("account.currentPasswordIncorrect");
+        }
+
         if (handleUnauthorizedError(changeError)) {
           return;
         }
 
-        throw new Error(
-          changeError.message || "Não foi possível alterar a palavra-passe."
-        );
+        throw new Error("account.passwordChangeFailed");
       }
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
 
-      setPasswordSuccess("Palavra-passe alterada com sucesso.");
+      setPasswordSuccess("account.passwordSuccess");
     } catch (err) {
       setPasswordError(err.message);
     } finally {
@@ -157,27 +220,23 @@ export default function AdminAccount({ admin }) {
   return (
     <>
       <Head>
-        <title>Minha conta | Caldo Verde</title>
-
+        <title>{t("account.pageTitle")}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
       <AdminLayout admin={admin}>
         <section className={styles.dashboardHeading}>
           <div>
-            <h1>Minha conta</h1>
+            <h1>{t("account.title")}</h1>
 
-            <p>Gerir os teus dados de acesso à administração.</p>
+            <p>{t("account.subtitle")}</p>
           </div>
         </section>
         {isSessionExpired && (
           <div className={styles.sessionExpiredNotice} role="alert">
-            <strong>A sessão expirou.</strong>
+            <strong>{t("session.expiredTitle")}</strong>
 
-            <p>
-              As alterações dos formulários continuam preservadas. Volta a
-              iniciar sessão para continuar.
-            </p>
+            <p>{t("session.expiredDescription")}</p>
 
             {!showReauthForm ? (
               <button
@@ -185,15 +244,16 @@ export default function AdminAccount({ admin }) {
                 type="button"
                 onClick={() => setShowReauthForm(true)}
               >
-                Voltar a iniciar sessão
+                {t("session.reauthenticate")}
               </button>
             ) : (
               <form
                 className={styles.reauthForm}
                 onSubmit={handleReauthenticate}
+                noValidate
               >
                 <label>
-                  <span>Email</span>
+                  <span>{t("session.email")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -202,12 +262,26 @@ export default function AdminAccount({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthEmail}
-                    onChange={(event) => setReauthEmail(event.target.value)}
+                    onChange={(event) => {
+                      setReauthEmail(event.target.value);
+
+                      if (reauthFieldErrors.email) {
+                        setReauthFieldErrors((current) => ({
+                          ...current,
+                          email: "",
+                        }));
+                      }
+                    }}
                   />
+                  {reauthFieldErrors.email && (
+                    <p className={styles.errorMessage} role="alert">
+                      {t(reauthFieldErrors.email)}
+                    </p>
+                  )}
                 </label>
 
                 <label>
-                  <span>Password</span>
+                  <span>{t("session.password")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -216,12 +290,26 @@ export default function AdminAccount({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthPassword}
-                    onChange={(event) => setReauthPassword(event.target.value)}
+                    onChange={(event) => {
+                      setReauthPassword(event.target.value);
+
+                      if (reauthFieldErrors.password) {
+                        setReauthFieldErrors((current) => ({
+                          ...current,
+                          password: "",
+                        }));
+                      }
+                    }}
                   />
+                  {reauthFieldErrors.password && (
+                    <p className={styles.errorMessage} role="alert">
+                      {t(reauthFieldErrors.password)}
+                    </p>
+                  )}
                 </label>
 
                 {reauthError && (
-                  <p className={styles.errorMessage}>{reauthError}</p>
+                  <p className={styles.errorMessage}>{t(reauthError)}</p>
                 )}
 
                 <div className={styles.reauthActions}>
@@ -235,7 +323,7 @@ export default function AdminAccount({ admin }) {
                       setReauthError("");
                     }}
                   >
-                    Cancelar
+                    {t("session.cancel")}
                   </button>
 
                   <button
@@ -244,8 +332,8 @@ export default function AdminAccount({ admin }) {
                     disabled={isReauthenticating}
                   >
                     {isReauthenticating
-                      ? "A iniciar sessão..."
-                      : "Iniciar sessão"}
+                      ? t("session.signingIn")
+                      : t("session.signIn")}
                   </button>
                 </div>
               </form>
@@ -253,23 +341,41 @@ export default function AdminAccount({ admin }) {
           </div>
         )}
         <section className={styles.userFormCard}>
-          <h2>Dados da conta</h2>
+          <h2>{t("account.accountData")}</h2>
 
-          <form className={styles.form} onSubmit={handleUpdateProfile}>
+          <form
+            className={styles.form}
+            onSubmit={handleUpdateProfile}
+            noValidate
+          >
             <div className={styles.field}>
-              <label htmlFor="account-name">Nome</label>
+              <label htmlFor="account-name">{t("account.name")}</label>
 
               <input
                 id="account-name"
                 type="text"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
                 required
+                onChange={(event) => {
+                  setName(event.target.value);
+
+                  if (profileFieldErrors.name) {
+                    setProfileFieldErrors((current) => ({
+                      ...current,
+                      name: "",
+                    }));
+                  }
+                }}
               />
+              {profileFieldErrors.name && (
+                <p className={styles.error} role="alert">
+                  {t(profileFieldErrors.name)}
+                </p>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="account-email">Email</label>
+              <label htmlFor="account-email">{t("account.email")}</label>
 
               <input
                 id="account-email"
@@ -279,9 +385,9 @@ export default function AdminAccount({ admin }) {
               />
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <p className={styles.error}>{t(error)}</p>}
 
-            {success && <p>{success}</p>}
+            {success && <p>{t(success)}</p>}
 
             <div className={styles.userFormActions}>
               <button
@@ -289,61 +395,111 @@ export default function AdminAccount({ admin }) {
                 className={styles.button}
                 disabled={isSaving}
               >
-                {isSaving ? "A guardar..." : "Guardar alterações"}
+                {isSaving ? t("account.saving") : t("account.saveChanges")}
               </button>
             </div>
           </form>
         </section>
         <section className={styles.userFormCard}>
-          <h2>Alterar a palavra-passe</h2>
+          <h2>{t("account.changePassword")}</h2>
 
-          <form className={styles.form} onSubmit={handleChangePassword}>
+          <form
+            className={styles.form}
+            onSubmit={handleChangePassword}
+            noValidate
+          >
             <div className={styles.field}>
-              <label htmlFor="current-password">Palavra-passe atual</label>
+              <label htmlFor="current-password">
+                {t("account.currentPassword")}
+              </label>
 
               <input
                 id="current-password"
                 type="password"
                 value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
+                onChange={(event) => {
+                  setCurrentPassword(event.target.value);
+
+                  if (passwordFieldErrors.currentPassword) {
+                    setPasswordFieldErrors((current) => ({
+                      ...current,
+                      currentPassword: "",
+                    }));
+                  }
+                }}
                 autoComplete="current-password"
                 required
               />
+              {passwordFieldErrors.currentPassword && (
+                <p className={styles.error} role="alert">
+                  {t(passwordFieldErrors.currentPassword)}
+                </p>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="new-password">Nova palavra-passe</label>
+              <label htmlFor="new-password">{t("account.newPassword")}</label>
 
               <input
                 id="new-password"
                 type="password"
                 value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
+                onChange={(event) => {
+                  setNewPassword(event.target.value);
+
+                  if (passwordFieldErrors.newPassword) {
+                    setPasswordFieldErrors((current) => ({
+                      ...current,
+                      newPassword: "",
+                    }));
+                  }
+                }}
                 autoComplete="new-password"
                 minLength={12}
                 required
               />
+              {passwordFieldErrors.newPassword && (
+                <p className={styles.error} role="alert">
+                  {t(passwordFieldErrors.newPassword)}
+                </p>
+              )}
             </div>
 
             <div className={styles.field}>
               <label htmlFor="confirm-password">
-                Confirmar nova palavra-passe
+                {t("account.confirmPassword")}
               </label>
 
               <input
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                onChange={(event) => {
+                  setConfirmPassword(event.target.value);
+
+                  if (passwordFieldErrors.confirmPassword) {
+                    setPasswordFieldErrors((current) => ({
+                      ...current,
+                      confirmPassword: "",
+                    }));
+                  }
+                }}
                 autoComplete="new-password"
                 minLength={12}
                 required
               />
+              {passwordFieldErrors.confirmPassword && (
+                <p className={styles.error} role="alert">
+                  {t(passwordFieldErrors.confirmPassword)}
+                </p>
+              )}
             </div>
 
-            {passwordError && <p className={styles.error}>{passwordError}</p>}
+            {passwordError && (
+              <p className={styles.error}>{t(passwordError)}</p>
+            )}
 
-            {passwordSuccess && <p>{passwordSuccess}</p>}
+            {passwordSuccess && <p>{t(passwordSuccess)}</p>}
 
             <div className={styles.userFormActions}>
               <button
@@ -351,7 +507,9 @@ export default function AdminAccount({ admin }) {
                 className={styles.button}
                 disabled={isChangingPassword}
               >
-                {isChangingPassword ? "A alterar..." : "Alterar palavra-passe"}
+                {isChangingPassword
+                  ? t("account.changingPassword")
+                  : t("account.changePassword")}
               </button>
             </div>
           </form>
