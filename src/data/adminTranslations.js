@@ -70,7 +70,6 @@ export const adminTranslations = {
       passwordChangeFailed: "Não foi possível alterar a palavra-passe.",
       currentPasswordIncorrect: "A palavra-passe atual está incorreta.",
     },
-
     session: {
       expiredTitle: "A sessão expirou.",
       expiredDescription:
@@ -82,6 +81,47 @@ export const adminTranslations = {
       signIn: "Iniciar sessão",
       signingIn: "A iniciar sessão...",
       signInFailed: "Email ou palavra-passe incorretos.",
+    },
+    users: {
+      pageTitle: "Utilizadores | Caldo Verde",
+      title: "Utilizadores",
+      subtitle: "Gerir os utilizadores com acesso à administração.",
+
+      addUser: "Adicionar utilizador",
+      newUser: "Novo utilizador",
+      name: "Nome",
+      email: "Email",
+      initialPassword: "Palavra-passe inicial",
+
+      create: "Criar utilizador",
+      creating: "A criar...",
+      edit: "Editar",
+      save: "Guardar",
+      saving: "A guardar...",
+      cancel: "Cancelar",
+
+      loadFailed: "Não foi possível carregar os utilizadores.",
+      createFailed: "Não foi possível criar o utilizador.",
+      updateFailed: "Não foi possível atualizar o utilizador.",
+      statusChangeFailed: "Não foi possível alterar o estado do utilizador.",
+
+      activateTitle: "Reativar utilizador",
+      deactivateTitle: "Desativar utilizador",
+      activateQuestion: "Queres reativar o acesso de {name}?",
+      deactivateQuestion: "Queres mesmo desativar o acesso de {name}?",
+
+      activate: "Reativar",
+      deactivate: "Desativar",
+      processing: "A processar...",
+
+      loading: "A carregar utilizadores...",
+
+      role: "Função",
+      status: "Estado",
+      actions: "Ações",
+      administrator: "Administrador",
+      active: "Ativo",
+      deactivated: "Desativado",
     },
   },
 
@@ -167,6 +207,47 @@ export const adminTranslations = {
       signingIn: "Iniciando sesión...",
       signInFailed: "El email o la contraseña son incorrectos.",
     },
+    users: {
+      pageTitle: "Usuarios | Caldo Verde",
+      title: "Usuarios",
+      subtitle: "Gestionar los usuarios con acceso a la administración.",
+
+      addUser: "Añadir usuario",
+      newUser: "Nuevo usuario",
+      name: "Nombre",
+      email: "Email",
+      initialPassword: "Contraseña inicial",
+
+      create: "Crear usuario",
+      creating: "Creando...",
+      edit: "Editar",
+      save: "Guardar",
+      saving: "Guardando...",
+      cancel: "Cancelar",
+
+      loadFailed: "No se pudieron cargar los usuarios.",
+      createFailed: "No se pudo crear el usuario.",
+      updateFailed: "No se pudo actualizar el usuario.",
+      statusChangeFailed: "No se pudo cambiar el estado del usuario.",
+
+      activateTitle: "Reactivar usuario",
+      deactivateTitle: "Desactivar usuario",
+      activateQuestion: "¿Quieres reactivar el acceso de {name}?",
+      deactivateQuestion: "¿Quieres desactivar el acceso de {name}?",
+
+      activate: "Reactivar",
+      deactivate: "Desactivar",
+      processing: "Procesando...",
+
+      loading: "Cargando usuarios...",
+
+      role: "Función",
+      status: "Estado",
+      actions: "Acciones",
+      administrator: "Administrador",
+      active: "Activo",
+      deactivated: "Desactivado",
+    },
   },
 
   en: {
@@ -249,6 +330,47 @@ export const adminTranslations = {
       signIn: "Sign in",
       signingIn: "Signing in...",
       signInFailed: "Incorrect email or password.",
+    },
+    users: {
+      pageTitle: "Users | Caldo Verde",
+      title: "Users",
+      subtitle: "Manage users with access to the administration area.",
+
+      addUser: "Add user",
+      newUser: "New user",
+      name: "Name",
+      email: "Email",
+      initialPassword: "Initial password",
+
+      create: "Create user",
+      creating: "Creating...",
+      edit: "Edit",
+      save: "Save",
+      saving: "Saving...",
+      cancel: "Cancel",
+
+      loadFailed: "Could not load users.",
+      createFailed: "Could not create the user.",
+      updateFailed: "Could not update the user.",
+      statusChangeFailed: "Could not change the user's status.",
+
+      activateTitle: "Reactivate user",
+      deactivateTitle: "Deactivate user",
+      activateQuestion: "Do you want to reactivate access for {name}?",
+      deactivateQuestion: "Do you really want to deactivate access for {name}?",
+
+      activate: "Reactivate",
+      deactivate: "Deactivate",
+      processing: "Processing...",
+
+      loading: "Loading users...",
+
+      role: "Role",
+      status: "Status",
+      actions: "Actions",
+      administrator: "Administrator",
+      active: "Active",
+      deactivated: "Deactivated",
     },
   },
 };

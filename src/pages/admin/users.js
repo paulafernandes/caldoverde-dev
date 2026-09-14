@@ -5,8 +5,10 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import { authClient } from "../../lib/authClient";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 export default function AdminUsers({ admin }) {
+  const { t } = useAdminLanguage();
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,6 +32,9 @@ export default function AdminUsers({ admin }) {
     email: "",
     password: "",
   });
+  const [newUserFieldErrors, setNewUserFieldErrors] = useState({});
+  const [editingNameError, setEditingNameError] = useState("");
+  const [reauthFieldErrors, setReauthFieldErrors] = useState({});
 
   useEffect(() => {
     let isMounted = true;
@@ -40,9 +45,7 @@ export default function AdminUsers({ admin }) {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(
-            data.error || "Não foi possível carregar os utilizadores."
-          );
+          throw new Error("users.loadFailed");
         }
 
         if (isMounted) {
@@ -73,9 +76,17 @@ export default function AdminUsers({ admin }) {
       ...current,
       [name]: value,
     }));
+
+    if (newUserFieldErrors[name]) {
+      setNewUserFieldErrors((current) => ({
+        ...current,
+        [name]: "",
+      }));
+    }
   }
 
   function handleCancelCreate() {
+    setNewUserFieldErrors({});
     setIsCreating(false);
     setError("");
     setNewUser({
@@ -83,6 +94,9 @@ export default function AdminUsers({ admin }) {
       email: "",
       password: "",
     });
+
+    setNewUserFieldErrors({});
+    setIsCreating(false);
   }
 
   useEffect(() => {
@@ -103,8 +117,40 @@ export default function AdminUsers({ admin }) {
     };
   }, []);
 
+  function validateNewUserForm() {
+    const errors = {};
+    const trimmedName = newUser.name.trim();
+    const trimmedEmail = newUser.email.trim();
+
+    if (!trimmedName) {
+      errors.name = "validation.nameRequired";
+    }
+
+    if (!trimmedEmail) {
+      errors.email = "validation.emailRequired";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "validation.emailInvalid";
+    }
+
+    if (!newUser.password) {
+      errors.password = "validation.passwordRequired";
+    } else if (newUser.password.length < 12) {
+      errors.password = "validation.passwordMinLength";
+    }
+
+    setNewUserFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
+
   async function handleCreateUser(event) {
     event.preventDefault();
+
+    setError("");
+
+    if (!validateNewUserForm()) {
+      return;
+    }
 
     setIsSaving(true);
     setError("");
@@ -125,7 +171,7 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Não foi possível criar o utilizador.");
+        throw new Error("users.createFailed");
       }
 
       setUsers((current) =>
@@ -148,20 +194,37 @@ export default function AdminUsers({ admin }) {
   function handleStartEdit(user) {
     setEditingUserId(user.id);
     setEditingName(user.name);
+    setEditingNameError("");
     setError("");
   }
 
   function handleCancelEdit() {
     setEditingUserId(null);
     setEditingName("");
+    setEditingNameError("");
     setError("");
+  }
+
+  function validateEditingName() {
+    if (!editingName.trim()) {
+      setEditingNameError("validation.nameRequired");
+      return false;
+    }
+
+    setEditingNameError("");
+    return true;
   }
 
   async function handleUpdateUser(event, userId) {
     event.preventDefault();
 
-    setIsUpdating(true);
     setError("");
+
+    if (!validateEditingName()) {
+      return;
+    }
+
+    setIsUpdating(true);
 
     try {
       const response = await fetch(`/api/admin/users/${userId}`, {
@@ -170,7 +233,7 @@ export default function AdminUsers({ admin }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: editingName,
+          name: editingName.trim(),
         }),
       });
 
@@ -181,9 +244,7 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Não foi possível atualizar o utilizador."
-        );
+        throw new Error("users.updateFailed");
       }
 
       setUsers((current) =>
@@ -232,9 +293,7 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.error || "Não foi possível alterar o estado do utilizador."
-        );
+        throw new Error("users.statusChangeFailed");
       }
 
       setUsers((current) =>
@@ -263,10 +322,34 @@ export default function AdminUsers({ admin }) {
     return true;
   }
 
+  function validateReauthForm() {
+    const errors = {};
+    const trimmedEmail = reauthEmail.trim();
+
+    if (!trimmedEmail) {
+      errors.email = "validation.emailRequired";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "validation.emailInvalid";
+    }
+
+    if (!reauthPassword) {
+      errors.password = "validation.passwordRequired";
+    }
+
+    setReauthFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
+
   async function handleReauthenticate(event) {
     event.preventDefault();
 
     setReauthError("");
+
+    if (!validateReauthForm()) {
+      return;
+    }
+
     setIsReauthenticating(true);
 
     const { error: signInError } = await authClient.signIn.email({
@@ -275,7 +358,7 @@ export default function AdminUsers({ admin }) {
     });
 
     if (signInError) {
-      setReauthError(signInError.message ?? "Não foi possível iniciar sessão.");
+      setReauthError("session.signInFailed");
 
       setIsReauthenticating(false);
       return;
@@ -290,7 +373,7 @@ export default function AdminUsers({ admin }) {
   return (
     <>
       <Head>
-        <title>Utilizadores | Caldo Verde</title>
+        <title>{t("users.pageTitle")}</title>
 
         <meta name="robots" content="noindex, nofollow" />
       </Head>
@@ -298,9 +381,9 @@ export default function AdminUsers({ admin }) {
       <AdminLayout admin={admin}>
         <section className={styles.dashboardHeading}>
           <div>
-            <h1>Utilizadores</h1>
+            <h1>{t("users.title")}</h1>
 
-            <p>Gerir os utilizadores com acesso à administração.</p>
+            <p>{t("users.subtitle")}</p>
           </div>
 
           {!isCreating && (
@@ -309,19 +392,16 @@ export default function AdminUsers({ admin }) {
               className={styles.button}
               onClick={() => setIsCreating(true)}
             >
-              Adicionar utilizador
+              {t("users.addUser")}
             </button>
           )}
         </section>
 
         {isSessionExpired && (
           <div className={styles.sessionExpiredNotice} role="alert">
-            <strong>A sessão expirou.</strong>
+            <strong>{t("session.expiredTitle")}</strong>
 
-            <p>
-              As alterações do formulário continuam preservadas. Volta a iniciar
-              sessão para continuar.
-            </p>
+            <p>{t("session.expiredDescription")}</p>
 
             {!showReauthForm ? (
               <button
@@ -329,15 +409,16 @@ export default function AdminUsers({ admin }) {
                 type="button"
                 onClick={() => setShowReauthForm(true)}
               >
-                Voltar a iniciar sessão
+                {t("session.reauthenticate")}
               </button>
             ) : (
               <form
                 className={styles.reauthForm}
                 onSubmit={handleReauthenticate}
+                noValidate
               >
                 <label>
-                  <span>Email</span>
+                  <span>{t("session.email")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -346,12 +427,31 @@ export default function AdminUsers({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthEmail}
-                    onChange={(event) => setReauthEmail(event.target.value)}
+                    onChange={(event) => {
+                      setReauthEmail(event.target.value);
+
+                      if (reauthFieldErrors.email) {
+                        setReauthFieldErrors((current) => ({
+                          ...current,
+                          email: "",
+                        }));
+                      }
+                    }}
                   />
+                  {reauthFieldErrors.email && (
+                    <p className={styles.errorMessage} role="alert">
+                      {t(reauthFieldErrors.email)}
+                    </p>
+                  )}
+                  {newUserFieldErrors.email && (
+                    <p className={styles.error} role="alert">
+                      {t(newUserFieldErrors.email)}
+                    </p>
+                  )}
                 </label>
 
                 <label>
-                  <span>Password</span>
+                  <span>{t("session.password")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -360,12 +460,31 @@ export default function AdminUsers({ admin }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthPassword}
-                    onChange={(event) => setReauthPassword(event.target.value)}
+                    onChange={(event) => {
+                      setReauthPassword(event.target.value);
+
+                      if (reauthFieldErrors.password) {
+                        setReauthFieldErrors((current) => ({
+                          ...current,
+                          password: "",
+                        }));
+                      }
+                    }}
                   />
+                  {reauthFieldErrors.password && (
+                    <p className={styles.errorMessage} role="alert">
+                      {t(reauthFieldErrors.password)}
+                    </p>
+                  )}
+                  {newUserFieldErrors.password && (
+                    <p className={styles.error} role="alert">
+                      {t(newUserFieldErrors.password)}
+                    </p>
+                  )}
                 </label>
 
                 {reauthError && (
-                  <p className={styles.errorMessage}>{reauthError}</p>
+                  <p className={styles.errorMessage}>{t(reauthError)}</p>
                 )}
 
                 <div className={styles.reauthActions}>
@@ -379,7 +498,7 @@ export default function AdminUsers({ admin }) {
                       setReauthError("");
                     }}
                   >
-                    Cancelar
+                    {t("session.cancel")}
                   </button>
 
                   <button
@@ -388,8 +507,8 @@ export default function AdminUsers({ admin }) {
                     disabled={isReauthenticating}
                   >
                     {isReauthenticating
-                      ? "A iniciar sessão..."
-                      : "Iniciar sessão"}
+                      ? t("session.signingIn")
+                      : t("session.signIn")}
                   </button>
                 </div>
               </form>
@@ -398,11 +517,15 @@ export default function AdminUsers({ admin }) {
         )}
         {isCreating && (
           <section className={styles.userFormCard}>
-            <h2>Novo utilizador</h2>
+            <h2>{t("users.newUser")}</h2>
 
-            <form className={styles.form} onSubmit={handleCreateUser}>
+            <form
+              className={styles.form}
+              onSubmit={handleCreateUser}
+              noValidate
+            >
               <div className={styles.field}>
-                <label htmlFor="new-user-name">Nome</label>
+                <label htmlFor="new-user-name">{t("users.name")}</label>
 
                 <input
                   id="new-user-name"
@@ -412,10 +535,15 @@ export default function AdminUsers({ admin }) {
                   onChange={handleNewUserChange}
                   required
                 />
+                {newUserFieldErrors.name && (
+                  <p className={styles.error} role="alert">
+                    {t(newUserFieldErrors.name)}
+                  </p>
+                )}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="new-user-email">Email</label>
+                <label htmlFor="new-user-email">{t("users.email")}</label>
 
                 <input
                   id="new-user-email"
@@ -425,10 +553,17 @@ export default function AdminUsers({ admin }) {
                   onChange={handleNewUserChange}
                   required
                 />
+                {newUserFieldErrors.email && (
+                  <p className={styles.error} role="alert">
+                    {t(newUserFieldErrors.email)}
+                  </p>
+                )}
               </div>
 
               <div className={styles.field}>
-                <label htmlFor="new-user-password">Palavra-passe inicial</label>
+                <label htmlFor="new-user-password">
+                  {t("users.initialPassword")}
+                </label>
 
                 <input
                   id="new-user-password"
@@ -439,6 +574,11 @@ export default function AdminUsers({ admin }) {
                   minLength={12}
                   required
                 />
+                {newUserFieldErrors.password && (
+                  <p className={styles.error} role="alert">
+                    {t(newUserFieldErrors.password)}
+                  </p>
+                )}
               </div>
 
               <div className={styles.userFormActions}>
@@ -447,7 +587,7 @@ export default function AdminUsers({ admin }) {
                   className={styles.button}
                   disabled={isSaving}
                 >
-                  {isSaving ? "A criar..." : "Criar utilizador"}
+                  {isSaving ? t("users.creating") : t("users.create")}
                 </button>
 
                 <button
@@ -456,27 +596,31 @@ export default function AdminUsers({ admin }) {
                   disabled={isSaving}
                   onClick={handleCancelCreate}
                 >
-                  Cancelar
+                  {t("users.cancel")}
                 </button>
               </div>
             </form>
           </section>
         )}
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
         {statusUser && (
           <div className={styles.confirmationCard}>
             <div>
               <h2>
                 {statusUser.banned
-                  ? "Reativar utilizador"
-                  : "Desativar utilizador"}
+                  ? t("users.activateTitle")
+                  : t("users.deactivateTitle")}
               </h2>
 
               <p>
                 {statusUser.banned
-                  ? `Queres reativar o acesso de ${statusUser.name}?`
-                  : `Queres mesmo desativar o acesso de ${statusUser.name}?`}
+                  ? t("users.activateQuestion", {
+                      name: statusUser.name,
+                    })
+                  : t("users.deactivateQuestion", {
+                      name: statusUser.name,
+                    })}
               </p>
             </div>
 
@@ -492,11 +636,13 @@ export default function AdminUsers({ admin }) {
                   setStatusUser(null);
                 }}
               >
-                {changingStatusUserId === statusUser.id
-                  ? "A processar..."
-                  : statusUser.banned
-                    ? "Reativar"
-                    : "Desativar"}
+                {statusUser.banned
+                  ? t("users.activateQuestion", {
+                      name: statusUser.name,
+                    })
+                  : t("users.deactivateQuestion", {
+                      name: statusUser.name,
+                    })}
               </button>
 
               <button
@@ -505,23 +651,23 @@ export default function AdminUsers({ admin }) {
                 disabled={changingStatusUserId === statusUser.id}
                 onClick={handleCancelUserStatusChange}
               >
-                Cancelar
+                {t("users.cancel")}
               </button>
             </div>
           </div>
         )}
         {isLoading ? (
-          <p>A carregar utilizadores...</p>
+          <p>{t("users.loading")}</p>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Nome</th>
-                  <th>Email</th>
-                  <th>Função</th>
-                  <th>Estado</th>
-                  <th>Ações</th>
+                  <th>{t("users.name")}</th>
+                  <th>{t("users.email")}</th>
+                  <th>{t("users.role")}</th>
+                  <th>{t("users.status")}</th>
+                  <th>{t("users.actions")}</th>
                 </tr>
               </thead>
 
@@ -533,19 +679,30 @@ export default function AdminUsers({ admin }) {
                         <input
                           type="text"
                           value={editingName}
-                          onChange={(event) =>
-                            setEditingName(event.target.value)
-                          }
+                          onChange={(event) => {
+                            setEditingName(event.target.value);
+
+                            if (editingNameError) {
+                              setEditingNameError("");
+                            }
+                          }}
                           required
                         />
                       ) : (
                         user.name
                       )}
+                      {editingNameError && (
+                        <p className={styles.error} role="alert">
+                          {t(editingNameError)}
+                        </p>
+                      )}
                     </td>
                     <td>{user.email}</td>
 
                     <td>
-                      {user.role === "admin" ? "Administrador" : user.role}
+                      {user.role === "admin"
+                        ? t("users.administrator")
+                        : user.role}
                     </td>
 
                     <td>
@@ -556,7 +713,9 @@ export default function AdminUsers({ admin }) {
                             : styles.statusVisible
                         }
                       >
-                        {user.banned ? "Desativado" : "Ativo"}
+                        {user.banned
+                          ? t("users.deactivated")
+                          : t("users.active")}
                       </span>
                     </td>
 
@@ -565,6 +724,7 @@ export default function AdminUsers({ admin }) {
                         <form
                           className={styles.userFormActions}
                           onSubmit={(event) => handleUpdateUser(event, user.id)}
+                          noValidate
                         >
                           <button
                             type="submit"
@@ -575,7 +735,7 @@ export default function AdminUsers({ admin }) {
                             }
                             disabled={isUpdating}
                           >
-                            {isUpdating ? "A guardar..." : "Guardar"}
+                            {isUpdating ? t("users.saving") : t("users.save")}
                           </button>
 
                           <button
@@ -584,7 +744,7 @@ export default function AdminUsers({ admin }) {
                             disabled={isUpdating}
                             onClick={handleCancelEdit}
                           >
-                            Cancelar
+                            {t("users.cancel")}
                           </button>
                         </form>
                       ) : (
@@ -594,7 +754,7 @@ export default function AdminUsers({ admin }) {
                             className={styles.editButton}
                             onClick={() => handleStartEdit(user)}
                           >
-                            Editar
+                            {t("users.edit")}
                           </button>
 
                           {user.id !== admin.id && (
@@ -607,10 +767,10 @@ export default function AdminUsers({ admin }) {
                               }
                             >
                               {changingStatusUserId === user.id
-                                ? "A processar..."
+                                ? t("users.processing")
                                 : user.banned
-                                  ? "Reativar"
-                                  : "Desativar"}
+                                  ? t("users.activate")
+                                  : t("users.deactivate")}
                             </button>
                           )}
                         </div>
