@@ -201,6 +201,67 @@ export const adminTranslations = {
         keep: "Manter prato",
         nameRequired: "Preenche o nome do prato em pelo menos um idioma.",
       },
+      category: {
+        add: "Adicionar categoria",
+        edit: "Editar categoria",
+        delete: "Eliminar categoria",
+        create: "Criar categoria",
+        save: "Guardar categoria",
+
+        tabName: "Nome do separador",
+        title: "Título da categoria",
+        highlightText: "Texto em destaque (opcional)",
+
+        subcategories: "Subcategorias",
+        subcategoriesDescription:
+          "Organiza os pratos desta categoria em secções.",
+        subcategoriesOptional:
+          "As subcategorias são opcionais. Podes adicioná-las agora ou mais tarde.",
+        noSubcategories: "Esta categoria ainda não tem subcategorias.",
+
+        visible: "Visível",
+        hidden: "Oculta",
+        editSubcategory: "Editar",
+
+        changeSubcategoryOrder: "Alterar ordem de {name}",
+        moveSubcategoryUp: "Mover {name} para cima",
+        moveSubcategoryDown: "Mover {name} para baixo",
+
+        image: "Imagem da categoria",
+        imagePreviewAlt: "Pré-visualização da categoria",
+        imageHelp: "Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.",
+        uploadingImage: "A carregar imagem...",
+        removeImage: "Remover imagem da categoria",
+        removeImageQuestion: "Remover a imagem da categoria?",
+        removeImageDescription:
+          "A imagem será removida quando guardares a categoria.",
+        keepImage: "Manter imagem",
+        confirmRemoveImage: "Remover imagem",
+
+        invalidImageType: "Seleciona uma imagem PNG, JPEG ou WebP.",
+        imageTooLarge: "A imagem não pode ultrapassar 5 MB.",
+        imageUploadFailed: "Não foi possível carregar a imagem.",
+        invalidImagePath:
+          "A imagem deve estar em /assets/images/ ou /uploads/.",
+
+        visibleOnSite: "Categoria visível no site público",
+
+        saveFailed: "Não foi possível guardar a categoria.",
+        deleteFailed: "Não foi possível eliminar a categoria.",
+        orderFailed: "Não foi possível alterar a ordem da subcategoria.",
+
+        deleteQuestion: "Eliminar “{name}”?",
+        deleteDescription:
+          "Esta ação é permanente e só será permitida se a categoria estiver vazia.",
+        keep: "Manter categoria",
+
+        subcategoryOrderUpdated: "A ordem das subcategorias foi atualizada.",
+        subcategoryUpdated: "A subcategoria foi atualizada com sucesso.",
+        subcategoryDeleted: "A subcategoria foi eliminada com sucesso.",
+        subcategoryCreated: "A nova subcategoria foi criada com sucesso.",
+        nameAndTitleRequired:
+          "Preenche o nome do separador e o título da categoria em pelo menos um idioma.",
+      },
     },
   },
 
@@ -405,6 +466,68 @@ export const adminTranslations = {
         keep: "Mantener plato",
         nameRequired: "Introduce el nombre del plato en al menos un idioma.",
       },
+      category: {
+        add: "Añadir categoría",
+        edit: "Editar categoría",
+        delete: "Eliminar categoría",
+        create: "Crear categoría",
+        save: "Guardar categoría",
+
+        tabName: "Nombre de la pestaña",
+        title: "Título de la categoría",
+        highlightText: "Texto destacado (opcional)",
+
+        subcategories: "Subcategorías",
+        subcategoriesDescription:
+          "Organiza los platos de esta categoría en secciones.",
+        subcategoriesOptional:
+          "Las subcategorías son opcionales. Puedes añadirlas ahora o más tarde.",
+        noSubcategories: "Esta categoría todavía no tiene subcategorías.",
+
+        visible: "Visible",
+        hidden: "Oculta",
+        editSubcategory: "Editar",
+
+        changeSubcategoryOrder: "Cambiar el orden de {name}",
+        moveSubcategoryUp: "Mover {name} hacia arriba",
+        moveSubcategoryDown: "Mover {name} hacia abajo",
+
+        image: "Imagen de la categoría",
+        imagePreviewAlt: "Vista previa de la categoría",
+        imageHelp: "Imagen opcional. PNG, JPEG o WebP. Máximo de 5 MB.",
+        uploadingImage: "Cargando imagen...",
+        removeImage: "Eliminar imagen de la categoría",
+        removeImageQuestion: "¿Eliminar la imagen de la categoría?",
+        removeImageDescription:
+          "La imagen se eliminará cuando guardes la categoría.",
+        keepImage: "Mantener imagen",
+        confirmRemoveImage: "Eliminar imagen",
+
+        invalidImageType: "Selecciona una imagen PNG, JPEG o WebP.",
+        imageTooLarge: "La imagen no puede superar los 5 MB.",
+        imageUploadFailed: "No se pudo cargar la imagen.",
+        invalidImagePath:
+          "La imagen debe estar en /assets/images/ o /uploads/.",
+
+        visibleOnSite: "Categoría visible en el sitio público",
+
+        saveFailed: "No se pudo guardar la categoría.",
+        deleteFailed: "No se pudo eliminar la categoría.",
+        orderFailed: "No se pudo cambiar el orden de la subcategoría.",
+
+        deleteQuestion: "¿Eliminar “{name}”?",
+        deleteDescription:
+          "Esta acción es permanente y solo se permitirá si la categoría está vacía.",
+        keep: "Mantener categoría",
+
+        subcategoryOrderUpdated:
+          "El orden de las subcategorías se ha actualizado.",
+        subcategoryUpdated: "La subcategoría se ha actualizado correctamente.",
+        subcategoryDeleted: "La subcategoría se ha eliminado correctamente.",
+        subcategoryCreated: "La nueva subcategoría se ha creado correctamente.",
+        nameAndTitleRequired:
+          "Introduce el nombre de la pestaña y el título de la categoría en al menos un idioma.",
+      },
     },
   },
 
@@ -606,6 +729,66 @@ export const adminTranslations = {
           "This action is permanent. The dish translations will also be deleted.",
         keep: "Keep dish",
         nameRequired: "Enter the dish name in at least one language.",
+      },
+      category: {
+        add: "Add category",
+        edit: "Edit category",
+        delete: "Delete category",
+        create: "Create category",
+        save: "Save category",
+
+        tabName: "Tab name",
+        title: "Category title",
+        highlightText: "Highlighted text (optional)",
+
+        subcategories: "Subcategories",
+        subcategoriesDescription:
+          "Organize the dishes in this category into sections.",
+        subcategoriesOptional:
+          "Subcategories are optional. You can add them now or later.",
+        noSubcategories: "This category does not have any subcategories yet.",
+
+        visible: "Visible",
+        hidden: "Hidden",
+        editSubcategory: "Edit",
+
+        changeSubcategoryOrder: "Change the order of {name}",
+        moveSubcategoryUp: "Move {name} up",
+        moveSubcategoryDown: "Move {name} down",
+
+        image: "Category image",
+        imagePreviewAlt: "Category preview",
+        imageHelp: "Optional image. PNG, JPEG or WebP. Maximum 5 MB.",
+        uploadingImage: "Uploading image...",
+        removeImage: "Remove category image",
+        removeImageQuestion: "Remove the category image?",
+        removeImageDescription:
+          "The image will be removed when you save the category.",
+        keepImage: "Keep image",
+        confirmRemoveImage: "Remove image",
+
+        invalidImageType: "Select a PNG, JPEG or WebP image.",
+        imageTooLarge: "The image cannot exceed 5 MB.",
+        imageUploadFailed: "Could not upload the image.",
+        invalidImagePath: "The image must be in /assets/images/ or /uploads/.",
+
+        visibleOnSite: "Category visible on the public website",
+
+        saveFailed: "Could not save the category.",
+        deleteFailed: "Could not delete the category.",
+        orderFailed: "Could not change the subcategory order.",
+
+        deleteQuestion: "Delete “{name}”?",
+        deleteDescription:
+          "This action is permanent and will only be allowed if the category is empty.",
+        keep: "Keep category",
+
+        subcategoryOrderUpdated: "The subcategory order was updated.",
+        subcategoryUpdated: "The subcategory was updated successfully.",
+        subcategoryDeleted: "The subcategory was deleted successfully.",
+        subcategoryCreated: "The new subcategory was created successfully.",
+        nameAndTitleRequired:
+          "Enter the tab name and category title in at least one language.",
       },
     },
   },

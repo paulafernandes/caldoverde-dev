@@ -3,6 +3,7 @@ import styles from "../../styles/Admin.module.css";
 import Image from "next/image";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 import { adminFetch } from "../../lib/adminFetch";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 const languages = [
   {
@@ -48,10 +49,9 @@ export default function MenuCategoryEditor({
   onSubcategoryCreationFinished,
   startCreatingSubcategory = false,
 }) {
+  const { language, t } = useAdminLanguage();
   const isCreating = category === null;
-
   const formIdentifier = isCreating ? "new" : category.id;
-
   const [formValues, setFormValues] = useState(() => {
     if (isCreating && initialFormValues) {
       return initialFormValues;
@@ -75,30 +75,19 @@ export default function MenuCategoryEditor({
           },
     };
   });
-
   const [errorMessage, setErrorMessage] = useState("");
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-
   const [isDeleting, setIsDeleting] = useState(false);
-
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-
   const isBusy = isSubmitting || isDeleting || isUploadingImage;
-
   const [isConfirmingImageRemoval, setIsConfirmingImageRemoval] =
     useState(false);
-
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
-
   const [isCreatingSubcategory, setIsCreatingSubcategory] = useState(
     startCreatingSubcategory
   );
-
   const [movingSubcategoryId, setMovingSubcategoryId] = useState(null);
-
   const isFormLocked =
     isBusy ||
     isConfirmingDelete ||
@@ -139,13 +128,13 @@ export default function MenuCategoryEditor({
     setErrorMessage("");
 
     if (!allowedImageTypes.has(image.type)) {
-      setErrorMessage("Seleciona uma imagem PNG, JPEG ou WebP.");
+      setErrorMessage("menu.category.invalidImageType");
       input.value = "";
       return;
     }
 
     if (image.size > MAX_IMAGE_SIZE) {
-      setErrorMessage("A imagem não pode ultrapassar 5 MB.");
+      setErrorMessage("menu.category.imageTooLarge");
       input.value = "";
       return;
     }
@@ -168,7 +157,7 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(result.error ?? "Não foi possível carregar a imagem.");
+        setErrorMessage("menu.category.imageUploadFailed");
         return;
       }
 
@@ -177,7 +166,7 @@ export default function MenuCategoryEditor({
         imagePath: result.imagePath,
       }));
     } catch {
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
     } finally {
       setIsUploadingImage(false);
       input.value = "";
@@ -188,12 +177,23 @@ export default function MenuCategoryEditor({
     event?.preventDefault();
     setErrorMessage("");
 
+    const hasCompleteTranslation = languages.some(({ code }) => {
+      const translation = formValues.translations[code];
+
+      return translation.label.trim() && translation.title.trim();
+    });
+
+    if (!hasCompleteTranslation) {
+      setErrorMessage("menu.category.nameAndTitleRequired");
+      return;
+    }
+
     const submitIntent = event.nativeEvent?.submitter?.value ?? "save";
 
     const imagePath = formValues.imagePath.trim();
 
     if (imagePath && !isAllowedImagePath(imagePath)) {
-      setErrorMessage("A imagem deve estar em /assets/images/ ou /uploads/.");
+      setErrorMessage("menu.category.invalidImagePath");
       return;
     }
 
@@ -227,13 +227,7 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        const validationMessage = result.details?.[0]?.message;
-
-        setErrorMessage(
-          validationMessage ??
-            result.error ??
-            "Não foi possível guardar a categoria."
-        );
+        setErrorMessage("menu.category.saveFailed");
 
         setIsSubmitting(false);
         return;
@@ -244,7 +238,7 @@ export default function MenuCategoryEditor({
         addSubcategory: submitIntent === "add-subcategory",
       });
     } catch {
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
 
       setIsSubmitting(false);
     }
@@ -269,9 +263,7 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(
-          result.error ?? "Não foi possível eliminar a categoria."
-        );
+        setErrorMessage("menu.category.deleteFailed");
 
         setIsDeleting(false);
         return;
@@ -280,7 +272,7 @@ export default function MenuCategoryEditor({
       setIsDeleting(false);
       await onDeleted();
     } catch {
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
 
       setIsDeleting(false);
     }
@@ -311,54 +303,50 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(
-          result.error ?? "Não foi possível alterar a ordem da subcategoria."
-        );
+        setErrorMessage("menu.category.orderFailed");
         return;
       }
 
       if (result.moved) {
         await onSubcategoriesChanged(
-          "A ordem das subcategorias foi atualizada."
+          t("menu.category.subcategoryOrderUpdated")
         );
       }
     } catch {
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
     } finally {
       setMovingSubcategoryId(null);
     }
   }
-
+  const categoryName =
+    category?.translations?.[language]?.label ||
+    category?.translations?.pt?.label ||
+    category?.translations?.es?.label ||
+    category?.translations?.en?.label ||
+    category?.slug ||
+    "";
   return (
     <form className={styles.itemEditor} onSubmit={handleSubmit}>
       <div className={styles.editorHeading}>
         <div>
           <h3>
             {isCreating
-              ? "Adicionar categoria"
+              ? t("menu.category.add")
               : isConfirmingDelete
-                ? "Eliminar categoria"
-                : "Editar categoria"}
+                ? t("menu.category.delete")
+                : t("menu.category.edit")}
           </h3>
 
           {!isCreating && isConfirmingDelete && (
-            <p>
-              {category.translations.pt.label ||
-                category.translations.es.label ||
-                category.translations.en.label ||
-                category.slug}
-            </p>
+            <p>{!isCreating && isConfirmingDelete && <p>{categoryName}</p>}</p>
           )}
         </div>
       </div>
       <div className={styles.translationEditorList}>
         {languages.map((language) => {
           const translation = formValues.translations[language.code];
-
           const labelId = `category-${formIdentifier}-${language.code}-label`;
-
           const titleId = `category-${formIdentifier}-${language.code}-title`;
-
           const highlightTextId = `category-${formIdentifier}-${language.code}-highlightText`;
 
           return (
@@ -370,7 +358,7 @@ export default function MenuCategoryEditor({
               <legend>{language.label}</legend>
 
               <label className={styles.editorField} htmlFor={labelId}>
-                Nome do separador
+                {t("menu.category.tabName")}
               </label>
 
               <input
@@ -385,7 +373,7 @@ export default function MenuCategoryEditor({
               />
 
               <label className={styles.editorField} htmlFor={titleId}>
-                Título da categoria
+                {t("menu.category.title")}
               </label>
 
               <input
@@ -399,7 +387,7 @@ export default function MenuCategoryEditor({
                 }
               />
               <label className={styles.editorField} htmlFor={highlightTextId}>
-                Texto em destaque (opcional)
+                {t("menu.category.highlightText")}
               </label>
 
               <textarea
@@ -423,9 +411,8 @@ export default function MenuCategoryEditor({
       <div className={styles.categorySubcategories}>
         <div className={styles.categorySubcategoriesHeading}>
           <div>
-            <strong>Subcategorias</strong>
-
-            <p>Organiza os pratos desta categoria em secções.</p>
+            <strong>{t("menu.category.subcategories")}</strong>
+            <p>{t("menu.category.subcategoriesDescription")}</p>
           </div>
 
           {!isCreating && !isCreatingSubcategory && (
@@ -438,41 +425,40 @@ export default function MenuCategoryEditor({
                 setIsCreatingSubcategory(true);
               }}
             >
-              + Adicionar subcategoria
+              + {t("menu.subcategory.add")}
             </button>
           )}
         </div>
 
         {isCreating ? (
           <>
-            <p>
-              As subcategorias são opcionais. Podes adicioná-las agora ou mais
-              tarde.
-            </p>
-
+            <p>{t("menu.category.subcategoriesOptional")}</p>
             <button
               className={styles.subcategoryEditButton}
               type="submit"
               value="add-subcategory"
               disabled={isFormLocked}
             >
-              + Adicionar subcategoria
+              + {t("menu.subcategory.add")}
             </button>
           </>
         ) : (
           <>
             {category.subcategories.length === 0 && !isCreatingSubcategory && (
               <p className={styles.emptyState}>
-                Esta categoria ainda não tem subcategorias.
+                {t("menu.category.noSubcategories")}
               </p>
             )}
 
             {category.subcategories.map((subcategory, subcategoryIndex) => {
               const subcategoryName =
+                subcategory.translations[language]?.name ||
                 subcategory.translations.pt.name ||
                 subcategory.translations.es.name ||
                 subcategory.translations.en.name ||
-                `Subcategoria #${subcategory.position}`;
+                t("menu.subcategory.fallbackWithPosition", {
+                  position: subcategory.position,
+                });
 
               const isEditing = editingSubcategoryId === subcategory.id;
 
@@ -485,13 +471,19 @@ export default function MenuCategoryEditor({
                     <div className={styles.categorySubcategorySummary}>
                       <div
                         className={styles.orderControls}
-                        aria-label={`Alterar ordem de ${subcategoryName}`}
+                        aria-label={t("menu.category.changeSubcategoryOrder", {
+                          name: subcategoryName,
+                        })}
                       >
                         <button
                           className={styles.orderButton}
                           type="button"
-                          title="Mover subcategoria para cima"
-                          aria-label={`Mover ${subcategoryName} para cima`}
+                          title={t("menu.category.moveSubcategoryUp", {
+                            name: subcategoryName,
+                          })}
+                          aria-label={t("menu.category.moveSubcategoryUp", {
+                            name: subcategoryName,
+                          })}
                           disabled={subcategoryIndex === 0 || isFormLocked}
                           onClick={() =>
                             handleMoveSubcategory(subcategory.id, "up")
@@ -507,8 +499,12 @@ export default function MenuCategoryEditor({
                         <button
                           className={styles.orderButton}
                           type="button"
-                          title="Mover subcategoria para baixo"
-                          aria-label={`Mover ${subcategoryName} para baixo`}
+                          title={t("menu.category.moveSubcategoryDown", {
+                            name: subcategoryName,
+                          })}
+                          aria-label={t("menu.category.moveSubcategoryDown", {
+                            name: subcategoryName,
+                          })}
                           disabled={
                             subcategoryIndex ===
                               category.subcategories.length - 1 || isFormLocked
@@ -524,7 +520,9 @@ export default function MenuCategoryEditor({
                         <strong>{subcategoryName}</strong>
 
                         <span>
-                          {subcategory.isVisible ? "Visível" : "Oculta"}
+                          {subcategory.isVisible
+                            ? t("menu.category.visible")
+                            : t("menu.category.hidden")}
                         </span>
                       </div>
 
@@ -538,7 +536,7 @@ export default function MenuCategoryEditor({
                         }
                         onClick={() => setEditingSubcategoryId(subcategory.id)}
                       >
-                        Editar
+                        {t("menu.category.editSubcategory")}
                       </button>
                     </div>
                   )}
@@ -553,14 +551,14 @@ export default function MenuCategoryEditor({
                         setEditingSubcategoryId(null);
 
                         await onSubcategoriesChanged(
-                          "A subcategoria foi atualizada com sucesso."
+                          t("menu.category.subcategoryOrderUpdated")
                         );
                       }}
                       onDeleted={async () => {
                         setEditingSubcategoryId(null);
 
                         await onSubcategoriesChanged(
-                          "A subcategoria foi eliminada com sucesso."
+                          t("menu.category.subcategoryDeleted")
                         );
                       }}
                     />
@@ -584,7 +582,7 @@ export default function MenuCategoryEditor({
                   onSubcategoryCreationFinished?.();
 
                   await onSubcategoriesChanged(
-                    "A nova subcategoria foi criada com sucesso."
+                    t("menu.category.subcategoryCreated")
                   );
                 }}
               />
@@ -593,7 +591,7 @@ export default function MenuCategoryEditor({
         )}
       </div>
       <div className={styles.imageUploadField}>
-        <span className={styles.editorField}>Imagem da categoria</span>
+        <span className={styles.editorField}>{t("menu.category.image")}</span>
 
         <div className={styles.categoryImageUploadRow}>
           <input
@@ -609,7 +607,7 @@ export default function MenuCategoryEditor({
             <Image
               className={styles.categoryImageThumbnail}
               src={formValues.imagePath}
-              alt="Pré-visualização da categoria"
+              alt={t("menu.category.imagePreviewAlt")}
               width={88}
               height={88}
               unoptimized
@@ -617,11 +615,11 @@ export default function MenuCategoryEditor({
           )}
         </div>
 
-        <small>Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.</small>
+        <small>{t("menu.category.imageHelp")}</small>
 
         {isUploadingImage && (
           <span className={styles.uploadStatus} role="status">
-            A carregar imagem...
+            {t("menu.category.uploadingImage")}
           </span>
         )}
         {formValues.imagePath && (
@@ -631,15 +629,14 @@ export default function MenuCategoryEditor({
             disabled={isFormLocked}
             onClick={() => setIsConfirmingImageRemoval(true)}
           >
-            Remover imagem da categoria
+            {t("menu.category.removeImage")}
           </button>
         )}
       </div>
       {isConfirmingImageRemoval && (
         <div className={styles.deleteConfirmation} role="alert">
-          <strong>Remover a imagem da categoria?</strong>
-
-          <p>A imagem será removida quando guardares a categoria.</p>
+          <strong>{t("menu.category.removeImageQuestion")}</strong>
+          <p>{t("menu.category.removeImageDescription")}</p>
 
           <div className={styles.deleteConfirmationActions}>
             <button
@@ -648,7 +645,7 @@ export default function MenuCategoryEditor({
               disabled={isBusy}
               onClick={() => setIsConfirmingImageRemoval(false)}
             >
-              Manter imagem
+              {t("menu.category.keepImage")}
             </button>
 
             <button
@@ -664,7 +661,7 @@ export default function MenuCategoryEditor({
                 setIsConfirmingImageRemoval(false);
               }}
             >
-              Remover imagem
+              {t("menu.category.confirmRemoveImage")}
             </button>
           </div>
         </div>
@@ -682,22 +679,23 @@ export default function MenuCategoryEditor({
           }
         />
 
-        <span>Categoria visível no site público</span>
+        <span>{t("menu.category.visibleOnSite")}</span>
       </label>
       {errorMessage && (
         <p className={styles.editorError} role="alert">
-          {errorMessage}
+          {t(errorMessage)}
         </p>
       )}
 
       {!isCreating && isConfirmingDelete && (
         <div className={styles.deleteConfirmation} role="alert">
-          <strong>Eliminar “{category.translations.pt.label}”?</strong>
+          <strong>
+            {t("menu.category.deleteQuestion", {
+              name: categoryName,
+            })}
+          </strong>
 
-          <p>
-            Esta ação é permanente e só será permitida se a categoria estiver
-            vazia.
-          </p>
+          <p>{t("menu.category.deleteDescription")}</p>
 
           <div className={styles.deleteConfirmationActions}>
             <button
@@ -706,7 +704,7 @@ export default function MenuCategoryEditor({
               disabled={isBusy}
               onClick={() => setIsConfirmingDelete(false)}
             >
-              Manter categoria
+              {t("menu.category.keep")}
             </button>
 
             <button
@@ -715,7 +713,9 @@ export default function MenuCategoryEditor({
               disabled={isBusy}
               onClick={handleDelete}
             >
-              {isDeleting ? "A eliminar..." : "Eliminar permanentemente"}
+              {isDeleting
+                ? t("menu.common.deleting")
+                : t("menu.common.deletePermanently")}
             </button>
           </div>
         </div>
@@ -729,7 +729,7 @@ export default function MenuCategoryEditor({
             disabled={isFormLocked}
             onClick={() => setIsConfirmingDelete(true)}
           >
-            Eliminar categoria
+            {t("menu.category.delete")}
           </button>
         )}
         <button
@@ -738,7 +738,7 @@ export default function MenuCategoryEditor({
           disabled={isFormLocked}
           onClick={onCancel}
         >
-          Cancelar
+          {t("menu.common.cancel")}
         </button>
 
         <button
@@ -748,10 +748,10 @@ export default function MenuCategoryEditor({
           disabled={isFormLocked}
         >
           {isSubmitting
-            ? "A guardar..."
+            ? t("menu.common.saving")
             : isCreating
-              ? "Criar categoria"
-              : "Guardar categoria"}
+              ? t("menu.category.create")
+              : t("menu.category.save")}
         </button>
       </div>
     </form>
