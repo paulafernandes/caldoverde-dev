@@ -5,19 +5,50 @@ import { useState } from "react";
 
 import { authClient } from "../../lib/authClient";
 import { getAdminSession } from "../../server/getAdminSession";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import styles from "../../styles/Admin.module.css";
 
 export default function AdminLogin() {
   const router = useRouter();
-
+  const { language, changeLanguage, t } = useAdminLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorKey, setErrorKey] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({
+    email: "",
+    password: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function validateForm() {
+    const errors = {};
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      errors.email = "validation.emailRequired";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      errors.email = "validation.emailInvalid";
+    }
+
+    if (!password) {
+      errors.password = "validation.passwordRequired";
+    }
+
+    setFieldErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setErrorMessage("");
+
+    setErrorKey("");
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     const { error } = await authClient.signIn.email({
@@ -26,7 +57,7 @@ export default function AdminLogin() {
     });
 
     if (error) {
-      setErrorMessage("Email ou palavra-passe incorretos.");
+      setErrorKey("login.invalidCredentials");
       setIsSubmitting(false);
       return;
     }
@@ -37,7 +68,7 @@ export default function AdminLogin() {
   return (
     <>
       <Head>
-        <title>Administração | Caldo Verde</title>
+        <title>{t("login.pageTitle")}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
@@ -51,16 +82,26 @@ export default function AdminLogin() {
             height={100}
             priority
           />
+          <div className={styles.loginLanguageSelector}>
+            <label htmlFor="admin-language">{t("layout.language")}</label>
 
-          <h1 className={styles.title}>Administração</h1>
+            <select
+              id="admin-language"
+              value={language}
+              onChange={(event) => changeLanguage(event.target.value)}
+            >
+              <option value="pt">PT</option>
+              <option value="es">ES</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+          <h1 className={styles.title}>{t("login.title")}</h1>
 
-          <p className={styles.subtitle}>
-            Inicia sessão para aceder à administração.
-          </p>
+          <p className={styles.subtitle}>{t("login.subtitle")}</p>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <form className={styles.form} onSubmit={handleSubmit} noValidate>
             <div className={styles.field}>
-              <label htmlFor="admin-email">Email</label>
+              <label htmlFor="admin-email">{t("login.email")}</label>
 
               <input
                 id="admin-email"
@@ -68,12 +109,26 @@ export default function AdminLogin() {
                 value={email}
                 autoComplete="email"
                 required
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event) => {
+                  setEmail(event.target.value);
+
+                  if (fieldErrors.email) {
+                    setFieldErrors((current) => ({
+                      ...current,
+                      email: "",
+                    }));
+                  }
+                }}
               />
+              {fieldErrors.email && (
+                <p className={styles.error} role="alert">
+                  {t(fieldErrors.email)}
+                </p>
+              )}
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="admin-password">Palavra-passe</label>
+              <label htmlFor="admin-password">{t("login.password")}</label>
 
               <input
                 id="admin-password"
@@ -81,13 +136,27 @@ export default function AdminLogin() {
                 value={password}
                 autoComplete="current-password"
                 required
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+
+                  if (fieldErrors.password) {
+                    setFieldErrors((current) => ({
+                      ...current,
+                      password: "",
+                    }));
+                  }
+                }}
               />
+              {fieldErrors.password && (
+                <p className={styles.error} role="alert">
+                  {t(fieldErrors.password)}
+                </p>
+              )}
             </div>
 
-            {errorMessage && (
+            {errorKey && (
               <p className={styles.error} role="alert">
-                {errorMessage}
+                {t(errorKey)}
               </p>
             )}
 
@@ -96,7 +165,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "A entrar..." : "Entrar"}
+              {isSubmitting ? t("login.submitting") : t("login.submit")}
             </button>
           </form>
         </section>

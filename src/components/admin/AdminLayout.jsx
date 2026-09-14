@@ -4,9 +4,11 @@ import { useState } from "react";
 
 import { authClient } from "../../lib/authClient";
 import styles from "../../styles/Admin.module.css";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 export default function AdminLayout({ admin, children }) {
   const router = useRouter();
+  const { language, changeLanguage, t } = useAdminLanguage();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -25,31 +27,39 @@ export default function AdminLayout({ admin, children }) {
             <Link
               href="/admin"
               className={styles.brandMark}
-              aria-label="Dashboard da administração"
+              aria-label={t("layout.dashboardAriaLabel")}
             >
               CV
             </Link>
 
             <div className={styles.brandText}>
-              <strong>Caldo Verde · Administração</strong>
+              <strong>{t("layout.title")}</strong>
 
               <span>{admin.email}</span>
             </div>
           </div>
-
+          <select
+            value={language}
+            onChange={(event) => changeLanguage(event.target.value)}
+            aria-label={t("layout.language")}
+          >
+            <option value="pt">PT</option>
+            <option value="es">ES</option>
+            <option value="en">EN</option>
+          </select>
           <button
             className={styles.logoutButton}
             type="button"
             disabled={isSigningOut}
             onClick={handleSignOut}
           >
-            {isSigningOut ? "A sair..." : "Terminar sessão"}
+            {isSigningOut ? t("common.signingOut") : t("common.logout")}
           </button>
         </header>
         {router.pathname !== "/admin" && (
           <div className={styles.adminBackNavigation}>
             <Link href="/admin" className={styles.adminBackButton}>
-              ← Voltar
+              ← {t("common.back")}
             </Link>
           </div>
         )}

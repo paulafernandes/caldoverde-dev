@@ -1643,3 +1643,23 @@ label.itemSubcategoryOption {
   color: #ffffff;
   text-decoration: none;
 }
+
+.loginLanguageSelector {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.loginLanguageSelector label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.loginLanguageSelector select {
+  padding: 6px 10px;
+  border: 1px solid #d8d3c7;
+  border-radius: 6px;
+  background: #ffffff;
+}

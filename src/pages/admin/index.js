@@ -3,13 +3,16 @@ import Link from "next/link";
 
 import AdminLayout from "../../components/admin/AdminLayout";
 import { getAdminSession } from "../../server/getAdminSession";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import styles from "../../styles/Admin.module.css";
 
 export default function AdminDashboard({ admin }) {
+  const { t } = useAdminLanguage();
+
   return (
     <>
       <Head>
-        <title>Administração | Caldo Verde</title>
+        <title>{t("dashboard.pageTitle")}</title>
 
         <meta name="robots" content="noindex, nofollow" />
       </Head>
@@ -17,33 +20,33 @@ export default function AdminDashboard({ admin }) {
       <AdminLayout admin={admin}>
         <section className={styles.dashboardHeading}>
           <div>
-            <h1>Administração</h1>
+            <h1>{t("dashboard.title")}</h1>
 
-            <p>Bem-vinda, {admin.name}.</p>
+            <p>
+              {t("dashboard.welcome", {
+                name: admin.name,
+              })}
+            </p>
           </div>
         </section>
 
         <section className={styles.dashboardCards}>
           <Link href="/admin/account" className={styles.adminDashboardCard}>
-            <strong>A minha conta</strong>
+            <strong>{t("dashboard.accountTitle")}</strong>
 
-            <span>Alterar o nome e a palavra-passe da tua conta.</span>
+            <span>{t("dashboard.accountDescription")}</span>
           </Link>
 
           <Link href="/admin/users" className={styles.adminDashboardCard}>
-            <strong>Utilizadores</strong>
+            <strong>{t("dashboard.usersTitle")}</strong>
 
-            <span>
-              Criar, editar, desativar e reativar utilizadores da administração.
-            </span>
+            <span>{t("dashboard.usersDescription")}</span>
           </Link>
 
           <Link href="/admin/menu" className={styles.adminDashboardCard}>
-            <strong>Menu</strong>
+            <strong>{t("dashboard.menuTitle")}</strong>
 
-            <span>
-              Gerir categorias, subcategorias, pratos, traduções e preços.
-            </span>
+            <span>{t("dashboard.menuDescription")}</span>
           </Link>
         </section>
       </AdminLayout>
