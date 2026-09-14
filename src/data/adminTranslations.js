@@ -123,6 +123,85 @@ export const adminTranslations = {
       active: "Ativo",
       deactivated: "Desativado",
     },
+    menu: {
+      common: {
+        name: "Nome",
+        cancel: "Cancelar",
+        saving: "A guardar...",
+        deleting: "A eliminar...",
+        deletePermanently: "Eliminar permanentemente",
+        serverError: "Não foi possível comunicar com o servidor.",
+      },
+
+      subcategory: {
+        add: "Adicionar subcategoria",
+        edit: "Editar subcategoria",
+        delete: "Eliminar subcategoria",
+        create: "Criar subcategoria",
+        save: "Guardar subcategoria",
+
+        visible: "Subcategoria visível no site público",
+        fallbackName: "Subcategoria",
+
+        saveFailed: "Não foi possível guardar a subcategoria.",
+        deleteFailed: "Não foi possível eliminar a subcategoria.",
+        operationFailed: "Não foi possível concluir a operação.",
+
+        deleteQuestion: "Eliminar “{name}”?",
+        deleteDescription:
+          "Os pratos desta subcategoria não serão eliminados. Ficarão sem subcategoria.",
+        keep: "Manter subcategoria",
+        nameRequired:
+          "Preenche o nome da subcategoria em pelo menos um idioma.",
+        fallbackWithPosition: "Subcategoria {position}",
+      },
+      item: {
+        add: "Adicionar prato",
+        edit: "Editar prato #{position}",
+        delete: "Eliminar prato",
+        create: "Criar prato",
+        save: "Guardar alterações",
+        editDescription: "Altera os textos, o preço ou a visibilidade.",
+
+        fallbackName: "Prato #{position}",
+
+        description: "Descrição",
+
+        subcategory: "Subcategoria",
+        subcategoryDescription: "Seleciona a subcategoria deste prato.",
+        noSubcategory: "Sem subcategoria",
+
+        image: "Imagem do prato",
+        imagePreviewAlt: "Pré-visualização do prato",
+        imageHelp: "Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.",
+        uploadingImage: "A carregar imagem...",
+        removeImage: "Remover imagem do prato",
+        removeImageQuestion: "Remover a imagem do prato?",
+        removeImageDescription:
+          "A imagem será removida quando guardares o prato.",
+        keepImage: "Manter imagem",
+        confirmRemoveImage: "Remover imagem",
+
+        invalidImageType: "Seleciona uma imagem PNG, JPEG ou WebP.",
+        imageTooLarge: "A imagem não pode ultrapassar 5 MB.",
+        imageUploadFailed: "Não foi possível carregar a imagem.",
+
+        price: "Preço / informação de preço",
+        pricePlaceholder: "Ex.: Meia dose: 8 € · Dose: 14 €",
+        priceHelp: "Podes escrever um preço simples ou várias opções.",
+
+        visible: "Visível no site público",
+
+        saveFailed: "Não foi possível guardar o prato.",
+        deleteFailed: "Não foi possível eliminar o prato.",
+
+        deleteQuestion: "Eliminar “{name}”?",
+        deleteDescription:
+          "Esta ação é permanente. As traduções do prato também serão eliminadas.",
+        keep: "Manter prato",
+        nameRequired: "Preenche o nome do prato em pelo menos um idioma.",
+      },
+    },
   },
 
   es: {
@@ -248,6 +327,85 @@ export const adminTranslations = {
       active: "Activo",
       deactivated: "Desactivado",
     },
+    menu: {
+      common: {
+        name: "Nombre",
+        cancel: "Cancelar",
+        saving: "Guardando...",
+        deleting: "Eliminando...",
+        deletePermanently: "Eliminar permanentemente",
+        serverError: "No se pudo comunicar con el servidor.",
+      },
+
+      subcategory: {
+        add: "Añadir subcategoría",
+        edit: "Editar subcategoría",
+        delete: "Eliminar subcategoría",
+        create: "Crear subcategoría",
+        save: "Guardar subcategoría",
+
+        visible: "Subcategoría visible en el sitio público",
+        fallbackName: "Subcategoría",
+
+        saveFailed: "No se pudo guardar la subcategoría.",
+        deleteFailed: "No se pudo eliminar la subcategoría.",
+        operationFailed: "No se pudo completar la operación.",
+
+        deleteQuestion: "¿Eliminar “{name}”?",
+        deleteDescription:
+          "Los platos de esta subcategoría no se eliminarán. Quedarán sin subcategoría.",
+        keep: "Mantener subcategoría",
+        nameRequired:
+          "Introduce el nombre de la subcategoría en al menos un idioma.",
+        fallbackWithPosition: "Subcategoría {position}",
+      },
+      item: {
+        add: "Añadir plato",
+        edit: "Editar plato #{position}",
+        delete: "Eliminar plato",
+        create: "Crear plato",
+        save: "Guardar cambios",
+        editDescription: "Modifica los textos, el precio o la visibilidad.",
+
+        fallbackName: "Plato #{position}",
+
+        description: "Descripción",
+
+        subcategory: "Subcategoría",
+        subcategoryDescription: "Selecciona la subcategoría de este plato.",
+        noSubcategory: "Sin subcategoría",
+
+        image: "Imagen del plato",
+        imagePreviewAlt: "Vista previa del plato",
+        imageHelp: "Imagen opcional. PNG, JPEG o WebP. Máximo de 5 MB.",
+        uploadingImage: "Cargando imagen...",
+        removeImage: "Eliminar imagen del plato",
+        removeImageQuestion: "¿Eliminar la imagen del plato?",
+        removeImageDescription:
+          "La imagen se eliminará cuando guardes el plato.",
+        keepImage: "Mantener imagen",
+        confirmRemoveImage: "Eliminar imagen",
+
+        invalidImageType: "Selecciona una imagen PNG, JPEG o WebP.",
+        imageTooLarge: "La imagen no puede superar los 5 MB.",
+        imageUploadFailed: "No se pudo cargar la imagen.",
+
+        price: "Precio / información de precio",
+        pricePlaceholder: "Ej.: Media ración: 8 € · Ración: 14 €",
+        priceHelp: "Puedes escribir un precio simple o varias opciones.",
+
+        visible: "Visible en el sitio público",
+
+        saveFailed: "No se pudo guardar el plato.",
+        deleteFailed: "No se pudo eliminar el plato.",
+
+        deleteQuestion: "¿Eliminar “{name}”?",
+        deleteDescription:
+          "Esta acción es permanente. Las traducciones del plato también se eliminarán.",
+        keep: "Mantener plato",
+        nameRequired: "Introduce el nombre del plato en al menos un idioma.",
+      },
+    },
   },
 
   en: {
@@ -371,6 +529,84 @@ export const adminTranslations = {
       administrator: "Administrator",
       active: "Active",
       deactivated: "Deactivated",
+    },
+    menu: {
+      common: {
+        name: "Name",
+        cancel: "Cancel",
+        saving: "Saving...",
+        deleting: "Deleting...",
+        deletePermanently: "Delete permanently",
+        serverError: "Could not communicate with the server.",
+      },
+
+      subcategory: {
+        add: "Add subcategory",
+        edit: "Edit subcategory",
+        delete: "Delete subcategory",
+        create: "Create subcategory",
+        save: "Save subcategory",
+
+        visible: "Subcategory visible on the public website",
+        fallbackName: "Subcategory",
+
+        saveFailed: "Could not save the subcategory.",
+        deleteFailed: "Could not delete the subcategory.",
+        operationFailed: "Could not complete the operation.",
+
+        deleteQuestion: "Delete “{name}”?",
+        deleteDescription:
+          "The dishes in this subcategory will not be deleted. They will remain without a subcategory.",
+        keep: "Keep subcategory",
+        nameRequired: "Enter the subcategory name in at least one language.",
+        fallbackWithPosition: "Subcategory {position}",
+      },
+      item: {
+        add: "Add dish",
+        edit: "Edit dish #{position}",
+        delete: "Delete dish",
+        create: "Create dish",
+        save: "Save changes",
+        editDescription: "Change the text, price or visibility.",
+
+        fallbackName: "Dish #{position}",
+
+        description: "Description",
+
+        subcategory: "Subcategory",
+        subcategoryDescription: "Select the subcategory for this dish.",
+        noSubcategory: "No subcategory",
+
+        image: "Dish image",
+        imagePreviewAlt: "Dish preview",
+        imageHelp: "Optional image. PNG, JPEG or WebP. Maximum 5 MB.",
+        uploadingImage: "Uploading image...",
+        removeImage: "Remove dish image",
+        removeImageQuestion: "Remove the dish image?",
+        removeImageDescription:
+          "The image will be removed when you save the dish.",
+        keepImage: "Keep image",
+        confirmRemoveImage: "Remove image",
+
+        invalidImageType: "Select a PNG, JPEG or WebP image.",
+        imageTooLarge: "The image cannot exceed 5 MB.",
+        imageUploadFailed: "Could not upload the image.",
+
+        price: "Price / price information",
+        pricePlaceholder: "E.g. Half portion: €8 · Portion: €14",
+        priceHelp: "You can enter a single price or several options.",
+
+        visible: "Visible on the public website",
+
+        saveFailed: "Could not save the dish.",
+        deleteFailed: "Could not delete the dish.",
+
+        deleteQuestion: "Delete “{name}”?",
+        deleteDescription:
+          "This action is permanent. The dish translations will also be deleted.",
+        keep: "Keep dish",
+        nameRequired: "Enter the dish name in at least one language.",
+      },
     },
   },
 };

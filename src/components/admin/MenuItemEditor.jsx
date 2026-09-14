@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import styles from "../../styles/Admin.module.css";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 import { adminFetch } from "../../lib/adminFetch";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 const languages = [
   {
@@ -41,6 +42,7 @@ export default function MenuItemEditor({
   onSaved,
   onDeleted,
 }) {
+  const { language, t } = useAdminLanguage();
   const [availableSubcategories, setAvailableSubcategories] = useState(
     () => subcategories
   );
@@ -129,14 +131,14 @@ export default function MenuItemEditor({
     setErrorMessage("");
 
     if (!allowedImageTypes.has(image.type)) {
-      setErrorMessage("Seleciona uma imagem PNG, JPEG ou WebP.");
+      setErrorMessage("menu.item.invalidImageType");
 
       input.value = "";
       return;
     }
 
     if (image.size > MAX_IMAGE_SIZE) {
-      setErrorMessage("A imagem não pode ultrapassar 5 MB.");
+      setErrorMessage("menu.item.imageTooLarge");
 
       input.value = "";
       return;
@@ -160,7 +162,7 @@ export default function MenuItemEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(result.error ?? "Não foi possível carregar a imagem.");
+        setErrorMessage("menu.item.imageUploadFailed");
 
         return;
       }
@@ -170,7 +172,7 @@ export default function MenuItemEditor({
         imagePath: result.imagePath,
       }));
     } catch {
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
     } finally {
       setIsUploadingImage(false);
       input.value = "";
@@ -180,6 +182,15 @@ export default function MenuItemEditor({
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage("");
+
+    const hasAnyName = languages.some(({ code }) =>
+      formValues.translations[code].name.trim()
+    );
+
+    if (!hasAnyName) {
+      setErrorMessage("menu.item.nameRequired");
+      return;
+    }
 
     const endpoint = isCreating
       ? "/api/admin/menu/items"
@@ -223,13 +234,8 @@ export default function MenuItemEditor({
           setIsSubmitting(false);
           return;
         }
-        const validationMessage = result.details?.[0]?.message;
 
-        setErrorMessage(
-          validationMessage ??
-            result.error ??
-            "Não foi possível guardar o prato."
-        );
+        setErrorMessage("menu.item.saveFailed");
 
         setIsSubmitting(false);
         return;
@@ -239,7 +245,7 @@ export default function MenuItemEditor({
       await onSaved(result.item);
     } catch {
       console.error("Erro ao guardar prato:", error);
-      setErrorMessage("Não foi possível comunicar com o servidor.");
+      setErrorMessage("menu.common.serverError");
 
       setIsSubmitting(false);
     }
@@ -261,7 +267,7 @@ export default function MenuItemEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage(result.error ?? "Não foi possível eliminar o prato.");
+        setErrorMessage("menu.item.deleteFailed");
 
         setIsDeleting(false);
         return;
@@ -270,33 +276,35 @@ export default function MenuItemEditor({
       setIsDeleting(false);
       await onDeleted();
     } catch {
-      console.error("Erro ao guardar prato:", error);
-      setErrorMessage("Não foi possível comunicar com o servidor.");
-
+      setErrorMessage("menu.common.serverError");
       setIsDeleting(false);
     }
   }
-
+  const itemName =
+    item?.translations?.[language]?.name ||
+    item?.translations?.pt?.name ||
+    item?.translations?.es?.name ||
+    item?.translations?.en?.name ||
+    t("menu.item.fallbackName", {
+      position: item?.position ?? "",
+    });
   return (
     <form className={styles.itemEditor} onSubmit={handleSubmit}>
       <div className={styles.editorHeading}>
         <div>
           <h3>
             {isCreating
-              ? "Adicionar prato"
+              ? t("menu.item.add")
               : isConfirmingDelete
-                ? "Eliminar prato"
-                : `Editar prato #${item.position}`}
+                ? t("menu.item.delete")
+                : t("menu.item.edit", {
+                    position: item.position,
+                  })}
           </h3>
 
           {!isCreating && (
             <p>
-              {isConfirmingDelete
-                ? item.translations.pt.name ||
-                  item.translations.es.name ||
-                  item.translations.en.name ||
-                  `Prato #${item.position}`
-                : "Altera os textos, o preço ou a visibilidade."}
+              {isConfirmingDelete ? itemName : t("menu.item.editDescription")}
             </p>
           )}
         </div>
@@ -319,7 +327,7 @@ export default function MenuItemEditor({
               <legend>{language.label}</legend>
 
               <label className={styles.editorField} htmlFor={nameId}>
-                Nome
+                {t("menu.common.name")}
               </label>
 
               <input
@@ -334,7 +342,7 @@ export default function MenuItemEditor({
               />
 
               <label className={styles.editorField} htmlFor={descriptionId}>
-                Descrição
+                {t("menu.item.description")}
               </label>
 
               <textarea
@@ -358,8 +366,8 @@ export default function MenuItemEditor({
       <div className={styles.itemSubcategories}>
         <div className={styles.itemSubcategoriesHeading}>
           <div>
-            <strong>Subcategoria</strong>
-            <p>Seleciona a subcategoria deste prato.</p>
+            <strong>{t("menu.item.subcategory")}</strong>
+            <p>{t("menu.item.subcategoryDescription")}</p>
           </div>
 
           <button
@@ -368,7 +376,7 @@ export default function MenuItemEditor({
             disabled={isFormLocked}
             onClick={() => setIsCreatingSubcategory(true)}
           >
-            + Adicionar subcategoria
+            + {t("menu.subcategory.add")}
           </button>
         </div>
 
@@ -388,15 +396,18 @@ export default function MenuItemEditor({
               }
             />
 
-            <span>Sem subcategoria</span>
+            <span>{t("menu.item.noSubcategory")}</span>
           </label>
 
           {availableSubcategories.map((subcategory) => {
             const name =
+              subcategory.translations[language]?.name ||
               subcategory.translations.pt.name ||
               subcategory.translations.es.name ||
               subcategory.translations.en.name ||
-              `Subcategoria ${subcategory.position}`;
+              t("menu.subcategory.fallbackWithPosition", {
+                position: subcategory.position,
+              });
 
             return (
               <div
@@ -451,7 +462,7 @@ export default function MenuItemEditor({
       </div>
 
       <div className={styles.imageUploadField}>
-        <span className={styles.editorField}>Imagem do prato</span>
+        <span className={styles.editorField}>{t("menu.item.image")}</span>
 
         <div className={styles.categoryImageUploadRow}>
           <input
@@ -467,7 +478,7 @@ export default function MenuItemEditor({
             <Image
               className={styles.categoryImageThumbnail}
               src={formValues.imagePath}
-              alt="Pré-visualização do prato"
+              alt={t("menu.item.imagePreviewAlt")}
               width={88}
               height={88}
               unoptimized
@@ -475,11 +486,11 @@ export default function MenuItemEditor({
           )}
         </div>
 
-        <small>Imagem opcional. PNG, JPEG ou WebP. Máximo de 5 MB.</small>
+        <small>{t("menu.item.imageHelp")}</small>
 
         {isUploadingImage && (
           <span className={styles.uploadStatus} role="status">
-            A carregar imagem...
+            {t("menu.item.uploadingImage")}
           </span>
         )}
 
@@ -490,15 +501,15 @@ export default function MenuItemEditor({
             disabled={isFormLocked}
             onClick={() => setIsConfirmingImageRemoval(true)}
           >
-            Remover imagem do prato
+            {t("menu.item.removeImage")}
           </button>
         )}
       </div>
       {isConfirmingImageRemoval && (
         <div className={styles.deleteConfirmation} role="alert">
-          <strong>Remover a imagem do prato?</strong>
+          <strong>{t("menu.item.removeImageQuestion")}</strong>
 
-          <p>A imagem será removida quando guardares o prato.</p>
+          <p>{t("menu.item.removeImageDescription")}</p>
 
           <div className={styles.deleteConfirmationActions}>
             <button
@@ -507,7 +518,7 @@ export default function MenuItemEditor({
               disabled={isBusy}
               onClick={() => setIsConfirmingImageRemoval(false)}
             >
-              Manter imagem
+              {t("menu.item.keepImage")}
             </button>
 
             <button
@@ -523,20 +534,20 @@ export default function MenuItemEditor({
                 setIsConfirmingImageRemoval(false);
               }}
             >
-              Remover imagem
+              {t("menu.item.confirmRemoveImage")}
             </button>
           </div>
         </div>
       )}
       <div className={styles.editorOptions}>
         <label className={styles.priceField}>
-          <span>Preço / informação de preço</span>
+          <span>{t("menu.item.price")}</span>
 
           <input
             className={styles.editorInput}
             type="text"
             maxLength={200}
-            placeholder="Ex.: Meia dose: 8 € · Dose: 14 €"
+            placeholder={t("menu.item.pricePlaceholder")}
             disabled={isFormLocked}
             value={formValues.priceText}
             onChange={(event) =>
@@ -547,7 +558,7 @@ export default function MenuItemEditor({
             }
           />
 
-          <small>Podes escrever um preço simples ou várias opções.</small>
+          <small>{t("menu.item.priceHelp")}</small>
         </label>
 
         <label className={styles.checkboxField}>
@@ -563,24 +574,25 @@ export default function MenuItemEditor({
             }
           />
 
-          <span>Visível no site público</span>
+          <span>{t("menu.item.visible")}</span>
         </label>
       </div>
 
       {errorMessage && (
         <p className={styles.editorError} role="alert">
-          {errorMessage}
+          {t(errorMessage)}
         </p>
       )}
 
       {!isCreating && isConfirmingDelete && (
         <div className={styles.deleteConfirmation} role="alert">
-          <strong>Eliminar “{item.translations.pt.name}”?</strong>
+          <strong>
+            {t("menu.item.deleteQuestion", {
+              name: itemName,
+            })}
+          </strong>
 
-          <p>
-            Esta ação é permanente. As traduções do prato também serão
-            eliminadas.
-          </p>
+          <p>{t("menu.item.deleteDescription")}</p>
 
           <div className={styles.deleteConfirmationActions}>
             <button
@@ -589,7 +601,7 @@ export default function MenuItemEditor({
               disabled={isBusy}
               onClick={() => setIsConfirmingDelete(false)}
             >
-              Manter prato
+              {t("menu.item.keep")}
             </button>
 
             <button
@@ -598,7 +610,9 @@ export default function MenuItemEditor({
               disabled={isBusy}
               onClick={handleDelete}
             >
-              {isDeleting ? "A eliminar..." : "Eliminar permanentemente"}
+              {isDeleting
+                ? t("menu.common.deleting")
+                : t("menu.common.deletePermanently")}
             </button>
           </div>
         </div>
@@ -612,7 +626,7 @@ export default function MenuItemEditor({
             disabled={isFormLocked}
             onClick={() => setIsConfirmingDelete(true)}
           >
-            Eliminar prato
+            {t("menu.item.delete")}
           </button>
         )}
         <button
@@ -621,7 +635,7 @@ export default function MenuItemEditor({
           disabled={isFormLocked}
           onClick={onCancel}
         >
-          Cancelar
+          {t("menu.common.cancel")}
         </button>
 
         <button
@@ -630,10 +644,10 @@ export default function MenuItemEditor({
           disabled={isFormLocked}
         >
           {isSubmitting
-            ? "A guardar..."
+            ? t("menu.common.saving")
             : isCreating
-              ? "Criar prato"
-              : "Guardar alterações"}
+              ? t("menu.item.create")
+              : t("menu.item.save")}
         </button>
       </div>
     </form>
