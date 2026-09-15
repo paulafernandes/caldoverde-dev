@@ -129,10 +129,7 @@ export default function MenuSubcategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        const validationMessage = result.details?.[0]?.message;
-
         setErrorMessage("menu.subcategory.saveFailed");
-
         setIsSubmitting(false);
         return;
       }

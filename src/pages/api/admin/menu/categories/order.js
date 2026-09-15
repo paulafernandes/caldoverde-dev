@@ -5,7 +5,7 @@ import { getAdminSession } from "../../../../../server/getAdminSession";
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
-    message: issue.message,
+    code: issue.message,
   }));
 }
 
@@ -14,7 +14,7 @@ export default async function handler(request, response) {
     response.setHeader("Allow", "PATCH");
 
     return response.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -22,7 +22,7 @@ export default async function handler(request, response) {
 
   if (!session) {
     return response.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -30,7 +30,7 @@ export default async function handler(request, response) {
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
-      error: "O pedido deve utilizar JSON.",
+      error: "JSON_REQUIRED",
     });
   }
 
@@ -38,8 +38,7 @@ export default async function handler(request, response) {
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados da ordenação são inválidos.",
-
+      error: "INVALID_CATEGORY_ORDER",
       details: formatValidationErrors(validation.error),
     });
   }
@@ -52,16 +51,14 @@ export default async function handler(request, response) {
 
     if (!result) {
       return response.status(404).json({
-        error: "Categoria não encontrada.",
+        error: "CATEGORY_NOT_FOUND",
       });
     }
 
     return response.status(200).json(result);
   } catch (error) {
-    console.error("Erro ao ordenar a categoria:", error);
-
     return response.status(500).json({
-      error: "Não foi possível alterar a ordem da categoria.",
+      error: "CATEGORY_ORDER_FAILED",
     });
   }
 }

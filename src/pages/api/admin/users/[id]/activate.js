@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["POST"]);
 
     return res.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   if (!session) {
     return res.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   if (!userId) {
     return res.status(400).json({
-      error: "Utilizador obrigatório.",
+      error: "INVALID_USER_ID",
     });
   }
 
@@ -38,10 +38,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.error("Erro ao reativar utilizador:", error);
-
     return res.status(400).json({
-      error: "Não foi possível reativar o utilizador.",
+      error: "USER_ACTIVATE_FAILED",
     });
   }
 }

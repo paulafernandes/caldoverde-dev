@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["GET", "POST"]);
 
     return res.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   if (!session) {
     return res.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -34,10 +34,8 @@ export default async function handler(req, res) {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error("Erro ao listar utilizadores:", error);
-
       return res.status(500).json({
-        error: "Não foi possível carregar os utilizadores.",
+        error: "USER_LIST_FAILED",
       });
     }
   }
@@ -48,7 +46,7 @@ export default async function handler(req, res) {
 
   if (!name || !email || !password) {
     return res.status(400).json({
-      error: "Nome, email e palavra-passe são obrigatórios.",
+      error: "INVALID_USER_DATA",
     });
   }
 
@@ -65,10 +63,8 @@ export default async function handler(req, res) {
 
     return res.status(201).json(result);
   } catch (error) {
-    console.error("Erro ao criar utilizador:", error);
-
     return res.status(400).json({
-      error: "Não foi possível criar o utilizador.",
+      error: "USER_CREATE_FAILED",
     });
   }
 }

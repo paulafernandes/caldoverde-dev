@@ -8,7 +8,7 @@ import { getAdminSession } from "../../../../../server/getAdminSession";
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
-    message: issue.message,
+    code: issue.message,
   }));
 }
 
@@ -19,7 +19,7 @@ export default async function handler(request, response) {
     response.setHeader("Allow", allowedMethods.join(", "));
 
     return response.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -27,7 +27,7 @@ export default async function handler(request, response) {
 
   if (!session) {
     return response.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -37,9 +37,10 @@ export default async function handler(request, response) {
 
   const categoryId = Number(rawCategoryId);
 
-  if (!Number.isInteger(categoryId) || categoryId <= 0) {
+  if (!validation.success) {
     return response.status(400).json({
-      error: "Identificador da categoria inválido.",
+      error: "INVALID_CATEGORY_ORDER",
+      details: formatValidationErrors(validation.error),
     });
   }
 
@@ -49,17 +50,16 @@ export default async function handler(request, response) {
 
       if (result.status === "not-found") {
         return response.status(404).json({
-          error: "Categoria não encontrada.",
+          error: "CATEGORY_NOT_FOUND",
         });
       }
 
       if (result.status === "not-empty") {
-        const itemLabel = result.itemCount === 1 ? "prato" : "pratos";
-
         return response.status(409).json({
-          error:
-            `A categoria contém ${result.itemCount} ${itemLabel}. ` +
-            "Remove-os antes de eliminar a categoria.",
+          error: "CATEGORY_NOT_EMPTY",
+          meta: {
+            itemCount: result.itemCount,
+          },
         });
       }
 
@@ -67,10 +67,8 @@ export default async function handler(request, response) {
         success: true,
       });
     } catch (error) {
-      console.error("Erro ao eliminar a categoria:", error);
-
       return response.status(500).json({
-        error: "Não foi possível eliminar a categoria.",
+        error: "CATEGORY_DELETE_FAILED",
       });
     }
   }
@@ -79,7 +77,7 @@ export default async function handler(request, response) {
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
-      error: "O pedido deve utilizar JSON.",
+      error: "JSON_REQUIRED",
     });
   }
 
@@ -87,7 +85,7 @@ export default async function handler(request, response) {
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados da categoria são inválidos.",
+      error: "INVALID_CATEGORY_DATA",
 
       details: formatValidationErrors(validation.error),
     });
@@ -101,7 +99,7 @@ export default async function handler(request, response) {
 
     if (!updatedCategory) {
       return response.status(404).json({
-        error: "Categoria não encontrada.",
+        error: "CATEGORY_NOT_FOUND",
       });
     }
 
@@ -109,10 +107,8 @@ export default async function handler(request, response) {
       category: updatedCategory,
     });
   } catch (error) {
-    console.error("Erro ao atualizar a categoria:", error);
-
     return response.status(500).json({
-      error: "Não foi possível atualizar a categoria.",
+      error: "CATEGORY_UPDATE_FAILED",
     });
   }
 }

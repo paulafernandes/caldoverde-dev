@@ -2,15 +2,9 @@ import { z } from "zod";
 
 const menuItemTranslationSchema = z
   .strictObject({
-    name: z
-      .string()
-      .trim()
-      .max(120, "O nome não pode ultrapassar 120 caracteres."),
+    name: z.string().trim().max(120, "ITEM_NAME_TOO_LONG"),
 
-    description: z
-      .string()
-      .trim()
-      .max(500, "A descrição não pode ultrapassar 500 caracteres."),
+    description: z.string().trim().max(500, "ITEM_DESCRIPTION_TOO_LONG"),
   })
   .superRefine((translation, context) => {
     const hasName = translation.name.length > 0;
@@ -20,7 +14,7 @@ const menuItemTranslationSchema = z
       context.addIssue({
         code: "custom",
         path: ["description"],
-        message: "Preenche a descrição neste idioma.",
+        message: "ITEM_DESCRIPTION_REQUIRED",
       });
     }
 
@@ -28,7 +22,7 @@ const menuItemTranslationSchema = z
       context.addIssue({
         code: "custom",
         path: ["name"],
-        message: "Preenche o nome do prato neste idioma.",
+        message: "ITEM_NAME_REQUIRED",
       });
     }
   });
@@ -46,35 +40,31 @@ const menuItemTranslationsSchema = z
           translation.name.length > 0 && translation.description.length > 0
       ),
     {
-      message: "Preenche o nome e a descrição em pelo menos um idioma.",
+      message: "ITEM_TRANSLATION_REQUIRED",
     }
   );
 
 const menuImagePathSchema = z
   .string()
   .trim()
-  .min(1, "O caminho da imagem não pode estar vazio.")
-  .max(500, "O caminho da imagem não pode ultrapassar 500 caracteres.")
+  .min(1, "IMAGE_PATH_REQUIRED")
+  .max(500, "IMAGE_PATH_TOO_LONG")
   .refine(
     (imagePath) =>
       imagePath.startsWith("/assets/images/") ||
       imagePath.startsWith("/uploads/"),
     {
-      message: "A imagem deve estar em /assets/images/ ou /uploads/.",
+      message: "INVALID_IMAGE_PATH",
     }
   );
 
 export const updateMenuItemSchema = z.strictObject({
   subcategoryId: z
     .number()
-    .int("O identificador da subcategoria tem de ser inteiro.")
-    .positive("O identificador da subcategoria é inválido.")
+    .int("INVALID_SUBCATEGORY_ID")
+    .positive("INVALID_SUBCATEGORY_ID")
     .nullable(),
-  priceText: z
-    .string()
-    .trim()
-    .max(200, "A informação do preço não pode ultrapassar 200 caracteres.")
-    .nullable(),
+  priceText: z.string().trim().max(200, "ITEM_PRICE_TOO_LONG").nullable(),
   imagePath: menuImagePathSchema.nullable(),
 
   isVisible: z.boolean(),
@@ -84,20 +74,11 @@ export const updateMenuItemSchema = z.strictObject({
 
 const menuCategoryTranslationSchema = z
   .strictObject({
-    label: z
-      .string()
-      .trim()
-      .max(120, "O nome do separador não pode ultrapassar 120 caracteres."),
+    label: z.string().trim().max(120, "CATEGORY_LABEL_TOO_LONG"),
 
-    title: z
-      .string()
-      .trim()
-      .max(120, "O título não pode ultrapassar 120 caracteres."),
+    title: z.string().trim().max(120, "CATEGORY_TITLE_TOO_LONG"),
 
-    highlightText: z
-      .string()
-      .trim()
-      .max(300, "O texto em destaque não pode ultrapassar 300 caracteres."),
+    highlightText: z.string().trim().max(300, "CATEGORY_HIGHLIGHT_TOO_LONG"),
   })
   .superRefine((translation, context) => {
     const hasLabel = translation.label.length > 0;
@@ -107,7 +88,7 @@ const menuCategoryTranslationSchema = z
       context.addIssue({
         code: "custom",
         path: ["title"],
-        message: "Preenche o título da categoria neste idioma.",
+        message: "CATEGORY_TITLE_REQUIRED",
       });
     }
 
@@ -115,7 +96,7 @@ const menuCategoryTranslationSchema = z
       context.addIssue({
         code: "custom",
         path: ["label"],
-        message: "Preenche o nome do separador neste idioma.",
+        message: "CATEGORY_LABEL_REQUIRED",
       });
     }
   });
@@ -133,16 +114,12 @@ const menuCategoryTranslationsSchema = z
           translation.label.length > 0 && translation.title.length > 0
       ),
     {
-      message:
-        "Preenche o nome do separador e o título da categoria em pelo menos um idioma.",
+      message: "CATEGORY_TRANSLATION_REQUIRED",
     }
   );
 
 const menuSubcategoryTranslationSchema = z.strictObject({
-  name: z
-    .string()
-    .trim()
-    .max(120, "O nome da subcategoria não pode ultrapassar 120 caracteres."),
+  name: z.string().trim().max(120, "SUBCATEGORY_NAME_TOO_LONG"),
 });
 
 const menuSubcategoryTranslationsSchema = z
@@ -157,7 +134,7 @@ const menuSubcategoryTranslationsSchema = z
         (translation) => translation.name.length > 0
       ),
     {
-      message: "Preenche o nome da subcategoria em pelo menos um idioma.",
+      message: "SUBCATEGORY_NAME_REQUIRED",
     }
   );
 
@@ -170,17 +147,16 @@ export const updateMenuSubcategorySchema = z.strictObject({
 export const createMenuSubcategorySchema = updateMenuSubcategorySchema.extend({
   categoryId: z
     .number()
-    .int("O identificador da categoria tem de ser inteiro.")
-    .positive("O identificador da categoria é inválido."),
+    .int("INVALID_CATEGORY_ID")
+    .positive("INVALID_CATEGORY_ID"),
 });
 
 export const moveMenuSubcategorySchema = z.strictObject({
-  subcategoryId: z
-    .number()
-    .int("O identificador da subcategoria tem de ser inteiro.")
-    .positive("O identificador da subcategoria é inválido."),
+  subcategoryId: z.number().int("INVALID_ITEM_ID").positive("INVALID_ITEM_ID"),
 
-  direction: z.enum(["up", "down"]),
+  direction: z.enum(["up", "down"], {
+    error: "INVALID_DIRECTION",
+  }),
 });
 
 export const updateMenuCategorySchema = z.strictObject({
@@ -192,28 +168,23 @@ export const updateMenuCategorySchema = z.strictObject({
 });
 
 export const createMenuItemSchema = updateMenuItemSchema.extend({
-  categoryId: z
-    .number()
-    .int("O identificador da categoria tem de ser inteiro.")
-    .positive("O identificador da categoria é inválido."),
+  categoryId: z.number().int("INVALID_ITEM_ID").positive("INVALID_ITEM_ID"),
 });
 
 export const moveMenuItemSchema = z.strictObject({
-  itemId: z
-    .number()
-    .int("O identificador do prato tem de ser inteiro.")
-    .positive("O identificador do prato é inválido."),
+  itemId: z.number().int("INVALID_ITEM_ID").positive("INVALID_ITEM_ID"),
 
-  direction: z.enum(["up", "down"]),
+  direction: z.enum(["up", "down"], {
+    error: "INVALID_DIRECTION",
+  }),
 });
 
 export const moveMenuCategorySchema = z.strictObject({
-  categoryId: z
-    .number()
-    .int("O identificador da categoria tem de ser inteiro.")
-    .positive("O identificador da categoria é inválido."),
+  categoryId: z.number().int("INVALID_ITEM_ID").positive("INVALID_ITEM_ID"),
 
-  direction: z.enum(["up", "down"]),
+  direction: z.enum(["up", "down"], {
+    error: "INVALID_DIRECTION",
+  }),
 });
 
 export const createMenuCategorySchema = updateMenuCategorySchema;

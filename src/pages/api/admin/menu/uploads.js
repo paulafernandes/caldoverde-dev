@@ -15,7 +15,7 @@ export default async function handler(request, response) {
     response.setHeader("Allow", "POST");
 
     return response.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -23,7 +23,7 @@ export default async function handler(request, response) {
 
   if (!session) {
     return response.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -31,7 +31,7 @@ export default async function handler(request, response) {
 
   if (!contentType.includes("multipart/form-data")) {
     return response.status(415).json({
-      error: "O pedido deve utilizar multipart/form-data.",
+      error: "MULTIPART_REQUIRED",
     });
   }
 
@@ -42,14 +42,11 @@ export default async function handler(request, response) {
   } catch (error) {
     if (error instanceof ImageUploadError) {
       return response.status(error.statusCode).json({
-        error: error.message,
+        error: error.code,
       });
     }
-
-    console.error("Erro ao carregar a imagem:", error);
-
     return response.status(500).json({
-      error: "Não foi possível carregar a imagem.",
+      error: "IMAGE_UPLOAD_FAILED",
     });
   }
 }

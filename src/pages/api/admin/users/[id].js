@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", ["PATCH"]);
 
     return res.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
   if (!session) {
     return res.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
   if (!userId || !name) {
     return res.status(400).json({
-      error: "Utilizador e nome são obrigatórios.",
+      error: "INVALID_USER_DATA",
     });
   }
 
@@ -42,10 +42,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json(result);
   } catch (error) {
-    console.error("Erro ao atualizar utilizador:", error);
-
     return res.status(400).json({
-      error: "Não foi possível atualizar o utilizador.",
+      error: "USER_UPDATE_FAILED",
     });
   }
 }

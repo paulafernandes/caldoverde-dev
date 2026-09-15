@@ -10,9 +10,10 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export class ImageUploadError extends Error {
-  constructor(message, statusCode = 400) {
-    super(message);
+  constructor(code, statusCode = 400) {
+    super(code);
     this.name = "ImageUploadError";
+    this.code = code;
     this.statusCode = statusCode;
   }
 }
@@ -83,9 +84,7 @@ export async function saveUploadedImage(request) {
     const isTooLarge = error.httpCode === 413;
 
     throw new ImageUploadError(
-      isTooLarge
-        ? "A imagem não pode ultrapassar 5 MB."
-        : "Não foi possível processar a imagem.",
+      isTooLarge ? "IMAGE_TOO_LARGE" : "IMAGE_PROCESSING_FAILED",
       isTooLarge ? 413 : 400
     );
   }
@@ -93,7 +92,7 @@ export async function saveUploadedImage(request) {
   const image = getFirstFile(files.image);
 
   if (!image) {
-    throw new ImageUploadError("Seleciona uma imagem PNG, JPEG ou WebP.");
+    throw new ImageUploadError("INVALID_IMAGE_TYPE");
   }
 
   const temporaryPath = image.filepath;
@@ -102,18 +101,13 @@ export async function saveUploadedImage(request) {
     const extension = await detectImageExtension(temporaryPath);
 
     if (!extension) {
-      throw new ImageUploadError(
-        "O conteúdo do ficheiro não corresponde a uma imagem válida."
-      );
+      throw new ImageUploadError("INVALID_IMAGE_CONTENT");
     }
 
     const configuredUploadsDir = process.env.UPLOADS_DIR;
 
     if (!configuredUploadsDir) {
-      throw new ImageUploadError(
-        "A pasta de uploads não está configurada.",
-        500
-      );
+      throw new ImageUploadError("UPLOADS_DIR_NOT_CONFIGURED", 500);
     }
 
     const uploadsDir = path.resolve(

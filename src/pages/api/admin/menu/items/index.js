@@ -5,7 +5,7 @@ import { getAdminSession } from "../../../../../server/getAdminSession";
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
-    message: issue.message,
+    code: issue.message,
   }));
 }
 
@@ -14,7 +14,7 @@ export default async function handler(request, response) {
     response.setHeader("Allow", "POST");
 
     return response.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -22,7 +22,7 @@ export default async function handler(request, response) {
 
   if (!session) {
     return response.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -30,7 +30,7 @@ export default async function handler(request, response) {
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
-      error: "O pedido deve utilizar JSON.",
+      error: "JSON_REQUIRED",
     });
   }
 
@@ -38,7 +38,7 @@ export default async function handler(request, response) {
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados do prato são inválidos.",
+      error: "INVALID_ITEM_DATA",
 
       details: formatValidationErrors(validation.error),
     });
@@ -49,19 +49,13 @@ export default async function handler(request, response) {
 
     if (createdItem === null) {
       return response.status(404).json({
-        error: "Categoria não encontrada.",
+        error: "CATEGORY_NOT_FOUND",
       });
     }
 
     if (createdItem === false) {
       return response.status(400).json({
-        error: "A subcategoria selecionada não pertence a esta categoria.",
-      });
-    }
-
-    if (createdItem === false) {
-      return response.status(400).json({
-        error: "A subcategoria não pertence à categoria selecionada.",
+        error: "SUBCATEGORY_CATEGORY_MISMATCH",
       });
     }
 
@@ -69,10 +63,8 @@ export default async function handler(request, response) {
       item: createdItem,
     });
   } catch (error) {
-    console.error("Erro ao criar o prato:", error);
-
     return response.status(500).json({
-      error: "Não foi possível criar o prato.",
+      error: "ITEM_CREATE_FAILED",
     });
   }
 }

@@ -8,7 +8,7 @@ import { getAdminSession } from "../../../../../server/getAdminSession";
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
     field: issue.path.join("."),
-    message: issue.message,
+    code: issue.message,
   }));
 }
 
@@ -19,7 +19,7 @@ export default async function handler(request, response) {
     response.setHeader("Allow", allowedMethods.join(", "));
 
     return response.status(405).json({
-      error: "Método não permitido.",
+      error: "METHOD_NOT_ALLOWED",
     });
   }
 
@@ -27,7 +27,7 @@ export default async function handler(request, response) {
 
   if (!session) {
     return response.status(401).json({
-      error: "Sessão de administradora necessária.",
+      error: "ADMIN_SESSION_REQUIRED",
     });
   }
 
@@ -39,7 +39,7 @@ export default async function handler(request, response) {
 
   if (!Number.isInteger(itemId) || itemId <= 0) {
     return response.status(400).json({
-      error: "Identificador do prato inválido.",
+      error: "INVALID_ITEM_ID",
     });
   }
 
@@ -49,7 +49,7 @@ export default async function handler(request, response) {
 
       if (!wasDeleted) {
         return response.status(404).json({
-          error: "Prato não encontrado.",
+          error: "ITEM_NOT_FOUND",
         });
       }
 
@@ -57,10 +57,8 @@ export default async function handler(request, response) {
         success: true,
       });
     } catch (error) {
-      console.error("Erro ao eliminar o prato:", error);
-
       return response.status(500).json({
-        error: "Não foi possível eliminar o prato.",
+        error: "ITEM_DELETE_FAILED",
       });
     }
   }
@@ -69,7 +67,7 @@ export default async function handler(request, response) {
 
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
-      error: "O pedido deve utilizar JSON.",
+      error: "JSON_REQUIRED",
     });
   }
 
@@ -77,7 +75,7 @@ export default async function handler(request, response) {
 
   if (!validation.success) {
     return response.status(400).json({
-      error: "Os dados do prato são inválidos.",
+      error: "INVALID_ITEM_DATA",
       details: formatValidationErrors(validation.error),
     });
   }
@@ -87,19 +85,13 @@ export default async function handler(request, response) {
 
     if (updatedItem === null) {
       return response.status(404).json({
-        error: "Prato não encontrado.",
+        error: "ITEM_NOT_FOUND",
       });
     }
 
     if (updatedItem === false) {
       return response.status(400).json({
-        error: "A subcategoria selecionada não pertence à categoria do prato.",
-      });
-    }
-
-    if (updatedItem === false) {
-      return response.status(400).json({
-        error: "A subcategoria não pertence à categoria do prato.",
+        error: "SUBCATEGORY_CATEGORY_MISMATCH",
       });
     }
 
@@ -107,10 +99,8 @@ export default async function handler(request, response) {
       item: updatedItem,
     });
   } catch (error) {
-    console.error("Erro ao atualizar o prato:", error);
-
     return response.status(500).json({
-      error: "Não foi possível atualizar o prato.",
+      error: "ITEM_UPDATE_FAILED",
     });
   }
 }
