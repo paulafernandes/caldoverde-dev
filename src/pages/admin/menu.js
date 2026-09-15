@@ -11,57 +11,41 @@ import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
 import Image from "next/image";
 import { adminFetch } from "../../lib/adminFetch";
 import AdminLayout from "../../components/admin/AdminLayout";
+import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 const languages = ["pt", "es", "en"];
 
 export default function AdminMenuPage({ admin, menuCategories }) {
+  const { t } = useAdminLanguage();
   const router = useRouter();
-
   const [expandedCategoryId, setExpandedCategoryId] = useState(
     menuCategories[0]?.id ?? null
   );
-
   const [editingItemId, setEditingItemId] = useState(null);
-
   const [editingCategoryId, setEditingCategoryId] = useState(null);
-
   const [creatingSubcategoryCategoryId, setCreatingSubcategoryCategoryId] =
     useState(null);
-
-  const [movingSubcategoryId, setMovingSubcategoryId] = useState(null);
-
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
-
   const [creatingItem, setCreatingItem] = useState(null);
-
   const [saveMessage, setSaveMessage] = useState("");
-
   const [isSessionExpired, setIsSessionExpired] = useState(false);
-
-  const [reauthEmail, setReauthEmail] = useState("");
+  const [reauthEmail, setReauthEmail] = useState(admin.email);
   const [reauthPassword, setReauthPassword] = useState("");
   const [reauthError, setReauthError] = useState("");
   const [isReauthenticating, setIsReauthenticating] = useState(false);
   const [showReauthForm, setShowReauthForm] = useState(false);
-
   const totalItems = menuCategories.reduce(
     (total, category) => total + category.items.length,
     0
   );
-
   const [movingItemId, setMovingItemId] = useState(null);
-
   const [movingCategoryId, setMovingCategoryId] = useState(null);
-
   const [actionError, setActionError] = useState("");
-
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
-
   const [newSubcategoryCategoryId, setNewSubcategoryCategoryId] =
     useState(null);
-
+  const [movingSubcategoryId, setMovingSubcategoryId] = useState(null);
   const [newCategoryDraft, setNewCategoryDraft] = useState(null);
-
   const hasOpenEditor =
     isCreatingCategory ||
     editingItemId !== null ||
@@ -132,20 +116,6 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
   }
 
-  function toggleSubcategoryEditor(subcategoryId) {
-    setIsCreatingCategory(false);
-    setCreatingItem(null);
-    setCreatingSubcategoryCategoryId(null);
-    setEditingItemId(null);
-    setEditingCategoryId(null);
-    setSaveMessage("");
-    setActionError("");
-
-    setEditingSubcategoryId((currentId) =>
-      currentId === subcategoryId ? null : subcategoryId
-    );
-  }
-
   function toggleItemCreator(categoryId, subcategoryId = null) {
     setIsCreatingCategory(false);
     setEditingItemId(null);
@@ -169,50 +139,6 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
   }
 
-  async function handleMoveSubcategory(subcategoryId, direction, categoryId) {
-    setActionError("");
-    setSaveMessage("");
-    setMovingSubcategoryId(subcategoryId);
-
-    try {
-      const response = await adminFetch("/api/admin/menu/subcategories/order", {
-        method: "PATCH",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          subcategoryId,
-          direction,
-        }),
-      });
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setActionError(
-          result.error ?? "Não foi possível alterar a ordem da subcategoria."
-        );
-        return;
-      }
-
-      if (!result.moved) {
-        return;
-      }
-
-      setExpandedCategoryId(categoryId);
-
-      await router.replace(router.asPath, undefined, {
-        scroll: false,
-      });
-    } catch {
-      setActionError("Não foi possível comunicar com o servidor.");
-    } finally {
-      setMovingSubcategoryId(null);
-    }
-  }
-
   async function handleItemCreated(categoryId) {
     setNewItemDraft(null);
     setCreatingItem(null);
@@ -224,7 +150,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("O novo prato foi criado com sucesso.");
+    setSaveMessage("menu.page.newItemCreated");
   }
 
   function toggleCategoryEditor(categoryId, editorId) {
@@ -255,7 +181,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("A categoria foi atualizada com sucesso.");
+    setSaveMessage("menu.page.categoryUpdated");
   }
 
   async function handleCategorySubcategoriesChanged(categoryId, message) {
@@ -278,7 +204,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("O prato foi atualizado com sucesso.");
+    setSaveMessage("menu.page.itemUpdated");
   }
 
   async function handleItemDeleted(categoryId) {
@@ -291,7 +217,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("O prato foi eliminado com sucesso.");
+    setSaveMessage("menu.page.itemDeleted");
   }
 
   async function handleMoveItem(itemId, direction, categoryId) {
@@ -316,7 +242,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setActionError(result.error ?? "Não foi possível alterar a ordem.");
+        setActionError("menu.page.itemOrderFailed");
         return;
       }
 
@@ -330,7 +256,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
         scroll: false,
       });
     } catch {
-      setActionError("Não foi possível comunicar com o servidor.");
+      setActionError("menu.common.serverError");
     } finally {
       setMovingItemId(null);
     }
@@ -358,7 +284,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setActionError(result.error ?? "Não foi possível alterar a ordem.");
+        setActionError("menu.page.categoryOrderFailed");
         return;
       }
 
@@ -372,7 +298,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
         scroll: false,
       });
     } catch {
-      setActionError("Não foi possível comunicar com o servidor.");
+      setActionError("menu.common.serverError");
     } finally {
       setMovingCategoryId(null);
     }
@@ -389,13 +315,27 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("A categoria foi eliminada com sucesso.");
+    setSaveMessage("menu.page.categoryDeleted");
   }
 
   async function handleReauthenticate(event) {
     event.preventDefault();
 
     setReauthError("");
+    if (!reauthEmail.trim()) {
+      setReauthError("validation.emailRequired");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(reauthEmail.trim())) {
+      setReauthError("validation.emailInvalid");
+      return;
+    }
+
+    if (!reauthPassword) {
+      setReauthError("validation.passwordRequired");
+      return;
+    }
     setIsReauthenticating(true);
 
     const { error } = await authClient.signIn.email({
@@ -404,7 +344,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
 
     if (error) {
-      setReauthError(error.message ?? "Não foi possível iniciar sessão.");
+      setReauthError("session.signInFailed");
 
       setIsReauthenticating(false);
       return;
@@ -462,14 +402,14 @@ export default function AdminMenuPage({ admin, menuCategories }) {
 
     setSaveMessage(
       options.addSubcategory
-        ? "A categoria foi criada. Adiciona agora a subcategoria."
-        : "A nova categoria foi criada com sucesso."
+        ? "menu.page.categoryCreatedAddSubcategory"
+        : "menu.page.categoryCreated"
     );
   }
   return (
     <>
       <Head>
-        <title>Ementa | Administração</title>
+        <title>{t("menu.page.pageTitle")}</title>
 
         <meta name="robots" content="noindex, nofollow" />
       </Head>
@@ -477,18 +417,26 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       <AdminLayout admin={admin}>
         <section className={styles.dashboardHeading}>
           <div>
-            <h1>Gestão da ementa</h1>
+            <h1>{t("menu.page.title")}</h1>
 
-            <p>Categorias, traduções, pratos e preços.</p>
+            <p>{t("menu.page.subtitle")}</p>
           </div>
 
-          <div className={styles.statList} aria-label="Resumo da ementa">
+          <div
+            className={styles.statList}
+            aria-label={t("menu.page.summaryAria")}
+          >
             <span className={styles.stat}>
-              <strong>{menuCategories.length}</strong> categorias
+              <strong>{menuCategories.length}</strong>{" "}
+              {menuCategories.length === 1
+                ? t("menu.page.categorySingular")
+                : t("menu.page.categoryPlural")}
             </span>
-
             <span className={styles.stat}>
-              <strong>{totalItems}</strong> pratos
+              <strong>{totalItems}</strong>{" "}
+              {totalItems === 1
+                ? t("menu.page.dishSingular")
+                : t("menu.page.dishPlural")}
             </span>
           </div>
         </section>
@@ -502,18 +450,15 @@ export default function AdminMenuPage({ admin, menuCategories }) {
             onClick={toggleCategoryCreator}
           >
             {isCreatingCategory
-              ? "Fechar nova categoria"
-              : "Adicionar categoria"}
+              ? t("menu.page.closeNewCategory")
+              : t("menu.page.addCategory")}
           </button>
         </div>
         {isSessionExpired && (
           <div className={styles.sessionExpiredNotice} role="alert">
-            <strong>A sessão expirou.</strong>
+            <strong>{t("session.expiredTitle")}</strong>
 
-            <p>
-              As alterações do formulário continuam preservadas. Volta a iniciar
-              sessão para continuar.
-            </p>
+            <p>{t("session.expiredDescription")}</p>
 
             {!showReauthForm ? (
               <button
@@ -521,15 +466,16 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                 type="button"
                 onClick={() => setShowReauthForm(true)}
               >
-                Voltar a iniciar sessão
+                {t("session.reauthenticate")}
               </button>
             ) : (
               <form
                 className={styles.reauthForm}
+                noValidate
                 onSubmit={handleReauthenticate}
               >
                 <label>
-                  <span>Email</span>
+                  <span>{t("session.email")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -538,12 +484,15 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthEmail}
-                    onChange={(event) => setReauthEmail(event.target.value)}
+                    onChange={(event) => {
+                      setReauthEmail(event.target.value);
+                      setReauthError("");
+                    }}
                   />
                 </label>
 
                 <label>
-                  <span>Password</span>
+                  <span>{t("session.password")}</span>
 
                   <input
                     className={styles.editorInput}
@@ -552,12 +501,15 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                     required
                     disabled={isReauthenticating}
                     value={reauthPassword}
-                    onChange={(event) => setReauthPassword(event.target.value)}
+                    onChange={(event) => {
+                      setReauthPassword(event.target.value);
+                      setReauthError("");
+                    }}
                   />
                 </label>
 
                 {reauthError && (
-                  <p className={styles.errorMessage}>{reauthError}</p>
+                  <p className={styles.errorMessage}>{t(reauthError)}</p>
                 )}
 
                 <div className={styles.reauthActions}>
@@ -571,7 +523,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                       setReauthError("");
                     }}
                   >
-                    Cancelar
+                    {t("session.cancel")}
                   </button>
 
                   <button
@@ -580,8 +532,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                     disabled={isReauthenticating}
                   >
                     {isReauthenticating
-                      ? "A iniciar sessão..."
-                      : "Iniciar sessão"}
+                      ? t("session.signingIn")
+                      : t("session.signIn")}
                   </button>
                 </div>
               </form>
@@ -591,13 +543,13 @@ export default function AdminMenuPage({ admin, menuCategories }) {
 
         {saveMessage && (
           <p className={styles.successMessage} role="status">
-            {saveMessage}
+            {t(saveMessage)}
           </p>
         )}
 
         {actionError && (
           <p className={styles.pageErrorMessage} role="alert">
-            {actionError}
+            {t(actionError)}
           </p>
         )}
 
@@ -620,39 +572,25 @@ export default function AdminMenuPage({ admin, menuCategories }) {
         )}
 
         {menuCategories.length === 0 ? (
-          <p>A ementa ainda não tem categorias.</p>
+          <p>{t("menu.page.noCategories")}</p>
         ) : (
           <div className={styles.accordionList}>
             {menuCategories.map((category, categoryIndex) => {
               const isExpanded = category.id === expandedCategoryId;
-
               const isEditingCategory = editingCategoryId === category.id;
-
               const categoryEditorId = `category-editor-${category.id}`;
-
               const buttonId = `category-button-${category.id}`;
-
               const panelId = `category-panel-${category.id}`;
-
               const isCreatingItem = creatingItem?.categoryId === category.id;
-
-              const isCreatingSubcategory =
-                creatingSubcategoryCategoryId === category.id;
-
-              const subcategoryCreatorId = `subcategory-creator-${category.id}`;
-
               const itemCreatorId = `item-creator-${category.id}`;
-
               const categoryName =
                 category.translations.pt.label ||
                 category.translations.es.label ||
                 category.translations.en.label ||
                 category.slug;
-
               const itemsWithoutSubcategory = category.items.filter(
                 (item) => item.subcategoryId === null
               );
-
               const itemGroups = [
                 ...(itemsWithoutSubcategory.length > 0
                   ? [
@@ -670,7 +608,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                     subcategory.translations.pt.name ||
                     subcategory.translations.es.name ||
                     subcategory.translations.en.name ||
-                    `Subcategoria ${subcategory.position}`,
+                    t("menu.subcategory.fallbackWithPosition", {
+                      position: subcategory.position,
+                    }),
                   items: category.items.filter(
                     (item) => item.subcategoryId === subcategory.id
                   ),
@@ -682,15 +622,19 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                   <div className={styles.categoryHeaderRow}>
                     <div
                       className={styles.categoryOrderControls}
-                      aria-label={`Alterar ordem de ${
-                        category.translations.pt.label || category.slug
-                      }`}
+                      aria-label={t("menu.page.changeCategoryOrder", {
+                        name: categoryName,
+                      })}
                     >
                       <button
                         className={styles.orderButton}
                         type="button"
-                        title="Mover categoria para cima"
-                        aria-label="Mover categoria para cima"
+                        title={t("menu.page.moveCategoryUp", {
+                          name: categoryName,
+                        })}
+                        aria-label={t("menu.page.moveCategoryUp", {
+                          name: categoryName,
+                        })}
                         disabled={
                           categoryIndex === 0 ||
                           movingCategoryId !== null ||
@@ -709,8 +653,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                       <button
                         className={styles.orderButton}
                         type="button"
-                        title="Mover categoria para baixo"
-                        aria-label="Mover categoria para baixo"
+                        title={t("menu.page.moveCategoryDown", {
+                          name: categoryName,
+                        })}
+                        aria-label={t("menu.page.moveCategoryDown", {
+                          name: categoryName,
+                        })}
                         disabled={
                           categoryIndex === menuCategories.length - 1 ||
                           movingCategoryId !== null ||
@@ -740,7 +688,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
 
                             <span className={styles.categoryItemCount}>
                               - {category.items.length}{" "}
-                              {category.items.length === 1 ? "prato" : "pratos"}
+                              {category.items.length === 1
+                                ? t("menu.page.dishSingular")
+                                : t("menu.page.dishPlural")}
                             </span>
                           </span>
                         </span>
@@ -764,7 +714,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                             : styles.statusHidden
                         }
                       >
-                        {category.isVisible ? "Visível" : "Oculta"}
+                        {category.isVisible
+                          ? t("menu.category.visible")
+                          : t("menu.category.hidden")}
                       </span>
 
                       <button
@@ -782,15 +734,17 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                         }}
                       >
                         {isEditingCategory
-                          ? "Fechar edição"
-                          : "Editar categoria"}
+                          ? t("menu.page.closeCategoryEdit")
+                          : t("menu.category.edit")}
                       </button>
 
                       <button
                         className={styles.categoryChevronButton}
                         type="button"
                         aria-label={
-                          isExpanded ? "Fechar categoria" : "Abrir categoria"
+                          isExpanded
+                            ? t("menu.page.closeCategory")
+                            : t("menu.page.openCategory")
                         }
                         aria-expanded={isExpanded}
                         aria-controls={panelId}
@@ -820,8 +774,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                             onClick={() => toggleItemCreator(category.id)}
                           >
                             {isCreatingItem
-                              ? "Fechar novo prato"
-                              : "Adicionar prato"}
+                              ? t("menu.page.closeNewItem")
+                              : t("menu.item.add")}
                           </button>
                         </div>
                         <div className={styles.translationList}>
@@ -881,7 +835,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                         </div>
                       )}
                       {category.items.length === 0 ? (
-                        <p>Esta categoria ainda não tem pratos.</p>
+                        <p>{t("menu.page.noItems")}</p>
                       ) : (
                         <div className={styles.dishList}>
                           {itemGroups.map((group) => (
@@ -900,13 +854,25 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                     <article className={styles.dishRow}>
                                       <div
                                         className={styles.orderControls}
-                                        aria-label={`Alterar ordem de ${item.translations.pt.name}`}
+                                        aria-label={t(
+                                          "menu.page.changeItemOrder",
+                                          {
+                                            name: item.translations.pt.name,
+                                          }
+                                        )}
                                       >
                                         <button
                                           className={styles.orderButton}
                                           type="button"
-                                          title="Mover para cima"
-                                          aria-label={`Mover ${item.translations.pt.name} para cima`}
+                                          title={t("menu.page.moveItemUp", {
+                                            name: item.translations.pt.name,
+                                          })}
+                                          aria-label={t(
+                                            "menu.page.moveItemUp",
+                                            {
+                                              name: item.translations.pt.name,
+                                            }
+                                          )}
                                           disabled={
                                             itemIndex === 0 ||
                                             movingItemId !== null ||
@@ -931,8 +897,15 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                         <button
                                           className={styles.orderButton}
                                           type="button"
-                                          title="Mover para baixo"
-                                          aria-label={`Mover ${item.translations.pt.name} para baixo`}
+                                          title={t("menu.page.moveItemDown", {
+                                            name: item.translations.pt.name,
+                                          })}
+                                          aria-label={t(
+                                            "menu.page.moveItemDown",
+                                            {
+                                              name: item.translations.pt.name,
+                                            }
+                                          )}
                                           disabled={
                                             itemIndex ===
                                               group.items.length - 1 ||
@@ -985,7 +958,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                       </div>
 
                                       <span className={styles.dishPrice}>
-                                        {item.priceText || "Pendente"}
+                                        {item.priceText ||
+                                          t("menu.page.pending")}
                                       </span>
 
                                       <span
@@ -995,7 +969,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                             : styles.statusHidden
                                         }
                                       >
-                                        {item.isVisible ? "Visível" : "Oculto"}
+                                        {item.isVisible
+                                          ? t("menu.item.visible")
+                                          : t("menu.item.hidden")}
                                       </span>
 
                                       <button
@@ -1007,7 +983,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                           toggleItemEditor(item.id, editorId)
                                         }
                                       >
-                                        {isEditing ? "Fechar" : "Editar"}
+                                        {isEditing
+                                          ? t("menu.page.close")
+                                          : t("menu.item.edit")}
                                       </button>
                                     </article>
 

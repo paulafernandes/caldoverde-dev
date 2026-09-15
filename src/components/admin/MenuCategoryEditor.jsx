@@ -239,13 +239,18 @@ export default function MenuCategoryEditor({
       });
     } catch {
       setErrorMessage("menu.common.serverError");
-
       setIsSubmitting(false);
     }
   }
 
   async function handleDelete() {
     setErrorMessage("");
+
+    if ((category?.items?.length ?? 0) > 0) {
+      setErrorMessage("menu.category.deleteNotEmpty");
+      return;
+    }
+
     setIsDeleting(true);
 
     try {
@@ -280,7 +285,7 @@ export default function MenuCategoryEditor({
 
   async function handleMoveSubcategory(subcategoryId, direction) {
     setErrorMessage("");
-    setMovingSubcategoryId(subcategoryId);
+    setMovingSubcategoryId(null);
 
     try {
       const response = await adminFetch("/api/admin/menu/subcategories/order", {
@@ -308,9 +313,7 @@ export default function MenuCategoryEditor({
       }
 
       if (result.moved) {
-        await onSubcategoriesChanged(
-          t("menu.category.subcategoryOrderUpdated")
-        );
+        await onSubcategoriesChanged("menu.category.subcategoryUpdated");
       }
     } catch {
       setErrorMessage("menu.common.serverError");
@@ -337,9 +340,7 @@ export default function MenuCategoryEditor({
                 : t("menu.category.edit")}
           </h3>
 
-          {!isCreating && isConfirmingDelete && (
-            <p>{!isCreating && isConfirmingDelete && <p>{categoryName}</p>}</p>
-          )}
+          {!isCreating && isConfirmingDelete && <p>{categoryName}</p>}
         </div>
       </div>
       <div className={styles.translationEditorList}>
@@ -551,14 +552,14 @@ export default function MenuCategoryEditor({
                         setEditingSubcategoryId(null);
 
                         await onSubcategoriesChanged(
-                          t("menu.category.subcategoryOrderUpdated")
+                          "menu.category.subcategoryUpdated"
                         );
                       }}
                       onDeleted={async () => {
                         setEditingSubcategoryId(null);
 
                         await onSubcategoriesChanged(
-                          t("menu.category.subcategoryDeleted")
+                          "menu.category.subcategoryDeleted"
                         );
                       }}
                     />
@@ -582,7 +583,7 @@ export default function MenuCategoryEditor({
                   onSubcategoryCreationFinished?.();
 
                   await onSubcategoriesChanged(
-                    t("menu.category.subcategoryCreated")
+                    "menu.category.subcategoryCreated"
                   );
                 }}
               />
@@ -701,7 +702,7 @@ export default function MenuCategoryEditor({
             <button
               className={styles.cancelButton}
               type="button"
-              disabled={isBusy}
+              disabled={isDeleting}
               onClick={() => setIsConfirmingDelete(false)}
             >
               {t("menu.category.keep")}
@@ -710,7 +711,7 @@ export default function MenuCategoryEditor({
             <button
               className={styles.confirmDeleteButton}
               type="button"
-              disabled={isBusy}
+              disabled={isDeleting}
               onClick={handleDelete}
             >
               {isDeleting

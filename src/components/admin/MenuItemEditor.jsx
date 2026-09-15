@@ -244,7 +244,6 @@ export default function MenuItemEditor({
       setIsSubmitting(false);
       await onSaved(result.item);
     } catch {
-      console.error("Erro ao guardar prato:", error);
       setErrorMessage("menu.common.serverError");
 
       setIsSubmitting(false);

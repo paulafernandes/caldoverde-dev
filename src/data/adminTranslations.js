@@ -157,7 +157,7 @@ export const adminTranslations = {
       },
       item: {
         add: "Adicionar prato",
-        edit: "Editar prato #{position}",
+        edit: "Editar",
         delete: "Eliminar prato",
         create: "Criar prato",
         save: "Guardar alterações",
@@ -190,7 +190,7 @@ export const adminTranslations = {
         pricePlaceholder: "Ex.: Meia dose: 8 € · Dose: 14 €",
         priceHelp: "Podes escrever um preço simples ou várias opções.",
 
-        visible: "Visível no site público",
+        visible: "Visível",
 
         saveFailed: "Não foi possível guardar o prato.",
         deleteFailed: "Não foi possível eliminar o prato.",
@@ -200,6 +200,7 @@ export const adminTranslations = {
           "Esta ação é permanente. As traduções do prato também serão eliminadas.",
         keep: "Manter prato",
         nameRequired: "Preenche o nome do prato em pelo menos um idioma.",
+        hidden: "Oculto",
       },
       category: {
         add: "Adicionar categoria",
@@ -261,6 +262,54 @@ export const adminTranslations = {
         subcategoryCreated: "A nova subcategoria foi criada com sucesso.",
         nameAndTitleRequired:
           "Preenche o nome do separador e o título da categoria em pelo menos um idioma.",
+        deleteNotEmpty:
+          "Não é possível eliminar esta categoria porque ainda tem pratos associados.",
+      },
+      page: {
+        pageTitle: "Ementa | Administração",
+        title: "Gestão da ementa",
+        subtitle: "Categorias, traduções, pratos e preços.",
+        summaryAria: "Resumo da ementa",
+
+        categorySingular: "categoria",
+        categoryPlural: "categorias",
+        dishSingular: "prato",
+        dishPlural: "pratos",
+
+        addCategory: "Adicionar categoria",
+        closeNewCategory: "Fechar nova categoria",
+
+        newItemCreated: "O novo prato foi criado com sucesso.",
+        categoryUpdated: "A categoria foi atualizada com sucesso.",
+        itemUpdated: "O prato foi atualizado com sucesso.",
+        itemDeleted: "O prato foi eliminado com sucesso.",
+        categoryDeleted: "A categoria foi eliminada com sucesso.",
+
+        categoryCreated: "A nova categoria foi criada com sucesso.",
+        categoryCreatedAddSubcategory:
+          "A categoria foi criada. Adiciona agora a subcategoria.",
+
+        itemOrderFailed: "Não foi possível alterar a ordem do prato.",
+        categoryOrderFailed: "Não foi possível alterar a ordem da categoria.",
+        noCategories: "A ementa ainda não tem categorias.",
+        noItems: "Esta categoria ainda não tem pratos.",
+
+        changeCategoryOrder: "Alterar ordem de {name}",
+        moveCategoryUp: "Mover {name} para cima",
+        moveCategoryDown: "Mover {name} para baixo",
+
+        closeCategoryEdit: "Fechar edição",
+        openCategory: "Abrir categoria",
+        closeCategory: "Fechar categoria",
+
+        closeNewItem: "Fechar novo prato",
+
+        changeItemOrder: "Alterar ordem de {name}",
+        moveItemUp: "Mover {name} para cima",
+        moveItemDown: "Mover {name} para baixo",
+
+        pending: "Pendente",
+        close: "Fechar",
       },
     },
   },
@@ -422,7 +471,7 @@ export const adminTranslations = {
       },
       item: {
         add: "Añadir plato",
-        edit: "Editar plato #{position}",
+        edit: "Editar",
         delete: "Eliminar plato",
         create: "Crear plato",
         save: "Guardar cambios",
@@ -455,7 +504,7 @@ export const adminTranslations = {
         pricePlaceholder: "Ej.: Media ración: 8 € · Ración: 14 €",
         priceHelp: "Puedes escribir un precio simple o varias opciones.",
 
-        visible: "Visible en el sitio público",
+        visible: "Visible",
 
         saveFailed: "No se pudo guardar el plato.",
         deleteFailed: "No se pudo eliminar el plato.",
@@ -465,6 +514,7 @@ export const adminTranslations = {
           "Esta acción es permanente. Las traducciones del plato también se eliminarán.",
         keep: "Mantener plato",
         nameRequired: "Introduce el nombre del plato en al menos un idioma.",
+        hidden: "Oculto",
       },
       category: {
         add: "Añadir categoría",
@@ -527,6 +577,54 @@ export const adminTranslations = {
         subcategoryCreated: "La nueva subcategoría se ha creado correctamente.",
         nameAndTitleRequired:
           "Introduce el nombre de la pestaña y el título de la categoría en al menos un idioma.",
+        deleteNotEmpty:
+          "No se puede eliminar esta categoría porque todavía tiene platos asociados.",
+      },
+      page: {
+        pageTitle: "Menú | Administración",
+        title: "Gestión del menú",
+        subtitle: "Categorías, traducciones, platos y precios.",
+        summaryAria: "Resumen del menú",
+
+        categorySingular: "categoría",
+        categoryPlural: "categorías",
+        dishSingular: "plato",
+        dishPlural: "platos",
+
+        addCategory: "Añadir categoría",
+        closeNewCategory: "Cerrar nueva categoría",
+
+        newItemCreated: "El nuevo plato se ha creado correctamente.",
+        categoryUpdated: "La categoría se ha actualizado correctamente.",
+        itemUpdated: "El plato se ha actualizado correctamente.",
+        itemDeleted: "El plato se ha eliminado correctamente.",
+        categoryDeleted: "La categoría se ha eliminado correctamente.",
+
+        categoryCreated: "La nueva categoría se ha creado correctamente.",
+        categoryCreatedAddSubcategory:
+          "La categoría se ha creado. Añade ahora la subcategoría.",
+
+        itemOrderFailed: "No se pudo cambiar el orden del plato.",
+        categoryOrderFailed: "No se pudo cambiar el orden de la categoría.",
+        noCategories: "El menú todavía no tiene categorías.",
+        noItems: "Esta categoría todavía no tiene platos.",
+
+        changeCategoryOrder: "Cambiar el orden de {name}",
+        moveCategoryUp: "Mover {name} hacia arriba",
+        moveCategoryDown: "Mover {name} hacia abajo",
+
+        closeCategoryEdit: "Cerrar edición",
+        openCategory: "Abrir categoría",
+        closeCategory: "Cerrar categoría",
+
+        closeNewItem: "Cerrar nuevo plato",
+
+        changeItemOrder: "Cambiar el orden de {name}",
+        moveItemUp: "Mover {name} hacia arriba",
+        moveItemDown: "Mover {name} hacia abajo",
+
+        pending: "Pendiente",
+        close: "Cerrar",
       },
     },
   },
@@ -686,7 +784,7 @@ export const adminTranslations = {
       },
       item: {
         add: "Add dish",
-        edit: "Edit dish #{position}",
+        edit: "Edit",
         delete: "Delete dish",
         create: "Create dish",
         save: "Save changes",
@@ -719,7 +817,7 @@ export const adminTranslations = {
         pricePlaceholder: "E.g. Half portion: €8 · Portion: €14",
         priceHelp: "You can enter a single price or several options.",
 
-        visible: "Visible on the public website",
+        visible: "Visible",
 
         saveFailed: "Could not save the dish.",
         deleteFailed: "Could not delete the dish.",
@@ -729,6 +827,7 @@ export const adminTranslations = {
           "This action is permanent. The dish translations will also be deleted.",
         keep: "Keep dish",
         nameRequired: "Enter the dish name in at least one language.",
+        hidden: "Hidden",
       },
       category: {
         add: "Add category",
@@ -789,6 +888,57 @@ export const adminTranslations = {
         subcategoryCreated: "The new subcategory was created successfully.",
         nameAndTitleRequired:
           "Enter the tab name and category title in at least one language.",
+        deleteNotEmpty:
+          "This category cannot be deleted because it still has dishes associated with it.",
+      },
+      page: {
+        pageTitle: "Menu | Administration",
+        title: "Menu management",
+        subtitle: "Categories, translations, dishes and prices.",
+        summaryAria: "Menu summary",
+
+        categorySingular: "category",
+        categoryPlural: "categories",
+        dishSingular: "dish",
+        dishPlural: "dishes",
+
+        addCategory: "Add category",
+        closeNewCategory: "Close new category",
+
+        newItemCreated: "The new dish was created successfully.",
+        categoryUpdated: "The category was updated successfully.",
+        itemUpdated: "The dish was updated successfully.",
+        itemDeleted: "The dish was deleted successfully.",
+        categoryDeleted: "The category was deleted successfully.",
+
+        categoryCreated: "The new category was created successfully.",
+        categoryCreatedAddSubcategory:
+          "The category was created. Add the subcategory now.",
+
+        itemOrderFailed: "Could not change the dish order.",
+        categoryOrderFailed: "Could not change the category order.",
+        noCategories: "El menú todavía no tiene categorías.",
+        noItems: "Esta categoría todavía no tiene platos.",
+
+        noCategories: "The menu does not have any categories yet.",
+        noItems: "This category does not have any dishes yet.",
+
+        changeCategoryOrder: "Change the order of {name}",
+        moveCategoryUp: "Move {name} up",
+        moveCategoryDown: "Move {name} down",
+
+        closeCategoryEdit: "Close editing",
+        openCategory: "Open category",
+        closeCategory: "Close category",
+
+        closeNewItem: "Close new dish",
+
+        changeItemOrder: "Change the order of {name}",
+        moveItemUp: "Move {name} up",
+        moveItemDown: "Move {name} down",
+
+        pending: "Pending",
+        close: "Close",
       },
     },
   },
