@@ -24,7 +24,6 @@ export default async function handler(request, response) {
   }
 
   const session = await getAdminSession(request);
-
   if (!session) {
     return response.status(401).json({
       error: "ADMIN_SESSION_REQUIRED",
@@ -37,10 +36,9 @@ export default async function handler(request, response) {
 
   const categoryId = Number(rawCategoryId);
 
-  if (!validation.success) {
+  if (!Number.isInteger(categoryId) || categoryId <= 0) {
     return response.status(400).json({
-      error: "INVALID_CATEGORY_ORDER",
-      details: formatValidationErrors(validation.error),
+      error: "INVALID_CATEGORY_ID",
     });
   }
 
@@ -74,7 +72,6 @@ export default async function handler(request, response) {
   }
 
   const contentType = request.headers["content-type"] ?? "";
-
   if (!contentType.includes("application/json")) {
     return response.status(415).json({
       error: "JSON_REQUIRED",

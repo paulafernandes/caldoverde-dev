@@ -280,10 +280,10 @@ export const adminTranslations = {
         closeNewCategory: "Fechar nova categoria",
 
         newItemCreated: "O novo prato foi criado com sucesso.",
-        categoryUpdated: "A categoria foi atualizada com sucesso.",
-        itemUpdated: "O prato foi atualizado com sucesso.",
-        itemDeleted: "O prato foi eliminado com sucesso.",
-        categoryDeleted: "A categoria foi eliminada com sucesso.",
+        categoryUpdated: "A categoria {name} foi atualizada com sucesso.",
+        itemUpdated: "O prato {name} foi atualizado com sucesso.",
+        itemDeleted: "O prato {name} foi eliminado com sucesso.",
+        categoryDeleted: "A categoria {name} foi eliminada com sucesso.",
 
         categoryCreated: "A nova categoria foi criada com sucesso.",
         categoryCreatedAddSubcategory:
@@ -595,10 +595,10 @@ export const adminTranslations = {
         closeNewCategory: "Cerrar nueva categoría",
 
         newItemCreated: "El nuevo plato se ha creado correctamente.",
-        categoryUpdated: "La categoría se ha actualizado correctamente.",
-        itemUpdated: "El plato se ha actualizado correctamente.",
-        itemDeleted: "El plato se ha eliminado correctamente.",
-        categoryDeleted: "La categoría se ha eliminado correctamente.",
+        categoryUpdated: "La categoría {name} se ha actualizado correctamente.",
+        itemUpdated: "El plato {name} se ha actualizado correctamente.",
+        itemDeleted: "El plato {name} se ha eliminado correctamente.",
+        categoryDeleted: "La categoría {name} se ha eliminado correctamente.",
 
         categoryCreated: "La nueva categoría se ha creado correctamente.",
         categoryCreatedAddSubcategory:
@@ -906,10 +906,10 @@ export const adminTranslations = {
         closeNewCategory: "Close new category",
 
         newItemCreated: "The new dish was created successfully.",
-        categoryUpdated: "The category was updated successfully.",
-        itemUpdated: "The dish was updated successfully.",
-        itemDeleted: "The dish was deleted successfully.",
-        categoryDeleted: "The category was deleted successfully.",
+        categoryUpdated: "The category {name} was updated successfully.",
+        itemUpdated: "The dish {name} was updated successfully.",
+        itemDeleted: "The dish {name} was deleted successfully.",
+        categoryDeleted: "The category {name} was deleted successfully.",
 
         categoryCreated: "The new category was created successfully.",
         categoryCreatedAddSubcategory:

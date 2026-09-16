@@ -16,7 +16,7 @@ import { useAdminLanguage } from "../../context/AdminLanguageContext";
 const languages = ["pt", "es", "en"];
 
 export default function AdminMenuPage({ admin, menuCategories }) {
-  const { t } = useAdminLanguage();
+  const { language, t } = useAdminLanguage();
   const router = useRouter();
   const [expandedCategoryId, setExpandedCategoryId] = useState(
     menuCategories[0]?.id ?? null
@@ -28,6 +28,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
   const [editingSubcategoryId, setEditingSubcategoryId] = useState(null);
   const [creatingItem, setCreatingItem] = useState(null);
   const [saveMessage, setSaveMessage] = useState("");
+  const [saveMessageVariables, setSaveMessageVariables] = useState({});
+  const [saveMessageCategoryId, setSaveMessageCategoryId] = useState(null);
   const [isSessionExpired, setIsSessionExpired] = useState(false);
   const [reauthEmail, setReauthEmail] = useState(admin.email);
   const [reauthPassword, setReauthPassword] = useState("");
@@ -97,6 +99,30 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
   }
 
+  function scrollToGlobalSuccess() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById("menu-global-success")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    });
+  }
+
+  function scrollToCategorySuccess(categoryId) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`category-success-${categoryId}`)
+          ?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+      });
+    });
+  }
+
   function toggleItemEditor(itemId, editorId) {
     setIsCreatingCategory(false);
     setCreatingItem(null);
@@ -139,6 +165,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
   }
 
+  function showSaveMessage(key, variables = {}, categoryId = null) {
+    setSaveMessage(key);
+    setSaveMessageVariables(variables);
+    setSaveMessageCategoryId(categoryId);
+  }
+
   async function handleItemCreated(categoryId) {
     setNewItemDraft(null);
     setCreatingItem(null);
@@ -150,7 +182,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("menu.page.newItemCreated");
+    showSaveMessage("menu.page.newItemCreated", {}, categoryId);
+
+    scrollToCategorySuccess(categoryId);
   }
 
   function toggleCategoryEditor(categoryId, editorId) {
@@ -171,7 +205,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     });
   }
 
-  async function handleCategorySaved(categoryId) {
+  async function handleCategorySaved(categoryId, categoryName) {
     setCreatingItem(null);
     setEditingCategoryId(null);
     setEditingItemId(null);
@@ -181,7 +215,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("menu.page.categoryUpdated");
+    showSaveMessage("menu.page.categoryUpdated", { name: categoryName });
+    scrollToGlobalSuccess();
   }
 
   async function handleCategorySubcategoriesChanged(categoryId, message) {
@@ -191,10 +226,10 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage(message);
+    showSaveMessage(message);
   }
 
-  async function handleItemSaved(categoryId) {
+  async function handleItemSaved(categoryId, itemName) {
     setEditingItemId(null);
     setEditingCategoryId(null);
     setCreatingItem(null);
@@ -204,10 +239,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("menu.page.itemUpdated");
+    showSaveMessage("menu.page.itemUpdated", { name: itemName }, categoryId);
+
+    scrollToCategorySuccess(categoryId);
   }
 
-  async function handleItemDeleted(categoryId) {
+  async function handleItemDeleted(categoryId, itemName) {
     setEditingItemId(null);
     setEditingCategoryId(null);
     setCreatingItem(null);
@@ -217,7 +254,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("menu.page.itemDeleted");
+    showSaveMessage("menu.page.itemDeleted", { name: itemName }, categoryId);
+    scrollToCategorySuccess(categoryId);
   }
 
   async function handleMoveItem(itemId, direction, categoryId) {
@@ -304,7 +342,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     }
   }
 
-  async function handleCategoryDeleted() {
+  async function handleCategoryDeleted(categoryName) {
     setIsCreatingCategory(false);
     setEditingCategoryId(null);
     setEditingItemId(null);
@@ -315,7 +353,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       scroll: false,
     });
 
-    setSaveMessage("menu.page.categoryDeleted");
+    showSaveMessage("menu.page.categoryDeleted", { name: categoryName });
+    scrollToGlobalSuccess();
   }
 
   async function handleReauthenticate(event) {
@@ -400,7 +439,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       });
     }
 
-    setSaveMessage(
+    showSaveMessage(
       options.addSubcategory
         ? "menu.page.categoryCreatedAddSubcategory"
         : "menu.page.categoryCreated"
@@ -541,9 +580,13 @@ export default function AdminMenuPage({ admin, menuCategories }) {
           </div>
         )}
 
-        {saveMessage && (
-          <p className={styles.successMessage} role="status">
-            {t(saveMessage)}
+        {saveMessage && saveMessageCategoryId === null && (
+          <p
+            id="menu-global-success"
+            className={styles.successMessage}
+            role="status"
+          >
+            {t(saveMessage, saveMessageVariables)}
           </p>
         )}
 
@@ -584,6 +627,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
               const isCreatingItem = creatingItem?.categoryId === category.id;
               const itemCreatorId = `item-creator-${category.id}`;
               const categoryName =
+                category.translations[language]?.label ||
                 category.translations.pt.label ||
                 category.translations.es.label ||
                 category.translations.en.label ||
@@ -618,408 +662,439 @@ export default function AdminMenuPage({ admin, menuCategories }) {
               ];
 
               return (
-                <section className={styles.accordion} key={category.id}>
-                  <div className={styles.categoryHeaderRow}>
-                    <div
-                      className={styles.categoryOrderControls}
-                      aria-label={t("menu.page.changeCategoryOrder", {
-                        name: categoryName,
-                      })}
+                <Fragment key={category.id}>
+                  {saveMessage && saveMessageCategoryId === category.id && (
+                    <p
+                      id={`category-success-${category.id}`}
+                      className={styles.successMessage}
+                      role="status"
                     >
-                      <button
-                        className={styles.orderButton}
-                        type="button"
-                        title={t("menu.page.moveCategoryUp", {
+                      {t(saveMessage, saveMessageVariables)}
+                    </p>
+                  )}
+                  <section className={styles.accordion} key={category.id}>
+                    <div className={styles.categoryHeaderRow}>
+                      <div
+                        className={styles.categoryOrderControls}
+                        aria-label={t("menu.page.changeCategoryOrder", {
                           name: categoryName,
                         })}
-                        aria-label={t("menu.page.moveCategoryUp", {
-                          name: categoryName,
-                        })}
-                        disabled={
-                          categoryIndex === 0 ||
-                          movingCategoryId !== null ||
-                          movingItemId !== null ||
-                          hasOpenEditor
-                        }
-                        onClick={() => handleMoveCategory(category.id, "up")}
                       >
-                        ↑
-                      </button>
+                        <button
+                          className={styles.orderButton}
+                          type="button"
+                          title={t("menu.page.moveCategoryUp", {
+                            name: categoryName,
+                          })}
+                          aria-label={t("menu.page.moveCategoryUp", {
+                            name: categoryName,
+                          })}
+                          disabled={
+                            categoryIndex === 0 ||
+                            movingCategoryId !== null ||
+                            movingItemId !== null ||
+                            hasOpenEditor
+                          }
+                          onClick={() => handleMoveCategory(category.id, "up")}
+                        >
+                          ↑
+                        </button>
 
-                      <span className={styles.categoryPosition}>
-                        {category.position}
-                      </span>
+                        <span className={styles.categoryPosition}>
+                          {category.position}
+                        </span>
 
-                      <button
-                        className={styles.orderButton}
-                        type="button"
-                        title={t("menu.page.moveCategoryDown", {
-                          name: categoryName,
-                        })}
-                        aria-label={t("menu.page.moveCategoryDown", {
-                          name: categoryName,
-                        })}
-                        disabled={
-                          categoryIndex === menuCategories.length - 1 ||
-                          movingCategoryId !== null ||
-                          movingItemId !== null ||
-                          hasOpenEditor
-                        }
-                        onClick={() => handleMoveCategory(category.id, "down")}
-                      >
-                        ↓
-                      </button>
-                    </div>
+                        <button
+                          className={styles.orderButton}
+                          type="button"
+                          title={t("menu.page.moveCategoryDown", {
+                            name: categoryName,
+                          })}
+                          aria-label={t("menu.page.moveCategoryDown", {
+                            name: categoryName,
+                          })}
+                          disabled={
+                            categoryIndex === menuCategories.length - 1 ||
+                            movingCategoryId !== null ||
+                            movingItemId !== null ||
+                            hasOpenEditor
+                          }
+                          onClick={() =>
+                            handleMoveCategory(category.id, "down")
+                          }
+                        >
+                          ↓
+                        </button>
+                      </div>
 
-                    <div className={styles.categoryHeaderContent}>
-                      <button
-                        className={styles.accordionButton}
-                        id={buttonId}
-                        type="button"
-                        aria-expanded={isExpanded}
-                        aria-controls={panelId}
-                        onClick={() => toggleCategory(category.id)}
-                      >
-                        <span className={styles.categoryIdentity}>
-                          <span className={styles.categoryTitleLine}>
-                            <strong>
-                              {category.translations.pt.label || category.slug}
-                            </strong>
+                      <div className={styles.categoryHeaderContent}>
+                        <button
+                          className={styles.accordionButton}
+                          id={buttonId}
+                          type="button"
+                          aria-expanded={isExpanded}
+                          aria-controls={panelId}
+                          onClick={() => toggleCategory(category.id)}
+                        >
+                          <span className={styles.categoryIdentity}>
+                            <span className={styles.categoryTitleLine}>
+                              <strong>
+                                {category.translations.pt.label ||
+                                  category.slug}
+                              </strong>
 
-                            <span className={styles.categoryItemCount}>
-                              - {category.items.length}{" "}
-                              {category.items.length === 1
-                                ? t("menu.page.dishSingular")
-                                : t("menu.page.dishPlural")}
+                              <span className={styles.categoryItemCount}>
+                                - {category.items.length}{" "}
+                                {category.items.length === 1
+                                  ? t("menu.page.dishSingular")
+                                  : t("menu.page.dishPlural")}
+                              </span>
                             </span>
                           </span>
-                        </span>
 
-                        {category.imagePath && (
-                          <Image
-                            className={styles.categoryThumbnail}
-                            src={category.imagePath}
-                            alt=""
-                            width={64}
-                            height={64}
-                            unoptimized
-                          />
-                        )}
-                      </button>
+                          {category.imagePath && (
+                            <Image
+                              className={styles.categoryThumbnail}
+                              src={category.imagePath}
+                              alt=""
+                              width={64}
+                              height={64}
+                              unoptimized
+                            />
+                          )}
+                        </button>
 
-                      <span
-                        className={
-                          category.isVisible
-                            ? styles.statusVisible
-                            : styles.statusHidden
-                        }
-                      >
-                        {category.isVisible
-                          ? t("menu.category.visible")
-                          : t("menu.category.hidden")}
-                      </span>
-
-                      <button
-                        className={`${styles.editButton} ${styles.categoryHeaderEditButton}`}
-                        type="button"
-                        disabled={isCreatingItem}
-                        aria-expanded={isEditingCategory}
-                        aria-controls={categoryEditorId}
-                        onClick={() => {
-                          if (!isExpanded) {
-                            setExpandedCategoryId(category.id);
+                        <span
+                          className={
+                            category.isVisible
+                              ? styles.statusVisible
+                              : styles.statusHidden
                           }
-
-                          toggleCategoryEditor(category.id, categoryEditorId);
-                        }}
-                      >
-                        {isEditingCategory
-                          ? t("menu.page.closeCategoryEdit")
-                          : t("menu.category.edit")}
-                      </button>
-
-                      <button
-                        className={styles.categoryChevronButton}
-                        type="button"
-                        aria-label={
-                          isExpanded
-                            ? t("menu.page.closeCategory")
-                            : t("menu.page.openCategory")
-                        }
-                        aria-expanded={isExpanded}
-                        aria-controls={panelId}
-                        onClick={() => toggleCategory(category.id)}
-                      >
-                        <span className={styles.chevron} aria-hidden="true">
-                          ⌄
+                        >
+                          {category.isVisible
+                            ? t("menu.category.visible")
+                            : t("menu.category.hidden")}
                         </span>
-                      </button>
-                    </div>
-                  </div>
-                  {isExpanded && (
-                    <div
-                      className={styles.accordionBody}
-                      id={panelId}
-                      role="region"
-                      aria-labelledby={buttonId}
-                    >
-                      <div className={styles.categoryDetails}>
-                        <div className={styles.categoryActions}>
-                          <button
-                            className={styles.addButton}
-                            type="button"
-                            disabled={isEditingCategory}
-                            aria-expanded={isCreatingItem}
-                            aria-controls={itemCreatorId}
-                            onClick={() => toggleItemCreator(category.id)}
-                          >
-                            {isCreatingItem
-                              ? t("menu.page.closeNewItem")
-                              : t("menu.item.add")}
-                          </button>
-                        </div>
-                        <div className={styles.translationList}>
-                          {languages.map((language) => (
-                            <span key={language}>
-                              <strong>{language.toUpperCase()}</strong>{" "}
-                              {category.translations[language].label}
-                            </span>
-                          ))}
-                        </div>
+
+                        <button
+                          className={`${styles.editButton} ${styles.categoryHeaderEditButton}`}
+                          type="button"
+                          disabled={isCreatingItem}
+                          aria-expanded={isEditingCategory}
+                          aria-controls={categoryEditorId}
+                          onClick={() => {
+                            if (!isExpanded) {
+                              setExpandedCategoryId(category.id);
+                            }
+
+                            toggleCategoryEditor(category.id, categoryEditorId);
+                          }}
+                        >
+                          {isEditingCategory
+                            ? t("menu.page.closeCategoryEdit")
+                            : t("menu.category.edit")}
+                        </button>
+
+                        <button
+                          className={styles.categoryChevronButton}
+                          type="button"
+                          aria-label={
+                            isExpanded
+                              ? t("menu.page.closeCategory")
+                              : t("menu.page.openCategory")
+                          }
+                          aria-expanded={isExpanded}
+                          aria-controls={panelId}
+                          onClick={() => toggleCategory(category.id)}
+                        >
+                          <span className={styles.chevron} aria-hidden="true">
+                            ⌄
+                          </span>
+                        </button>
                       </div>
-                      {isEditingCategory && (
-                        <div
-                          className={styles.categoryEditorWrapper}
-                          id={categoryEditorId}
-                        >
-                          <MenuCategoryEditor
-                            category={category}
-                            startCreatingSubcategory={
-                              newSubcategoryCategoryId === category.id
-                            }
-                            onCancel={() => setEditingCategoryId(null)}
-                            onSaved={() => handleCategorySaved(category.id)}
-                            onDeleted={handleCategoryDeleted}
-                            onSubcategoriesChanged={(message) =>
-                              handleCategorySubcategoriesChanged(
-                                category.id,
-                                message
-                              )
-                            }
-                            onSubcategoryCreationFinished={() =>
-                              setNewSubcategoryCategoryId(null)
-                            }
-                          />
-                        </div>
-                      )}
-                      {isCreatingItem && (
-                        <div
-                          className={styles.categoryEditorWrapper}
-                          id={itemCreatorId}
-                        >
-                          <MenuItemEditor
-                            item={null}
-                            categoryId={category.id}
-                            subcategories={category.subcategories}
-                            initialSubcategoryId={
-                              creatingItem?.subcategoryId ?? null
-                            }
-                            initialFormValues={newItemDraft}
-                            onFormValuesChange={setNewItemDraft}
-                            onCancel={() => {
-                              setNewItemDraft(null);
-                              setCreatingItem(null);
-                            }}
-                            onSaved={() => handleItemCreated(category.id)}
-                          />
-                        </div>
-                      )}
-                      {category.items.length === 0 ? (
-                        <p>{t("menu.page.noItems")}</p>
-                      ) : (
-                        <div className={styles.dishList}>
-                          {itemGroups.map((group) => (
-                            <div className={styles.dishGroup} key={group.id}>
-                              <h3 className={styles.dishGroupTitle}>
-                                {group.name}
-                              </h3>
-
-                              {group.items.map((item, itemIndex) => {
-                                const isEditing = editingItemId === item.id;
-
-                                const editorId = `item-editor-${item.id}`;
-
-                                return (
-                                  <Fragment key={item.id}>
-                                    <article className={styles.dishRow}>
-                                      <div
-                                        className={styles.orderControls}
-                                        aria-label={t(
-                                          "menu.page.changeItemOrder",
-                                          {
-                                            name: item.translations.pt.name,
-                                          }
-                                        )}
-                                      >
-                                        <button
-                                          className={styles.orderButton}
-                                          type="button"
-                                          title={t("menu.page.moveItemUp", {
-                                            name: item.translations.pt.name,
-                                          })}
-                                          aria-label={t(
-                                            "menu.page.moveItemUp",
-                                            {
-                                              name: item.translations.pt.name,
-                                            }
-                                          )}
-                                          disabled={
-                                            itemIndex === 0 ||
-                                            movingItemId !== null ||
-                                            movingSubcategoryId !== null ||
-                                            hasOpenEditor
-                                          }
-                                          onClick={() =>
-                                            handleMoveItem(
-                                              item.id,
-                                              "up",
-                                              category.id
-                                            )
-                                          }
-                                        >
-                                          ↑
-                                        </button>
-
-                                        <span className={styles.dishOrder}>
-                                          {item.position}
-                                        </span>
-
-                                        <button
-                                          className={styles.orderButton}
-                                          type="button"
-                                          title={t("menu.page.moveItemDown", {
-                                            name: item.translations.pt.name,
-                                          })}
-                                          aria-label={t(
-                                            "menu.page.moveItemDown",
-                                            {
-                                              name: item.translations.pt.name,
-                                            }
-                                          )}
-                                          disabled={
-                                            itemIndex ===
-                                              group.items.length - 1 ||
-                                            movingItemId !== null ||
-                                            movingSubcategoryId !== null ||
-                                            hasOpenEditor
-                                          }
-                                          onClick={() =>
-                                            handleMoveItem(
-                                              item.id,
-                                              "down",
-                                              category.id
-                                            )
-                                          }
-                                        >
-                                          ↓
-                                        </button>
-                                      </div>
-
-                                      <div className={styles.dishPrimary}>
-                                        <strong>
-                                          {item.translations.pt.name}
-                                        </strong>
-
-                                        <span>
-                                          {item.translations.pt.description}
-                                        </span>
-                                      </div>
-
-                                      <div className={styles.dishAlternate}>
-                                        <div>
-                                          <strong>
-                                            ES · {item.translations.es.name}
-                                          </strong>
-
-                                          <span>
-                                            {item.translations.es.description}
-                                          </span>
-                                        </div>
-
-                                        <div>
-                                          <strong>
-                                            EN · {item.translations.en.name}
-                                          </strong>
-
-                                          <span>
-                                            {item.translations.en.description}
-                                          </span>
-                                        </div>
-                                      </div>
-
-                                      <span className={styles.dishPrice}>
-                                        {item.priceText ||
-                                          t("menu.page.pending")}
-                                      </span>
-
-                                      <span
-                                        className={
-                                          item.isVisible
-                                            ? styles.statusVisible
-                                            : styles.statusHidden
-                                        }
-                                      >
-                                        {item.isVisible
-                                          ? t("menu.item.visible")
-                                          : t("menu.item.hidden")}
-                                      </span>
-
-                                      <button
-                                        className={styles.editButton}
-                                        type="button"
-                                        aria-expanded={isEditing}
-                                        aria-controls={editorId}
-                                        onClick={() =>
-                                          toggleItemEditor(item.id, editorId)
-                                        }
-                                      >
-                                        {isEditing
-                                          ? t("menu.page.close")
-                                          : t("menu.item.edit")}
-                                      </button>
-                                    </article>
-
-                                    {isEditing && (
-                                      <div
-                                        className={styles.editorWrapper}
-                                        id={editorId}
-                                      >
-                                        <MenuItemEditor
-                                          item={item}
-                                          categoryId={category.id}
-                                          subcategories={category.subcategories}
-                                          onCancel={() =>
-                                            setEditingItemId(null)
-                                          }
-                                          onSaved={() =>
-                                            handleItemSaved(category.id)
-                                          }
-                                          onDeleted={() =>
-                                            handleItemDeleted(category.id)
-                                          }
-                                        />
-                                      </div>
-                                    )}
-                                  </Fragment>
-                                );
-                              })}
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  )}
-                </section>
+                    {isExpanded && (
+                      <div
+                        className={styles.accordionBody}
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={buttonId}
+                      >
+                        <div className={styles.categoryDetails}>
+                          <div className={styles.categoryActions}>
+                            <button
+                              className={styles.addButton}
+                              type="button"
+                              disabled={isEditingCategory}
+                              aria-expanded={isCreatingItem}
+                              aria-controls={itemCreatorId}
+                              onClick={() => toggleItemCreator(category.id)}
+                            >
+                              {isCreatingItem
+                                ? t("menu.page.closeNewItem")
+                                : t("menu.item.add")}
+                            </button>
+                          </div>
+                          <div className={styles.translationList}>
+                            {languages.map((language) => (
+                              <span key={language}>
+                                <strong>{language.toUpperCase()}</strong>{" "}
+                                {category.translations[language].label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        {isEditingCategory && (
+                          <div
+                            className={styles.categoryEditorWrapper}
+                            id={categoryEditorId}
+                          >
+                            <MenuCategoryEditor
+                              category={category}
+                              startCreatingSubcategory={
+                                newSubcategoryCategoryId === category.id
+                              }
+                              onCancel={() => setEditingCategoryId(null)}
+                              onSaved={() =>
+                                handleCategorySaved(category.id, categoryName)
+                              }
+                              onDeleted={() =>
+                                handleCategoryDeleted(categoryName)
+                              }
+                              onSubcategoriesChanged={(message) =>
+                                handleCategorySubcategoriesChanged(
+                                  category.id,
+                                  message
+                                )
+                              }
+                              onSubcategoryCreationFinished={() =>
+                                setNewSubcategoryCategoryId(null)
+                              }
+                            />
+                          </div>
+                        )}
+                        {isCreatingItem && (
+                          <div
+                            className={styles.categoryEditorWrapper}
+                            id={itemCreatorId}
+                          >
+                            <MenuItemEditor
+                              item={null}
+                              categoryId={category.id}
+                              subcategories={category.subcategories}
+                              initialSubcategoryId={
+                                creatingItem?.subcategoryId ?? null
+                              }
+                              initialFormValues={newItemDraft}
+                              onFormValuesChange={setNewItemDraft}
+                              onCancel={() => {
+                                setNewItemDraft(null);
+                                setCreatingItem(null);
+                              }}
+                              onSaved={() => handleItemCreated(category.id)}
+                            />
+                          </div>
+                        )}
+                        {category.items.length === 0 ? (
+                          <p>{t("menu.page.noItems")}</p>
+                        ) : (
+                          <div className={styles.dishList}>
+                            {itemGroups.map((group) => (
+                              <div className={styles.dishGroup} key={group.id}>
+                                <h3 className={styles.dishGroupTitle}>
+                                  {group.name}
+                                </h3>
+
+                                {group.items.map((item, itemIndex) => {
+                                  const isEditing = editingItemId === item.id;
+
+                                  const editorId = `item-editor-${item.id}`;
+                                  const itemName =
+                                    item.translations[language]?.name ||
+                                    item.translations.pt.name ||
+                                    item.translations.es.name ||
+                                    item.translations.en.name ||
+                                    `#${item.id}`;
+                                  return (
+                                    <Fragment key={item.id}>
+                                      <article className={styles.dishRow}>
+                                        <div
+                                          className={styles.orderControls}
+                                          aria-label={t(
+                                            "menu.page.changeItemOrder",
+                                            {
+                                              name: item.translations.pt.name,
+                                            }
+                                          )}
+                                        >
+                                          <button
+                                            className={styles.orderButton}
+                                            type="button"
+                                            title={t("menu.page.moveItemUp", {
+                                              name: item.translations.pt.name,
+                                            })}
+                                            aria-label={t(
+                                              "menu.page.moveItemUp",
+                                              {
+                                                name: item.translations.pt.name,
+                                              }
+                                            )}
+                                            disabled={
+                                              itemIndex === 0 ||
+                                              movingItemId !== null ||
+                                              movingSubcategoryId !== null ||
+                                              hasOpenEditor
+                                            }
+                                            onClick={() =>
+                                              handleMoveItem(
+                                                item.id,
+                                                "up",
+                                                category.id
+                                              )
+                                            }
+                                          >
+                                            ↑
+                                          </button>
+
+                                          <span className={styles.dishOrder}>
+                                            {item.position}
+                                          </span>
+
+                                          <button
+                                            className={styles.orderButton}
+                                            type="button"
+                                            title={t("menu.page.moveItemDown", {
+                                              name: item.translations.pt.name,
+                                            })}
+                                            aria-label={t(
+                                              "menu.page.moveItemDown",
+                                              {
+                                                name: item.translations.pt.name,
+                                              }
+                                            )}
+                                            disabled={
+                                              itemIndex ===
+                                                group.items.length - 1 ||
+                                              movingItemId !== null ||
+                                              movingSubcategoryId !== null ||
+                                              hasOpenEditor
+                                            }
+                                            onClick={() =>
+                                              handleMoveItem(
+                                                item.id,
+                                                "down",
+                                                category.id
+                                              )
+                                            }
+                                          >
+                                            ↓
+                                          </button>
+                                        </div>
+
+                                        <div className={styles.dishPrimary}>
+                                          <strong>
+                                            {item.translations.pt.name}
+                                          </strong>
+
+                                          <span>
+                                            {item.translations.pt.description}
+                                          </span>
+                                        </div>
+
+                                        <div className={styles.dishAlternate}>
+                                          <div>
+                                            <strong>
+                                              ES · {item.translations.es.name}
+                                            </strong>
+
+                                            <span>
+                                              {item.translations.es.description}
+                                            </span>
+                                          </div>
+
+                                          <div>
+                                            <strong>
+                                              EN · {item.translations.en.name}
+                                            </strong>
+
+                                            <span>
+                                              {item.translations.en.description}
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <span className={styles.dishPrice}>
+                                          {item.priceText ||
+                                            t("menu.page.pending")}
+                                        </span>
+
+                                        <span
+                                          className={
+                                            item.isVisible
+                                              ? styles.statusVisible
+                                              : styles.statusHidden
+                                          }
+                                        >
+                                          {item.isVisible
+                                            ? t("menu.item.visible")
+                                            : t("menu.item.hidden")}
+                                        </span>
+
+                                        <button
+                                          className={styles.editButton}
+                                          type="button"
+                                          aria-expanded={isEditing}
+                                          aria-controls={editorId}
+                                          onClick={() =>
+                                            toggleItemEditor(item.id, editorId)
+                                          }
+                                        >
+                                          {isEditing
+                                            ? t("menu.page.close")
+                                            : t("menu.item.edit")}
+                                        </button>
+                                      </article>
+
+                                      {isEditing && (
+                                        <div
+                                          className={styles.editorWrapper}
+                                          id={editorId}
+                                        >
+                                          <MenuItemEditor
+                                            item={item}
+                                            categoryId={category.id}
+                                            subcategories={
+                                              category.subcategories
+                                            }
+                                            onCancel={() =>
+                                              setEditingItemId(null)
+                                            }
+                                            onSaved={() =>
+                                              handleItemSaved(
+                                                category.id,
+                                                itemName
+                                              )
+                                            }
+                                            onDeleted={() =>
+                                              handleItemDeleted(
+                                                category.id,
+                                                itemName
+                                              )
+                                            }
+                                          />
+                                        </div>
+                                      )}
+                                    </Fragment>
+                                  );
+                                })}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </section>
+                </Fragment>
               );
             })}
           </div>
