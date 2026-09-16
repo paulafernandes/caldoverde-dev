@@ -16,6 +16,7 @@ export default function AdminAccount({ admin }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [activeSection, setActiveSection] = useState(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
@@ -170,6 +171,7 @@ export default function AdminAccount({ admin }) {
 
       setName(name.trim());
       setSuccess("account.updateSuccess");
+      setActiveSection(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -211,11 +213,29 @@ export default function AdminAccount({ admin }) {
       setConfirmPassword("");
 
       setPasswordSuccess("account.passwordSuccess");
+      setActiveSection(null);
     } catch (err) {
       setPasswordError(err.message);
     } finally {
       setIsChangingPassword(false);
     }
+  }
+  function handleCancelProfile() {
+    setName(admin.name);
+    setProfileFieldErrors({});
+    setError("");
+    setSuccess("");
+    setActiveSection(null);
+  }
+
+  function handleCancelPassword() {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordFieldErrors({});
+    setPasswordError("");
+    setPasswordSuccess("");
+    setActiveSection(null);
   }
   return (
     <>
@@ -348,56 +368,77 @@ export default function AdminAccount({ admin }) {
             onSubmit={handleUpdateProfile}
             noValidate
           >
-            <div className={styles.field}>
-              <label htmlFor="account-name">{t("account.name")}</label>
+            <fieldset
+              disabled={activeSection === "password"}
+              className={styles.formFieldset}
+            >
+              <div className={styles.field}>
+                <label htmlFor="account-name">{t("account.name")}</label>
 
-              <input
-                id="account-name"
-                type="text"
-                value={name}
-                required
-                onChange={(event) => {
-                  setName(event.target.value);
+                <input
+                  id="account-name"
+                  type="text"
+                  value={name}
+                  required
+                  onFocus={() => setActiveSection("profile")}
+                  onChange={(event) => {
+                    setName(event.target.value);
 
-                  if (profileFieldErrors.name) {
-                    setProfileFieldErrors((current) => ({
-                      ...current,
-                      name: "",
-                    }));
-                  }
-                }}
-              />
-              {profileFieldErrors.name && (
-                <p className={styles.error} role="alert">
-                  {t(profileFieldErrors.name)}
+                    if (profileFieldErrors.name) {
+                      setProfileFieldErrors((current) => ({
+                        ...current,
+                        name: "",
+                      }));
+                    }
+                  }}
+                />
+                {profileFieldErrors.name && (
+                  <p className={styles.error} role="alert">
+                    {t(profileFieldErrors.name)}
+                  </p>
+                )}
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="account-email">{t("account.email")}</label>
+
+                <input
+                  id="account-email"
+                  type="email"
+                  value={admin.email}
+                  disabled
+                />
+              </div>
+
+              {error && <p className={styles.error}>{t(error)}</p>}
+
+              {success && (
+                <p
+                  className={`${styles.successMessage} ${styles.formMessage}`}
+                  role="status"
+                >
+                  {t(success)}
                 </p>
               )}
-            </div>
 
-            <div className={styles.field}>
-              <label htmlFor="account-email">{t("account.email")}</label>
-
-              <input
-                id="account-email"
-                type="email"
-                value={admin.email}
-                disabled
-              />
-            </div>
-
-            {error && <p className={styles.error}>{t(error)}</p>}
-
-            {success && <p>{t(success)}</p>}
-
-            <div className={styles.userFormActions}>
-              <button
-                type="submit"
-                className={styles.button}
-                disabled={isSaving}
-              >
-                {isSaving ? t("account.saving") : t("account.saveChanges")}
-              </button>
-            </div>
+              <div className={styles.userFormActions}>
+                <button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isSaving}
+                >
+                  {isSaving ? t("account.saving") : t("account.saveChanges")}
+                </button>
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  disabled={isSaving}
+                  onClick={handleCancelProfile}
+                >
+                  {t("account.cancel")}
+                </button>
+              </div>
+            </fieldset>
           </form>
         </section>
         <section className={styles.userFormCard}>
@@ -408,110 +449,133 @@ export default function AdminAccount({ admin }) {
             onSubmit={handleChangePassword}
             noValidate
           >
-            <div className={styles.field}>
-              <label htmlFor="current-password">
-                {t("account.currentPassword")}
-              </label>
+            <fieldset
+              disabled={activeSection === "profile"}
+              className={styles.formFieldset}
+            >
+              <div className={styles.field}>
+                <label htmlFor="current-password">
+                  {t("account.currentPassword")}
+                </label>
 
-              <input
-                id="current-password"
-                type="password"
-                value={currentPassword}
-                onChange={(event) => {
-                  setCurrentPassword(event.target.value);
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onFocus={() => setActiveSection("password")}
+                  onChange={(event) => {
+                    setCurrentPassword(event.target.value);
 
-                  if (passwordFieldErrors.currentPassword) {
-                    setPasswordFieldErrors((current) => ({
-                      ...current,
-                      currentPassword: "",
-                    }));
-                  }
-                }}
-                autoComplete="current-password"
-                required
-              />
-              {passwordFieldErrors.currentPassword && (
-                <p className={styles.error} role="alert">
-                  {t(passwordFieldErrors.currentPassword)}
+                    if (passwordFieldErrors.currentPassword) {
+                      setPasswordFieldErrors((current) => ({
+                        ...current,
+                        currentPassword: "",
+                      }));
+                    }
+                  }}
+                  autoComplete="current-password"
+                  required
+                />
+                {passwordFieldErrors.currentPassword && (
+                  <p className={styles.error} role="alert">
+                    {t(passwordFieldErrors.currentPassword)}
+                  </p>
+                )}
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="new-password">{t("account.newPassword")}</label>
+
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onFocus={() => setActiveSection("password")}
+                  onChange={(event) => {
+                    setNewPassword(event.target.value);
+
+                    if (passwordFieldErrors.newPassword) {
+                      setPasswordFieldErrors((current) => ({
+                        ...current,
+                        newPassword: "",
+                      }));
+                    }
+                  }}
+                  autoComplete="new-password"
+                  minLength={12}
+                  required
+                />
+                {passwordFieldErrors.newPassword && (
+                  <p className={styles.error} role="alert">
+                    {t(passwordFieldErrors.newPassword)}
+                  </p>
+                )}
+              </div>
+
+              <div className={styles.field}>
+                <label htmlFor="confirm-password">
+                  {t("account.confirmPassword")}
+                </label>
+
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onFocus={() => setActiveSection("password")}
+                  onChange={(event) => {
+                    setConfirmPassword(event.target.value);
+
+                    if (passwordFieldErrors.confirmPassword) {
+                      setPasswordFieldErrors((current) => ({
+                        ...current,
+                        confirmPassword: "",
+                      }));
+                    }
+                  }}
+                  autoComplete="new-password"
+                  minLength={12}
+                  required
+                />
+                {passwordFieldErrors.confirmPassword && (
+                  <p className={styles.error} role="alert">
+                    {t(passwordFieldErrors.confirmPassword)}
+                  </p>
+                )}
+              </div>
+
+              {passwordError && (
+                <p className={styles.error}>{t(passwordError)}</p>
+              )}
+
+              {passwordSuccess && (
+                <p
+                  className={`${styles.successMessage} ${styles.formMessage}`}
+                  role="status"
+                >
+                  {t(passwordSuccess)}
                 </p>
               )}
-            </div>
 
-            <div className={styles.field}>
-              <label htmlFor="new-password">{t("account.newPassword")}</label>
-
-              <input
-                id="new-password"
-                type="password"
-                value={newPassword}
-                onChange={(event) => {
-                  setNewPassword(event.target.value);
-
-                  if (passwordFieldErrors.newPassword) {
-                    setPasswordFieldErrors((current) => ({
-                      ...current,
-                      newPassword: "",
-                    }));
-                  }
-                }}
-                autoComplete="new-password"
-                minLength={12}
-                required
-              />
-              {passwordFieldErrors.newPassword && (
-                <p className={styles.error} role="alert">
-                  {t(passwordFieldErrors.newPassword)}
-                </p>
-              )}
-            </div>
-
-            <div className={styles.field}>
-              <label htmlFor="confirm-password">
-                {t("account.confirmPassword")}
-              </label>
-
-              <input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(event) => {
-                  setConfirmPassword(event.target.value);
-
-                  if (passwordFieldErrors.confirmPassword) {
-                    setPasswordFieldErrors((current) => ({
-                      ...current,
-                      confirmPassword: "",
-                    }));
-                  }
-                }}
-                autoComplete="new-password"
-                minLength={12}
-                required
-              />
-              {passwordFieldErrors.confirmPassword && (
-                <p className={styles.error} role="alert">
-                  {t(passwordFieldErrors.confirmPassword)}
-                </p>
-              )}
-            </div>
-
-            {passwordError && (
-              <p className={styles.error}>{t(passwordError)}</p>
-            )}
-
-            {passwordSuccess && <p>{t(passwordSuccess)}</p>}
-
-            <div className={styles.userFormActions}>
-              <button
-                type="submit"
-                className={styles.button}
-                disabled={isChangingPassword}
-              >
-                {isChangingPassword
-                  ? t("account.changingPassword")
-                  : t("account.changePassword")}
-              </button>
-            </div>
+              <div className={styles.userFormActions}>
+                <button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isChangingPassword}
+                >
+                  {isChangingPassword
+                    ? t("account.changingPassword")
+                    : t("account.changePassword")}
+                </button>
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  disabled={isSaving}
+                  onClick={handleCancelProfile}
+                >
+                  {t("account.cancel")}
+                </button>
+              </div>
+            </fieldset>
           </form>
         </section>
       </AdminLayout>

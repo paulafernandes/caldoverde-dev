@@ -69,6 +69,7 @@ export const adminTranslations = {
       passwordMismatch: "A confirmação da nova palavra-passe não coincide.",
       passwordChangeFailed: "Não foi possível alterar a palavra-passe.",
       currentPasswordIncorrect: "A palavra-passe atual está incorreta.",
+      cancel: "Cancelar",
     },
     session: {
       expiredTitle: "A sessão expirou.",
@@ -312,6 +313,57 @@ export const adminTranslations = {
         close: "Fechar",
       },
     },
+    apiErrors: {
+      categoryNotFound: "A categoria não foi encontrada.",
+      categoryNotEmpty:
+        "Não é possível eliminar esta categoria porque ainda tem pratos associados.",
+
+      subcategoryNotFound: "A subcategoria não foi encontrada.",
+      subcategoryCategoryMismatch:
+        "A subcategoria selecionada não pertence a esta categoria.",
+
+      itemNotFound: "O prato não foi encontrado.",
+
+      imageTooLarge: "A imagem não pode ultrapassar 5 MB.",
+      invalidImageType: "Seleciona uma imagem PNG, JPEG ou WebP.",
+      invalidImageContent:
+        "O ficheiro selecionado não contém uma imagem válida.",
+      imageProcessingFailed: "Não foi possível processar a imagem.",
+      imageUploadFailed: "Não foi possível carregar a imagem.",
+
+      invalidCategoryData: "Os dados da categoria são inválidos.",
+      invalidSubcategoryData: "Os dados da subcategoria são inválidos.",
+      invalidItemData: "Os dados do prato são inválidos.",
+
+      invalidCategoryOrder: "A ordenação da categoria é inválida.",
+      invalidSubcategoryOrder: "A ordenação da subcategoria é inválida.",
+      invalidItemOrder: "A ordenação do prato é inválida.",
+
+      categoryCreateFailed: "Não foi possível criar a categoria.",
+      categoryUpdateFailed: "Não foi possível atualizar a categoria.",
+      categoryDeleteFailed: "Não foi possível eliminar a categoria.",
+      categoryOrderFailed: "Não foi possível alterar a ordem da categoria.",
+
+      subcategoryCreateFailed: "Não foi possível criar a subcategoria.",
+      subcategoryUpdateFailed: "Não foi possível atualizar a subcategoria.",
+      subcategoryDeleteFailed: "Não foi possível eliminar a subcategoria.",
+      subcategoryOrderFailed:
+        "Não foi possível alterar a ordem da subcategoria.",
+
+      itemCreateFailed: "Não foi possível criar o prato.",
+      itemUpdateFailed: "Não foi possível atualizar o prato.",
+      itemDeleteFailed: "Não foi possível eliminar o prato.",
+      itemOrderFailed: "Não foi possível alterar a ordem do prato.",
+
+      userListFailed: "Não foi possível carregar os utilizadores.",
+      invalidUserData: "Os dados do utilizador são inválidos.",
+      invalidUserId: "O utilizador selecionado é inválido.",
+      userCreateFailed: "Não foi possível criar o utilizador.",
+      userUpdateFailed: "Não foi possível atualizar o utilizador.",
+      userActivateFailed: "Não foi possível reativar o utilizador.",
+      userDeactivateFailed: "Não foi possível desativar o utilizador.",
+      cannotDeactivateSelf: "Não podes desativar a tua própria conta.",
+    },
   },
 
   es: {
@@ -382,6 +434,7 @@ export const adminTranslations = {
       passwordMismatch: "La confirmación de la nueva contraseña no coincide.",
       passwordChangeFailed: "No se pudo cambiar la contraseña.",
       currentPasswordIncorrect: "La contraseña actual es incorrecta.",
+      cancel: "Cancelar",
     },
 
     session: {
@@ -627,6 +680,56 @@ export const adminTranslations = {
         close: "Cerrar",
       },
     },
+    apiErrors: {
+      categoryNotFound: "No se encontró la categoría.",
+      categoryNotEmpty:
+        "No se puede eliminar esta categoría porque todavía tiene platos asociados.",
+
+      subcategoryNotFound: "No se encontró la subcategoría.",
+      subcategoryCategoryMismatch:
+        "La subcategoría seleccionada no pertenece a esta categoría.",
+
+      itemNotFound: "No se encontró el plato.",
+
+      imageTooLarge: "La imagen no puede superar los 5 MB.",
+      invalidImageType: "Selecciona una imagen PNG, JPEG o WebP.",
+      invalidImageContent:
+        "El archivo seleccionado no contiene una imagen válida.",
+      imageProcessingFailed: "No se pudo procesar la imagen.",
+      imageUploadFailed: "No se pudo cargar la imagen.",
+
+      invalidCategoryData: "Los datos de la categoría no son válidos.",
+      invalidSubcategoryData: "Los datos de la subcategoría no son válidos.",
+      invalidItemData: "Los datos del plato no son válidos.",
+
+      invalidCategoryOrder: "El orden de la categoría no es válido.",
+      invalidSubcategoryOrder: "El orden de la subcategoría no es válido.",
+      invalidItemOrder: "El orden del plato no es válido.",
+
+      categoryCreateFailed: "No se pudo crear la categoría.",
+      categoryUpdateFailed: "No se pudo actualizar la categoría.",
+      categoryDeleteFailed: "No se pudo eliminar la categoría.",
+      categoryOrderFailed: "No se pudo cambiar el orden de la categoría.",
+
+      subcategoryCreateFailed: "No se pudo crear la subcategoría.",
+      subcategoryUpdateFailed: "No se pudo actualizar la subcategoría.",
+      subcategoryDeleteFailed: "No se pudo eliminar la subcategoría.",
+      subcategoryOrderFailed: "No se pudo cambiar el orden de la subcategoría.",
+
+      itemCreateFailed: "No se pudo crear el plato.",
+      itemUpdateFailed: "No se pudo actualizar el plato.",
+      itemDeleteFailed: "No se pudo eliminar el plato.",
+      itemOrderFailed: "No se pudo cambiar el orden del plato.",
+
+      userListFailed: "No se pudieron cargar los usuarios.",
+      invalidUserData: "Los datos del usuario no son válidos.",
+      invalidUserId: "El usuario seleccionado no es válido.",
+      userCreateFailed: "No se pudo crear el usuario.",
+      userUpdateFailed: "No se pudo actualizar el usuario.",
+      userActivateFailed: "No se pudo reactivar el usuario.",
+      userDeactivateFailed: "No se pudo desactivar el usuario.",
+      cannotDeactivateSelf: "No puedes desactivar tu propia cuenta.",
+    },
   },
 
   en: {
@@ -696,6 +799,7 @@ export const adminTranslations = {
       passwordMismatch: "The new password confirmation does not match.",
       passwordChangeFailed: "Could not change the password.",
       currentPasswordIncorrect: "The current password is incorrect.",
+      cancel: "Cancel",
     },
 
     session: {
@@ -940,6 +1044,55 @@ export const adminTranslations = {
         pending: "Pending",
         close: "Close",
       },
+    },
+    apiErrors: {
+      categoryNotFound: "The category was not found.",
+      categoryNotEmpty:
+        "This category cannot be deleted because it still has dishes associated with it.",
+
+      subcategoryNotFound: "The subcategory was not found.",
+      subcategoryCategoryMismatch:
+        "The selected subcategory does not belong to this category.",
+
+      itemNotFound: "The dish was not found.",
+
+      imageTooLarge: "The image cannot exceed 5 MB.",
+      invalidImageType: "Select a PNG, JPEG or WebP image.",
+      invalidImageContent: "The selected file does not contain a valid image.",
+      imageProcessingFailed: "The image could not be processed.",
+      imageUploadFailed: "The image could not be uploaded.",
+
+      invalidCategoryData: "The category data is invalid.",
+      invalidSubcategoryData: "The subcategory data is invalid.",
+      invalidItemData: "The dish data is invalid.",
+
+      invalidCategoryOrder: "The category order is invalid.",
+      invalidSubcategoryOrder: "The subcategory order is invalid.",
+      invalidItemOrder: "The dish order is invalid.",
+
+      categoryCreateFailed: "The category could not be created.",
+      categoryUpdateFailed: "The category could not be updated.",
+      categoryDeleteFailed: "The category could not be deleted.",
+      categoryOrderFailed: "The category order could not be changed.",
+
+      subcategoryCreateFailed: "The subcategory could not be created.",
+      subcategoryUpdateFailed: "The subcategory could not be updated.",
+      subcategoryDeleteFailed: "The subcategory could not be deleted.",
+      subcategoryOrderFailed: "The subcategory order could not be changed.",
+
+      itemCreateFailed: "The dish could not be created.",
+      itemUpdateFailed: "The dish could not be updated.",
+      itemDeleteFailed: "The dish could not be deleted.",
+      itemOrderFailed: "The dish order could not be changed.",
+
+      userListFailed: "The users could not be loaded.",
+      invalidUserData: "The user data is invalid.",
+      invalidUserId: "The selected user is invalid.",
+      userCreateFailed: "The user could not be created.",
+      userUpdateFailed: "The user could not be updated.",
+      userActivateFailed: "The user could not be reactivated.",
+      userDeactivateFailed: "The user could not be deactivated.",
+      cannotDeactivateSelf: "You cannot deactivate your own account.",
     },
   },
 };

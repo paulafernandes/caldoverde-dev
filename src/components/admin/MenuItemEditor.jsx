@@ -4,6 +4,7 @@ import styles from "../../styles/Admin.module.css";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 import { adminFetch } from "../../lib/adminFetch";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { getAdminApiErrorKey } from "../../lib/adminApiError";
 
 const languages = [
   {
@@ -162,7 +163,9 @@ export default function MenuItemEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.item.imageUploadFailed");
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "menu.item.imageUploadFailed")
+        );
 
         return;
       }
@@ -235,7 +238,9 @@ export default function MenuItemEditor({
           return;
         }
 
-        setErrorMessage("menu.item.saveFailed");
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "menu.item.saveFailed")
+        );
 
         setIsSubmitting(false);
         return;
@@ -266,7 +271,9 @@ export default function MenuItemEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.item.deleteFailed");
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "menu.item.deleteFailed")
+        );
 
         setIsDeleting(false);
         return;

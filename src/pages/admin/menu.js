@@ -12,6 +12,7 @@ import Image from "next/image";
 import { adminFetch } from "../../lib/adminFetch";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { getAdminApiErrorKey } from "../../lib/adminApiError";
 
 const languages = ["pt", "es", "en"];
 
@@ -280,10 +281,15 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setActionError("menu.page.itemOrderFailed");
+        setActionError(
+          getAdminApiErrorKey(result.error, "menu.page.itemOrderFailed")
+        );
         return;
       }
 
+      if (!result.moved) {
+        return;
+      }
       if (!result.moved) {
         return;
       }
@@ -322,7 +328,9 @@ export default function AdminMenuPage({ admin, menuCategories }) {
       const result = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setActionError("menu.page.categoryOrderFailed");
+        setActionError(
+          getAdminApiErrorKey(result.error, "menu.page.categoryOrderFailed")
+        );
         return;
       }
 

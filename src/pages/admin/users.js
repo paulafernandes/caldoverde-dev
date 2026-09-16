@@ -6,6 +6,7 @@ import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import { authClient } from "../../lib/authClient";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { getAdminApiErrorKey } from "../../lib/adminApiError";
 
 export default function AdminUsers({ admin }) {
   const { t } = useAdminLanguage();
@@ -45,7 +46,7 @@ export default function AdminUsers({ admin }) {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error("users.loadFailed");
+          throw new Error(getAdminApiErrorKey(data.error, "users.loadFailed"));
         }
 
         if (isMounted) {
@@ -171,7 +172,7 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("users.createFailed");
+        throw new Error(getAdminApiErrorKey(data.error, "users.createFailed"));
       }
 
       setUsers((current) =>
@@ -244,7 +245,7 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("users.updateFailed");
+        throw new Error(getAdminApiErrorKey(data.error, "users.updateFailed"));
       }
 
       setUsers((current) =>
@@ -293,7 +294,9 @@ export default function AdminUsers({ admin }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("users.statusChangeFailed");
+        throw new Error(
+          getAdminApiErrorKey(data.error, "users.statusChangeFailed")
+        );
       }
 
       setUsers((current) =>
@@ -691,7 +694,7 @@ export default function AdminUsers({ admin }) {
                       ) : (
                         user.name
                       )}
-                      {editingNameError && (
+                      {editingUserId === user.id && editingNameError && (
                         <p className={styles.error} role="alert">
                           {t(editingNameError)}
                         </p>

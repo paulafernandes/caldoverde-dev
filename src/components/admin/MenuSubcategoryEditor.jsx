@@ -3,6 +3,7 @@ import { useState } from "react";
 import styles from "../../styles/Admin.module.css";
 import { adminFetch } from "../../lib/adminFetch";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { getAdminApiErrorKey } from "../../lib/adminApiError";
 
 const languages = [
   {
@@ -129,7 +130,9 @@ export default function MenuSubcategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.subcategory.saveFailed");
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "menu.subcategory.saveFailed")
+        );
         setIsSubmitting(false);
         return;
       }
@@ -138,7 +141,6 @@ export default function MenuSubcategoryEditor({
       await onSaved(result.subcategory);
     } catch {
       setErrorMessage("menu.common.serverError");
-
       setIsSubmitting(false);
     }
   }
@@ -159,10 +161,13 @@ export default function MenuSubcategoryEditor({
 
       if (!response.ok) {
         if (response.status === 401) {
-          setIsSubmitting(false);
+          setIsDeleting(false);
           return;
         }
-        setErrorMessage("menu.common.serverError");
+
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "menu.subcategory.operationFailed")
+        );
 
         setIsDeleting(false);
         return;
@@ -170,10 +175,9 @@ export default function MenuSubcategoryEditor({
 
       setIsDeleting(false);
       await onDeleted();
-    } catch (error) {
-      setErrorMessage("menu.subcategory.operationFailed");
-
-      setIsSubmitting(false);
+    } catch {
+      setErrorMessage("menu.common.serverError");
+      setIsDeleting(false);
     }
   }
 

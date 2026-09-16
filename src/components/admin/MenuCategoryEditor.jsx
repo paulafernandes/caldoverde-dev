@@ -4,6 +4,7 @@ import Image from "next/image";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 import { adminFetch } from "../../lib/adminFetch";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { getAdminApiErrorKey } from "../../lib/adminApiError";
 
 const languages = [
   {
@@ -157,7 +158,11 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.category.imageUploadFailed");
+
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "apiErrors.imageUploadFailed")
+        );
+
         return;
       }
 
@@ -227,7 +232,15 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.category.saveFailed");
+
+        setErrorMessage(
+          getAdminApiErrorKey(
+            result.error,
+            isCreating
+              ? "apiErrors.categoryCreateFailed"
+              : "apiErrors.categoryUpdateFailed"
+          )
+        );
 
         setIsSubmitting(false);
         return;
@@ -268,7 +281,10 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.category.deleteFailed");
+
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "apiErrors.categoryDeleteFailed")
+        );
 
         setIsDeleting(false);
         return;
@@ -285,7 +301,7 @@ export default function MenuCategoryEditor({
 
   async function handleMoveSubcategory(subcategoryId, direction) {
     setErrorMessage("");
-    setMovingSubcategoryId(null);
+    setMovingSubcategoryId(subcategoryId);
 
     try {
       const response = await adminFetch("/api/admin/menu/subcategories/order", {
@@ -308,7 +324,11 @@ export default function MenuCategoryEditor({
           setIsSubmitting(false);
           return;
         }
-        setErrorMessage("menu.category.orderFailed");
+
+        setErrorMessage(
+          getAdminApiErrorKey(result.error, "apiErrors.subcategoryOrderFailed")
+        );
+
         return;
       }
 
