@@ -12,6 +12,90 @@ datasource db {
   provider = "sqlite"
 }
 
+model BusinessSettings {
+  id               String   @id @default("business")
+  name             String
+  logoPath         String?
+  faviconPath      String?
+  email            String?
+  phone            String?
+  addressLine1     String?
+  addressLine2     String?
+  postalCode       String?
+  city             String?
+  countryCode      String?
+  primaryActionUrl String?
+  defaultLanguage  String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  translations BusinessSettingsTranslation[]
+  languages    BusinessLanguage[]
+  socialLinks  BusinessSocialLink[]
+}
+
+model BusinessSettingsTranslation {
+  id             Int              @id @default(autoincrement())
+  settingsId     String
+  language       String
+  seoTitle       String?
+  seoDescription String?
+  settings       BusinessSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+
+  @@unique([settingsId, language])
+  @@index([language])
+}
+
+model BusinessLanguage {
+  id         Int              @id @default(autoincrement())
+  settingsId String
+  language   String
+  locale     String
+  isEnabled  Boolean          @default(true)
+  position   Int              @default(0)
+  settings   BusinessSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+
+  @@unique([settingsId, language])
+  @@index([settingsId, position])
+}
+
+model BusinessSocialLink {
+  id         Int              @id @default(autoincrement())
+  settingsId String
+  platform   String
+  url        String
+  position   Int              @default(0)
+  isVisible  Boolean          @default(true)
+  settings   BusinessSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+
+  @@index([settingsId, position])
+}
+
+model MediaAsset {
+  id           Int                     @id @default(autoincrement())
+  imagePath    String
+  category     String?
+  position     Int                     @default(0)
+  isVisible    Boolean                 @default(true)
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  translations MediaAssetTranslation[]
+
+  @@index([position])
+}
+
+model MediaAssetTranslation {
+  id       Int        @id @default(autoincrement())
+  mediaId  Int
+  language String
+  altText  String?
+  caption  String?
+  media    MediaAsset @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, language])
+  @@index([language])
+}
+
 model MenuCategory {
   id            Int                       @id @default(autoincrement())
   slug          String                    @unique
