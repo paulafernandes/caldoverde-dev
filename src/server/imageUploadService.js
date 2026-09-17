@@ -62,7 +62,7 @@ async function detectImageExtension(filepath) {
   return null;
 }
 
-export async function saveUploadedImage(request) {
+export async function saveUploadedImage(request, folder = null) {
   const form = formidable({
     uploadDir: os.tmpdir(),
     allowEmptyFiles: false,
@@ -116,20 +116,67 @@ export async function saveUploadedImage(request) {
       configuredUploadsDir
     );
 
-    await mkdir(uploadsDir, {
+    const targetDir = folder ? path.join(uploadsDir, folder) : uploadsDir;
+
+    await mkdir(targetDir, {
       recursive: true,
     });
 
     const filename = `${randomUUID()}.${extension}`;
 
-    const finalPath = path.join(uploadsDir, filename);
+    const finalPath = path.join(targetDir, filename);
 
     await copyFile(temporaryPath, finalPath);
 
     return {
-      imagePath: `/uploads/${filename}`,
+      imagePath: folder
+        ? `/uploads/${folder}/${filename}`
+        : `/uploads/${filename}`,
     };
   } finally {
     await unlink(temporaryPath).catch(() => undefined);
+  }
+}
+
+export async function deleteUploadedImage(imagePath) {
+  if (typeof imagePath !== "string" || !imagePath.startsWith("/uploads/")) {
+    throw new Error("INVALID_UPLOAD_PATH");
+  }
+
+  const configuredUploadsDir = process.env.UPLOADS_DIR;
+
+  if (!configuredUploadsDir) {
+    throw new Error("UPLOADS_DIR_NOT_CONFIGURED");
+  }
+
+  const uploadsDir = path.resolve(
+    /* turbopackIgnore: true */
+    process.cwd(),
+    configuredUploadsDir
+  );
+
+  const relativePath = imagePath.slice("/uploads/".length);
+
+  if (!relativePath) {
+    throw new Error("INVALID_UPLOAD_PATH");
+  }
+
+  const finalPath = path.resolve(uploadsDir, relativePath);
+  const uploadsPrefix = `${uploadsDir}${path.sep}`;
+
+  if (!finalPath.startsWith(uploadsPrefix)) {
+    throw new Error("INVALID_UPLOAD_PATH");
+  }
+
+  try {
+    await unlink(finalPath);
+
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return false;
+    }
+
+    throw error;
   }
 }
