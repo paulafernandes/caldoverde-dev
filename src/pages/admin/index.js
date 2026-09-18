@@ -48,6 +48,11 @@ export default function AdminDashboard({ admin }) {
 
             <span>{t("dashboard.menuDescription")}</span>
           </Link>
+          <Link href="/admin/settings" className={styles.adminDashboardCard}>
+            <strong>{t("dashboard.settingsTitle")}</strong>
+
+            <span>{t("dashboard.settingsDescription")}</span>
+          </Link>
         </section>
       </AdminLayout>
     </>

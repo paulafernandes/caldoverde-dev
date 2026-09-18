@@ -34,26 +34,36 @@ export const updateBusinessSettingsSchema = z.strictObject({
   email: z
     .string()
     .trim()
+    .min(1, "EMAIL_REQUIRED")
     .max(254, "EMAIL_TOO_LONG")
-    .email("INVALID_EMAIL")
-    .nullable(),
+    .email("INVALID_EMAIL"),
 
-  phone: z.string().trim().max(50, "PHONE_TOO_LONG").nullable(),
+  phone: z.string().trim().min(1, "PHONE_REQUIRED").max(50, "PHONE_TOO_LONG"),
 
-  addressLine1: z.string().trim().max(200, "ADDRESS_TOO_LONG").nullable(),
+  addressLine1: z
+    .string()
+    .trim()
+    .min(1, "ADDRESS_REQUIRED")
+    .max(200, "ADDRESS_TOO_LONG"),
 
   addressLine2: z.string().trim().max(200, "ADDRESS_TOO_LONG").nullable(),
 
-  postalCode: z.string().trim().max(30, "POSTAL_CODE_TOO_LONG").nullable(),
+  postalCode: z
+    .string()
+    .trim()
+    .min(1, "POSTAL_CODE_REQUIRED")
+    .max(30, "POSTAL_CODE_TOO_LONG"),
 
-  city: z.string().trim().max(120, "CITY_TOO_LONG").nullable(),
+  city: z.string().trim().min(1, "CITY_REQUIRED").max(120, "CITY_TOO_LONG"),
 
   countryCode: z
     .string()
     .trim()
+    .min(1, "COUNTRY_REQUIRED")
     .length(2, "INVALID_COUNTRY_CODE")
-    .transform((value) => value.toUpperCase())
-    .nullable(),
+    .transform((value) => value.toUpperCase()),
+
+  primaryActionUrl: optionalUrlSchema,
 
   primaryActionUrl: optionalUrlSchema,
 });

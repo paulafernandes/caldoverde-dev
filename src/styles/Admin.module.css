@@ -1687,3 +1687,29 @@ label.itemSubcategoryOption {
 .formMessage {
   margin-top: 25px;
 }
+
+.settingsFormCard {
+  max-width: 1000px;
+}
+
+.settingsFormColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.settingsFormColumn {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+}
+
+.settingsFormColumn .field label {
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .settingsFormColumns {
+    grid-template-columns: 1fr;
+  }
+}
