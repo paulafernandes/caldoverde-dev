@@ -20,6 +20,14 @@ export default function AdminSettings({ admin, businessSettings }) {
     postalCode: businessSettings.postalCode ?? "",
     city: businessSettings.city ?? "",
     countryCode: businessSettings.countryCode ?? "",
+    taxId: businessSettings.taxId ?? "",
+    fiscalAddressSameAsBusiness:
+      businessSettings.fiscalAddressSameAsBusiness ?? true,
+    fiscalAddressLine1: businessSettings.fiscalAddressLine1 ?? "",
+    fiscalAddressLine2: businessSettings.fiscalAddressLine2 ?? "",
+    fiscalPostalCode: businessSettings.fiscalPostalCode ?? "",
+    fiscalCity: businessSettings.fiscalCity ?? "",
+    fiscalCountryCode: businessSettings.fiscalCountryCode ?? "",
     primaryActionUrl: businessSettings.primaryActionUrl ?? "",
   });
 
@@ -92,24 +100,40 @@ export default function AdminSettings({ admin, businessSettings }) {
         INVALID_URL: "settings.invalidUrl",
         URL_TOO_LONG: "settings.urlTooLong",
       },
+      taxId: {
+        TAX_ID_REQUIRED: "settings.taxIdRequired",
+        TAX_ID_TOO_LONG: "settings.taxIdTooLong",
+      },
+      fiscalAddressLine1: {
+        FISCAL_ADDRESS_REQUIRED: "settings.fiscalAddressRequired",
+        FISCAL_ADDRESS_TOO_LONG: "settings.fiscalAddressTooLong",
+      },
+      fiscalAddressLine2: {
+        FISCAL_ADDRESS_TOO_LONG: "settings.fiscalAddressLine2TooLong",
+      },
+      fiscalPostalCode: {
+        FISCAL_POSTAL_CODE_REQUIRED: "settings.fiscalPostalCodeRequired",
+        FISCAL_POSTAL_CODE_TOO_LONG: "settings.fiscalPostalCodeTooLong",
+      },
+      fiscalCity: {
+        FISCAL_CITY_REQUIRED: "settings.fiscalCityRequired",
+        FISCAL_CITY_TOO_LONG: "settings.fiscalCityTooLong",
+      },
+      fiscalCountryCode: {
+        FISCAL_COUNTRY_REQUIRED: "settings.fiscalCountryRequired",
+        INVALID_FISCAL_COUNTRY_CODE: "settings.invalidFiscalCountryCode",
+      },
     };
 
     return fieldErrorMessages[field]?.[code] ?? null;
   }
 
   function handleChange(event) {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
     setFormValues((current) => ({
       ...current,
-      [name]: value,
-    }));
-
-    setError("");
-    setSuccess("");
-    setFieldErrors((current) => ({
-      ...current,
-      [name]: "",
+      [name]: type === "checkbox" ? checked : value,
     }));
   }
 
@@ -123,6 +147,14 @@ export default function AdminSettings({ admin, businessSettings }) {
       postalCode: businessSettings.postalCode ?? "",
       city: businessSettings.city ?? "",
       countryCode: businessSettings.countryCode ?? "",
+      taxId: businessSettings.taxId ?? "",
+      fiscalAddressSameAsBusiness:
+        businessSettings.fiscalAddressSameAsBusiness ?? true,
+      fiscalAddressLine1: businessSettings.fiscalAddressLine1 ?? "",
+      fiscalAddressLine2: businessSettings.fiscalAddressLine2 ?? "",
+      fiscalPostalCode: businessSettings.fiscalPostalCode ?? "",
+      fiscalCity: businessSettings.fiscalCity ?? "",
+      fiscalCountryCode: businessSettings.fiscalCountryCode ?? "",
       primaryActionUrl: businessSettings.primaryActionUrl ?? "",
     });
 
@@ -190,6 +222,13 @@ export default function AdminSettings({ admin, businessSettings }) {
           postalCode: formValues.postalCode.trim(),
           city: formValues.city.trim(),
           countryCode: formValues.countryCode.trim(),
+          taxId: formValues.taxId.trim(),
+          fiscalAddressSameAsBusiness: formValues.fiscalAddressSameAsBusiness,
+          fiscalAddressLine1: formValues.fiscalAddressLine1.trim() || null,
+          fiscalAddressLine2: formValues.fiscalAddressLine2.trim() || null,
+          fiscalPostalCode: formValues.fiscalPostalCode.trim() || null,
+          fiscalCity: formValues.fiscalCity.trim() || null,
+          fiscalCountryCode: formValues.fiscalCountryCode.trim() || null,
           primaryActionUrl: formValues.primaryActionUrl.trim() || null,
         }),
       });
@@ -232,6 +271,14 @@ export default function AdminSettings({ admin, businessSettings }) {
         postalCode: data.settings.postalCode ?? "",
         city: data.settings.city ?? "",
         countryCode: data.settings.countryCode ?? "",
+        taxId: data.settings.taxId ?? "",
+        fiscalAddressSameAsBusiness:
+          data.settings.fiscalAddressSameAsBusiness ?? true,
+        fiscalAddressLine1: data.settings.fiscalAddressLine1 ?? "",
+        fiscalAddressLine2: data.settings.fiscalAddressLine2 ?? "",
+        fiscalPostalCode: data.settings.fiscalPostalCode ?? "",
+        fiscalCity: data.settings.fiscalCity ?? "",
+        fiscalCountryCode: data.settings.fiscalCountryCode ?? "",
         primaryActionUrl: data.settings.primaryActionUrl ?? "",
       });
 
@@ -362,6 +409,27 @@ export default function AdminSettings({ admin, businessSettings }) {
                     getFieldErrorMessage("name", fieldErrors.name) && (
                       <p className={styles.error} role="alert">
                         {t(getFieldErrorMessage("name", fieldErrors.name))}
+                      </p>
+                    )}
+                </div>
+
+                <div className={styles.field}>
+                  <label htmlFor="business-tax-id">{t("settings.taxId")}</label>
+
+                  <input
+                    id="business-tax-id"
+                    name="taxId"
+                    type="text"
+                    required
+                    value={formValues.taxId}
+                    disabled={isSaving}
+                    onChange={handleChange}
+                  />
+
+                  {fieldErrors.taxId &&
+                    getFieldErrorMessage("taxId", fieldErrors.taxId) && (
+                      <p className={styles.error} role="alert">
+                        {t(getFieldErrorMessage("taxId", fieldErrors.taxId))}
                       </p>
                     )}
                 </div>
@@ -498,7 +566,7 @@ export default function AdminSettings({ admin, businessSettings }) {
                     onChange={handleChange}
                   />
                   {fieldErrors.city && (
-                    <p className={styles.city} role="alert">
+                    <p className={styles.error} role="alert">
                       {t(getFieldErrorMessage("city", fieldErrors.city))}
                     </p>
                   )}
@@ -554,26 +622,204 @@ export default function AdminSettings({ admin, businessSettings }) {
                   )}
                 </div>
               </div>
-              <div className={styles.userFormActions}>
-                <button
-                  type="submit"
-                  className={styles.button}
-                  disabled={isSaving}
-                >
-                  {isSaving ? t("settings.saving") : t("settings.save")}
-                </button>
-
-                <button
-                  type="button"
-                  className={styles.editButton}
-                  disabled={isSaving}
-                  onClick={handleCancel}
-                >
-                  {t("settings.cancel")}
-                </button>
-              </div>
             </div>
 
+            <div className={styles.settingsFiscalSection}>
+              <h3>{t("settings.fiscalData")}</h3>
+
+              <label className={styles.settingsCheckbox}>
+                <input
+                  name="fiscalAddressSameAsBusiness"
+                  type="checkbox"
+                  checked={formValues.fiscalAddressSameAsBusiness}
+                  disabled={isSaving}
+                  onChange={handleChange}
+                />
+
+                <span>{t("settings.fiscalAddressSameAsBusiness")}</span>
+              </label>
+
+              {!formValues.fiscalAddressSameAsBusiness && (
+                <div className={styles.settingsFormColumns}>
+                  <div className={styles.settingsFormColumn}>
+                    <div className={styles.field}>
+                      <label htmlFor="business-fiscal-address">
+                        {t("settings.fiscalAddressLine1")}
+                      </label>
+
+                      <input
+                        id="business-fiscal-address"
+                        name="fiscalAddressLine1"
+                        type="text"
+                        required
+                        value={formValues.fiscalAddressLine1}
+                        disabled={isSaving}
+                        onChange={handleChange}
+                      />
+
+                      {fieldErrors.fiscalAddressLine1 &&
+                        getFieldErrorMessage(
+                          "fiscalAddressLine1",
+                          fieldErrors.fiscalAddressLine1
+                        ) && (
+                          <p className={styles.error} role="alert">
+                            {t(
+                              getFieldErrorMessage(
+                                "fiscalAddressLine1",
+                                fieldErrors.fiscalAddressLine1
+                              )
+                            )}
+                          </p>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor="business-fiscal-address-2">
+                        {t("settings.fiscalAddressLine2")}
+                      </label>
+
+                      <input
+                        id="business-fiscal-address-2"
+                        name="fiscalAddressLine2"
+                        type="text"
+                        value={formValues.fiscalAddressLine2}
+                        disabled={isSaving}
+                        onChange={handleChange}
+                      />
+
+                      {fieldErrors.fiscalAddressLine2 &&
+                        getFieldErrorMessage(
+                          "fiscalAddressLine2",
+                          fieldErrors.fiscalAddressLine2
+                        ) && (
+                          <p className={styles.error} role="alert">
+                            {t(
+                              getFieldErrorMessage(
+                                "fiscalAddressLine2",
+                                fieldErrors.fiscalAddressLine2
+                              )
+                            )}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+
+                  <div className={styles.settingsFormColumn}>
+                    <div className={styles.field}>
+                      <label htmlFor="business-fiscal-country">
+                        {t("settings.fiscalCountryCode")}
+                      </label>
+
+                      <input
+                        id="business-fiscal-country"
+                        name="fiscalCountryCode"
+                        type="text"
+                        required
+                        maxLength={2}
+                        value={formValues.fiscalCountryCode}
+                        disabled={isSaving}
+                        onChange={handleChange}
+                      />
+
+                      {fieldErrors.fiscalCountryCode &&
+                        getFieldErrorMessage(
+                          "fiscalCountryCode",
+                          fieldErrors.fiscalCountryCode
+                        ) && (
+                          <p className={styles.error} role="alert">
+                            {t(
+                              getFieldErrorMessage(
+                                "fiscalCountryCode",
+                                fieldErrors.fiscalCountryCode
+                              )
+                            )}
+                          </p>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor="business-fiscal-city">
+                        {t("settings.fiscalCity")}
+                      </label>
+
+                      <input
+                        id="business-fiscal-city"
+                        name="fiscalCity"
+                        type="text"
+                        required
+                        value={formValues.fiscalCity}
+                        disabled={isSaving}
+                        onChange={handleChange}
+                      />
+
+                      {fieldErrors.fiscalCity &&
+                        getFieldErrorMessage(
+                          "fiscalCity",
+                          fieldErrors.fiscalCity
+                        ) && (
+                          <p className={styles.error} role="alert">
+                            {t(
+                              getFieldErrorMessage(
+                                "fiscalCity",
+                                fieldErrors.fiscalCity
+                              )
+                            )}
+                          </p>
+                        )}
+                    </div>
+
+                    <div className={styles.field}>
+                      <label htmlFor="business-fiscal-postal-code">
+                        {t("settings.fiscalPostalCode")}
+                      </label>
+
+                      <input
+                        id="business-fiscal-postal-code"
+                        name="fiscalPostalCode"
+                        type="text"
+                        required
+                        value={formValues.fiscalPostalCode}
+                        disabled={isSaving}
+                        onChange={handleChange}
+                      />
+
+                      {fieldErrors.fiscalPostalCode &&
+                        getFieldErrorMessage(
+                          "fiscalPostalCode",
+                          fieldErrors.fiscalPostalCode
+                        ) && (
+                          <p className={styles.error} role="alert">
+                            {t(
+                              getFieldErrorMessage(
+                                "fiscalPostalCode",
+                                fieldErrors.fiscalPostalCode
+                              )
+                            )}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className={styles.userFormActions}>
+              <button
+                type="submit"
+                className={styles.button}
+                disabled={isSaving}
+              >
+                {isSaving ? t("settings.saving") : t("settings.save")}
+              </button>
+
+              <button
+                type="button"
+                className={styles.editButton}
+                disabled={isSaving}
+                onClick={handleCancel}
+              >
+                {t("settings.cancel")}
+              </button>
+            </div>
             {error && (
               <p className={styles.error} role="alert">
                 {t(error)}

@@ -407,6 +407,33 @@ export const adminTranslations = {
       postalCodeRequired: "O código postal é obrigatório.",
       cityRequired: "A cidade é obrigatória.",
       countryRequired: "O país é obrigatório.",
+      taxId: "NIF",
+      taxIdRequired: "O NIF é obrigatório.",
+      taxIdTooLong: "O NIF não pode ultrapassar 50 caracteres.",
+
+      fiscalData: "Dados fiscais",
+      fiscalAddressSameAsBusiness:
+        "A morada fiscal é igual à morada do estabelecimento",
+      fiscalAddressLine1: "Morada fiscal",
+      fiscalAddressLine2: "Complemento da morada fiscal (opcional)",
+      fiscalPostalCode: "Código postal fiscal",
+      fiscalCity: "Cidade",
+      fiscalCountryCode: "País",
+
+      fiscalAddressRequired: "A morada fiscal é obrigatória.",
+      fiscalAddressTooLong:
+        "A morada fiscal não pode ultrapassar 200 caracteres.",
+      fiscalAddressLine2TooLong:
+        "O complemento da morada fiscal não pode ultrapassar 200 caracteres.",
+      fiscalPostalCodeRequired: "O código postal fiscal é obrigatório.",
+      fiscalPostalCodeTooLong:
+        "O código postal fiscal não pode ultrapassar 30 caracteres.",
+      fiscalCityRequired: "A cidade da morada fiscal é obrigatória.",
+      fiscalCityTooLong:
+        "A cidade da morada fiscal não pode ultrapassar 120 caracteres.",
+      fiscalCountryRequired: "O país da morada fiscal é obrigatório.",
+      invalidFiscalCountryCode:
+        "O país deve ser indicado com um código de 2 letras, por exemplo ES.",
     },
   },
 
@@ -818,6 +845,33 @@ export const adminTranslations = {
       postalCodeRequired: "El código postal es obligatorio.",
       cityRequired: "La ciudad es obligatoria.",
       countryRequired: "El país es obligatorio.",
+      taxId: "NIF",
+      taxIdRequired: "El NIF es obligatorio.",
+      taxIdTooLong: "El NIF no puede superar los 50 caracteres.",
+
+      fiscalData: "Datos fiscales",
+      fiscalAddressSameAsBusiness:
+        "La dirección fiscal es igual a la dirección del establecimiento",
+      fiscalAddressLine1: "Dirección fiscal",
+      fiscalAddressLine2: "Complemento de la dirección fiscal (opcional)",
+      fiscalPostalCode: "Código postal fiscal",
+      fiscalCity: "Ciudad",
+      fiscalCountryCode: "País",
+
+      fiscalAddressRequired: "La dirección fiscal es obligatoria.",
+      fiscalAddressTooLong:
+        "La dirección fiscal no puede superar los 200 caracteres.",
+      fiscalAddressLine2TooLong:
+        "El complemento de la dirección fiscal no puede superar los 200 caracteres.",
+      fiscalPostalCodeRequired: "El código postal fiscal es obligatorio.",
+      fiscalPostalCodeTooLong:
+        "El código postal fiscal no puede superar los 30 caracteres.",
+      fiscalCityRequired: "La ciudad de la dirección fiscal es obligatoria.",
+      fiscalCityTooLong:
+        "La ciudad de la dirección fiscal no puede superar los 120 caracteres.",
+      fiscalCountryRequired: "El país de la dirección fiscal es obligatorio.",
+      invalidFiscalCountryCode:
+        "El país debe indicarse con un código de 2 letras, por ejemplo ES.",
     },
   },
 
@@ -1223,6 +1277,31 @@ export const adminTranslations = {
       postalCodeRequired: "Postal code is required.",
       cityRequired: "City is required.",
       countryRequired: "Country is required.",
+      taxId: "Tax ID",
+      taxIdRequired: "The tax ID is required.",
+      taxIdTooLong: "The tax ID cannot exceed 50 characters.",
+
+      fiscalData: "Tax details",
+      fiscalAddressSameAsBusiness:
+        "The tax address is the same as the business address",
+      fiscalAddressLine1: "Tax address",
+      fiscalAddressLine2: "Tax address line 2 (optional)",
+      fiscalPostalCode: "Tax postal code",
+      fiscalCity: "City",
+      fiscalCountryCode: "Country",
+
+      fiscalAddressRequired: "The tax address is required.",
+      fiscalAddressTooLong: "The tax address cannot exceed 200 characters.",
+      fiscalAddressLine2TooLong:
+        "Tax address line 2 cannot exceed 200 characters.",
+      fiscalPostalCodeRequired: "The tax postal code is required.",
+      fiscalPostalCodeTooLong:
+        "The tax postal code cannot exceed 30 characters.",
+      fiscalCityRequired: "The tax address city is required.",
+      fiscalCityTooLong: "The tax address city cannot exceed 120 characters.",
+      fiscalCountryRequired: "The tax address country is required.",
+      invalidFiscalCountryCode:
+        "The country must use a 2-letter code, for example ES.",
     },
   },
 };

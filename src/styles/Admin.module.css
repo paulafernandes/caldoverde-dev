@@ -1713,3 +1713,26 @@ label.itemSubcategoryOption {
     grid-template-columns: 1fr;
   }
 }
+
+.settingsFiscalSection {
+  margin-top: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #d8d3c7;
+}
+
+.settingsFiscalSection h3 {
+  margin: 0 0 18px;
+}
+
+.settingsCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.settingsCheckbox input {
+  width: auto;
+  margin: 0;
+}
