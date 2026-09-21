@@ -397,8 +397,7 @@ export const adminTranslations = {
       addressLine2Optional: "Complemento da morada (opcional)",
       postalCodeTooLong: "O código postal não pode ultrapassar 30 caracteres.",
       cityTooLong: "A cidade não pode ultrapassar 120 caracteres.",
-      invalidCountryCode:
-        "O país deve ser indicado com um código de 2 letras, por exemplo ES.",
+      invalidCountryCode: "Seleciona um país válido.",
       invalidUrl: "Introduz um URL válido.",
       urlTooLong: "O URL é demasiado longo.",
       emailRequired: "O email é obrigatório.",
@@ -432,8 +431,10 @@ export const adminTranslations = {
       fiscalCityTooLong:
         "A cidade da morada fiscal não pode ultrapassar 120 caracteres.",
       fiscalCountryRequired: "O país da morada fiscal é obrigatório.",
-      invalidFiscalCountryCode:
-        "O país deve ser indicado com um código de 2 letras, por exemplo ES.",
+      invalidFiscalCountryCode: "Seleciona um país válido.",
+      selectCountry: "Seleciona um país",
+      languageCountries: "Países dos idiomas configurados",
+      otherCountries: "Outros países",
     },
   },
 
@@ -835,8 +836,7 @@ export const adminTranslations = {
       addressLine2Optional: "Complemento de la dirección (opcional)",
       postalCodeTooLong: "El código postal no puede superar los 30 caracteres.",
       cityTooLong: "La ciudad no puede superar los 120 caracteres.",
-      invalidCountryCode:
-        "El país debe indicarse con un código de 2 letras, por ejemplo ES.",
+      invalidCountryCode: "Selecciona un país válido.",
       invalidUrl: "Introduce una URL válida.",
       urlTooLong: "La URL es demasiado larga.",
       emailRequired: "El email es obligatorio.",
@@ -870,8 +870,10 @@ export const adminTranslations = {
       fiscalCityTooLong:
         "La ciudad de la dirección fiscal no puede superar los 120 caracteres.",
       fiscalCountryRequired: "El país de la dirección fiscal es obligatorio.",
-      invalidFiscalCountryCode:
-        "El país debe indicarse con un código de 2 letras, por ejemplo ES.",
+      invalidFiscalCountryCode: "Selecciona un país válido.",
+      selectCountry: "Seleciona um país",
+      languageCountries: "Países dos idiomas configurados",
+      otherCountries: "Outros países",
     },
   },
 
@@ -1267,8 +1269,7 @@ export const adminTranslations = {
       addressLine2Optional: "Address line 2 (optional)",
       postalCodeTooLong: "The postal code cannot exceed 30 characters.",
       cityTooLong: "The city cannot exceed 120 characters.",
-      invalidCountryCode:
-        "The country must use a 2-letter code, for example ES.",
+      invalidCountryCode: "Select a valid country.",
       invalidUrl: "Enter a valid URL.",
       urlTooLong: "The URL is too long.",
       emailRequired: "Email is required.",
@@ -1300,8 +1301,10 @@ export const adminTranslations = {
       fiscalCityRequired: "The tax address city is required.",
       fiscalCityTooLong: "The tax address city cannot exceed 120 characters.",
       fiscalCountryRequired: "The tax address country is required.",
-      invalidFiscalCountryCode:
-        "The country must use a 2-letter code, for example ES.",
+      invalidFiscalCountryCode: "Select a valid country.",
+      selectCountry: "Seleciona um país",
+      languageCountries: "Países dos idiomas configurados",
+      otherCountries: "Outros países",
     },
   },
 };

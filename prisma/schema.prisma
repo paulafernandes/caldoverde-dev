@@ -17,21 +17,27 @@ model BusinessSettings {
   name             String
   logoPath         String?
   faviconPath      String?
-  email            String?
-  phone            String?
-  addressLine1     String?
-  addressLine2     String?
-  postalCode       String?
-  city             String?
-  countryCode      String?
-  taxId            String?
+  email                       String?
+  phone                       String?
+  mobilePhone                 String?
+
+  addressLine1                String?
+  addressLine2                String?
+  postalCode                  String?
+  city                        String?
+  countryCode                 String?
+  administrativeAreaCode      String?
+
+  taxId                       String?
   fiscalAddressSameAsBusiness Boolean  @default(true)
   fiscalAddressLine1          String?
   fiscalAddressLine2          String?
   fiscalPostalCode            String?
   fiscalCity                  String?
   fiscalCountryCode           String?
-  primaryActionUrl String?
+  fiscalAdministrativeAreaCode String?
+
+  primaryActionUrl            String?
   defaultLanguage  String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

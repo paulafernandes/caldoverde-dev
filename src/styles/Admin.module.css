@@ -1736,3 +1736,17 @@ label.itemSubcategoryOption {
   width: auto;
   margin: 0;
 }
+
+.settingsFormCard .field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #b9c1bb;
+  border-radius: 8px;
+  background: #ffffff;
+  font: inherit;
+}
+
+.settingsFormCard .field select:focus {
+  border-color: #315c45;
+  outline: 3px solid rgba(49, 92, 69, 0.16);
+}

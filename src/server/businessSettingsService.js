@@ -58,11 +58,15 @@ export async function getBusinessSettings() {
     faviconPath: settings.faviconPath,
     email: settings.email,
     phone: settings.phone,
+    mobilePhone: settings.mobilePhone,
+
     addressLine1: settings.addressLine1,
     addressLine2: settings.addressLine2,
     postalCode: settings.postalCode,
     city: settings.city,
     countryCode: settings.countryCode,
+    administrativeAreaCode: settings.administrativeAreaCode,
+
     taxId: settings.taxId,
     fiscalAddressSameAsBusiness: settings.fiscalAddressSameAsBusiness,
     fiscalAddressLine1: settings.fiscalAddressLine1,
@@ -70,6 +74,8 @@ export async function getBusinessSettings() {
     fiscalPostalCode: settings.fiscalPostalCode,
     fiscalCity: settings.fiscalCity,
     fiscalCountryCode: settings.fiscalCountryCode,
+    fiscalAdministrativeAreaCode: settings.fiscalAdministrativeAreaCode,
+
     primaryActionUrl: settings.primaryActionUrl,
     defaultLanguage: settings.defaultLanguage,
 
@@ -118,11 +124,13 @@ export async function updateBusinessSettings(input) {
       faviconPath: input.faviconPath,
       email: input.email,
       phone: input.phone,
+      mobilePhone: input.mobilePhone,
       addressLine1: input.addressLine1,
       addressLine2: input.addressLine2,
       postalCode: input.postalCode,
       city: input.city,
       countryCode: input.countryCode,
+      administrativeAreaCode: input.administrativeAreaCode,
       taxId: input.taxId,
       fiscalAddressSameAsBusiness: input.fiscalAddressSameAsBusiness,
       fiscalAddressLine1: input.fiscalAddressLine1,
@@ -130,6 +138,7 @@ export async function updateBusinessSettings(input) {
       fiscalPostalCode: input.fiscalPostalCode,
       fiscalCity: input.fiscalCity,
       fiscalCountryCode: input.fiscalCountryCode,
+      fiscalAdministrativeAreaCode: input.fiscalAdministrativeAreaCode,
       primaryActionUrl: input.primaryActionUrl,
     },
   });

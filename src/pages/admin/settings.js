@@ -6,6 +6,7 @@ import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getBusinessSettings } from "../../server/businessSettingsService";
 import { getAdminSession } from "../../server/getAdminSession";
 import { authClient } from "../../lib/authClient";
+import CountrySelect from "../../components/admin/CountrySelect";
 import styles from "../../styles/Admin.module.css";
 
 export default function AdminSettings({ admin, businessSettings }) {
@@ -137,6 +138,36 @@ export default function AdminSettings({ admin, businessSettings }) {
     }));
   }
 
+  function getRequiredCountryError(fieldName) {
+    return fieldName === "fiscalCountryCode"
+      ? "FISCAL_COUNTRY_REQUIRED"
+      : "COUNTRY_REQUIRED";
+  }
+
+  function handleCountryChange(event) {
+    const { name, value } = event.target;
+
+    handleChange(event);
+
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: value ? "" : getRequiredCountryError(name),
+    }));
+  }
+
+  function handleCountryBlur(event) {
+    const { name, value } = event.target;
+
+    if (value) {
+      return;
+    }
+
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: getRequiredCountryError(name),
+    }));
+  }
+
   function handleCancel() {
     setFormValues({
       name: businessSettings.name ?? "",
@@ -250,7 +281,7 @@ export default function AdminSettings({ admin, businessSettings }) {
           const nextFieldErrors = {};
 
           for (const detail of data.details) {
-            if (detail.field) {
+            if (detail.field && !nextFieldErrors[detail.field]) {
               nextFieldErrors[detail.field] = detail.code;
             }
           }
@@ -533,15 +564,15 @@ export default function AdminSettings({ admin, businessSettings }) {
                     {t("settings.countryCode")}
                   </label>
 
-                  <input
+                  <CountrySelect
                     id="business-country"
                     name="countryCode"
-                    type="text"
-                    required
-                    maxLength={2}
                     value={formValues.countryCode}
+                    languages={businessSettings.languages}
+                    required
                     disabled={isSaving}
-                    onChange={handleChange}
+                    onChange={handleCountryChange}
+                    onBlur={handleCountryBlur}
                   />
                   {fieldErrors.countryCode && (
                     <p className={styles.error} role="alert">
