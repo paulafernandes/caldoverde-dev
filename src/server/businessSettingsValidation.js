@@ -1,4 +1,14 @@
 import { z } from "zod";
+import {
+  getAdministrativeAreaConfig,
+  isValidAdministrativeAreaCode,
+} from "../data/administrativeAreas";
+import {
+  isValidPostalCode,
+  normalizePostalCode,
+} from "../utils/postalCodeValidation";
+import { isValidTaxId, normalizeTaxId } from "../utils/taxIdValidation";
+import { isValidE164PhoneNumber } from "../utils/phoneValidation";
 
 const imagePathSchema = z
   .string()
@@ -39,7 +49,25 @@ export const updateBusinessSettingsSchema = z
       .max(254, "EMAIL_TOO_LONG")
       .email("INVALID_EMAIL"),
 
-    phone: z.string().trim().min(1, "PHONE_REQUIRED").max(50, "PHONE_TOO_LONG"),
+    phone: z
+      .string()
+      .trim()
+      .max(16, "PHONE_TOO_LONG")
+      .refine(
+        (value) => value === "" || isValidE164PhoneNumber(value),
+        "INVALID_PHONE_NUMBER"
+      )
+      .nullable(),
+
+    mobilePhone: z
+      .string()
+      .trim()
+      .max(16, "MOBILE_PHONE_TOO_LONG")
+      .refine(
+        (value) => value === "" || isValidE164PhoneNumber(value),
+        "INVALID_MOBILE_PHONE_NUMBER"
+      )
+      .nullable(),
 
     addressLine1: z
       .string()
@@ -63,6 +91,12 @@ export const updateBusinessSettingsSchema = z
       .min(1, "COUNTRY_REQUIRED")
       .length(2, "INVALID_COUNTRY_CODE")
       .transform((value) => value.toUpperCase()),
+
+    administrativeAreaCode: z
+      .string()
+      .trim()
+      .max(50, "ADMINISTRATIVE_AREA_CODE_TOO_LONG")
+      .nullable(),
 
     taxId: z
       .string()
@@ -99,9 +133,72 @@ export const updateBusinessSettingsSchema = z
       .transform((value) => value.toUpperCase())
       .nullable(),
 
+    fiscalAdministrativeAreaCode: z
+      .string()
+      .trim()
+      .max(50, "FISCAL_ADMINISTRATIVE_AREA_CODE_TOO_LONG")
+      .nullable(),
+
     primaryActionUrl: optionalUrlSchema,
   })
   .superRefine((data, context) => {
+    if (!data.phone?.trim() && !data.mobilePhone?.trim()) {
+      context.addIssue({
+        code: "custom",
+        path: ["phone"],
+        message: "PHONE_CONTACT_REQUIRED",
+      });
+    }
+
+    const administrativeAreaConfig = getAdministrativeAreaConfig(
+      data.countryCode
+    );
+
+    if (administrativeAreaConfig) {
+      if (!data.administrativeAreaCode?.trim()) {
+        context.addIssue({
+          code: "custom",
+          path: ["administrativeAreaCode"],
+          message: "ADMINISTRATIVE_AREA_REQUIRED",
+        });
+      } else if (
+        !isValidAdministrativeAreaCode(
+          data.countryCode,
+          data.administrativeAreaCode
+        )
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["administrativeAreaCode"],
+          message: "INVALID_ADMINISTRATIVE_AREA",
+        });
+      }
+    }
+
+    const normalizedPostalCode = normalizePostalCode(
+      data.countryCode,
+      data.postalCode
+    );
+
+    if (
+      data.postalCode &&
+      !isValidPostalCode(data.countryCode, normalizedPostalCode)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["postalCode"],
+        message: "INVALID_POSTAL_CODE",
+      });
+    }
+
+    if (data.taxId && !isValidTaxId(data.countryCode, data.taxId)) {
+      context.addIssue({
+        code: "custom",
+        path: ["taxId"],
+        message: "INVALID_TAX_ID",
+      });
+    }
+
     if (data.fiscalAddressSameAsBusiness) {
       return;
     }
@@ -122,6 +219,23 @@ export const updateBusinessSettingsSchema = z
       });
     }
 
+    const normalizedFiscalPostalCode =
+      data.fiscalPostalCode && data.fiscalCountryCode
+        ? normalizePostalCode(data.fiscalCountryCode, data.fiscalPostalCode)
+        : null;
+
+    if (
+      normalizedFiscalPostalCode &&
+      data.fiscalCountryCode &&
+      !isValidPostalCode(data.fiscalCountryCode, normalizedFiscalPostalCode)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["fiscalPostalCode"],
+        message: "INVALID_FISCAL_POSTAL_CODE",
+      });
+    }
+
     if (!data.fiscalCity?.trim()) {
       context.addIssue({
         code: "custom",
@@ -137,19 +251,58 @@ export const updateBusinessSettingsSchema = z
         message: "FISCAL_COUNTRY_REQUIRED",
       });
     }
+
+    const fiscalAdministrativeAreaConfig = getAdministrativeAreaConfig(
+      data.fiscalCountryCode
+    );
+
+    if (fiscalAdministrativeAreaConfig) {
+      if (!data.fiscalAdministrativeAreaCode?.trim()) {
+        context.addIssue({
+          code: "custom",
+          path: ["fiscalAdministrativeAreaCode"],
+          message: "FISCAL_ADMINISTRATIVE_AREA_REQUIRED",
+        });
+      } else if (
+        !isValidAdministrativeAreaCode(
+          data.fiscalCountryCode,
+          data.fiscalAdministrativeAreaCode
+        )
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["fiscalAdministrativeAreaCode"],
+          message: "INVALID_FISCAL_ADMINISTRATIVE_AREA",
+        });
+      }
+    }
   })
   .transform((data) => {
+    const postalCode = normalizePostalCode(data.countryCode, data.postalCode);
+
+    const taxId = normalizeTaxId(data.countryCode, data.taxId);
+
     if (!data.fiscalAddressSameAsBusiness) {
-      return data;
+      return {
+        ...data,
+        postalCode,
+        taxId,
+        fiscalPostalCode: data.fiscalPostalCode
+          ? normalizePostalCode(data.fiscalCountryCode, data.fiscalPostalCode)
+          : null,
+      };
     }
 
     return {
       ...data,
+      postalCode,
       fiscalAddressLine1: null,
       fiscalAddressLine2: null,
+      taxId,
       fiscalPostalCode: null,
       fiscalCity: null,
       fiscalCountryCode: null,
+      fiscalAdministrativeAreaCode: null,
     };
   });
 

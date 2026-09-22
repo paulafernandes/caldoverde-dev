@@ -1,4 +1,19 @@
-export const ADMIN_LANGUAGES = ["pt", "es", "en"];
+export const ADMIN_LANGUAGE_OPTIONS = [
+  {
+    code: "pt",
+    countryCode: "PT",
+  },
+  {
+    code: "es",
+    countryCode: "ES",
+  },
+  {
+    code: "en",
+    countryCode: "GB",
+  },
+];
+
+export const ADMIN_LANGUAGES = ADMIN_LANGUAGE_OPTIONS.map(({ code }) => code);
 
 export const adminTranslations = {
   pt: {
@@ -374,7 +389,12 @@ export const adminTranslations = {
       generalData: "Dados gerais",
       name: "Nome",
       email: "Email",
-      phone: "Telefone",
+      phone: "Telefone fixo",
+      mobilePhone: "Telemóvel",
+      phoneContactRequired:
+        "Indica pelo menos um telefone fixo ou um telemóvel.",
+      phoneTooLong: "O telefone fixo não pode ultrapassar 50 caracteres.",
+      mobilePhoneTooLong: "O telemóvel não pode ultrapassar 50 caracteres.",
       addressLine1: "Morada",
       addressLine2: "Complemento da morada",
       postalCode: "Código postal",
@@ -401,11 +421,11 @@ export const adminTranslations = {
       invalidUrl: "Introduz um URL válido.",
       urlTooLong: "O URL é demasiado longo.",
       emailRequired: "O email é obrigatório.",
-      phoneRequired: "O telefone é obrigatório.",
       addressRequired: "A morada é obrigatória.",
       postalCodeRequired: "O código postal é obrigatório.",
       cityRequired: "A cidade é obrigatória.",
       countryRequired: "O país é obrigatório.",
+      selectAdministrativeArea: "Seleciona uma área",
       taxId: "NIF",
       taxIdRequired: "O NIF é obrigatório.",
       taxIdTooLong: "O NIF não pode ultrapassar 50 caracteres.",
@@ -431,10 +451,30 @@ export const adminTranslations = {
       fiscalCityTooLong:
         "A cidade da morada fiscal não pode ultrapassar 120 caracteres.",
       fiscalCountryRequired: "O país da morada fiscal é obrigatório.",
+      administrativeAreaRequired: "Seleciona uma área administrativa.",
+      invalidAdministrativeArea: "Seleciona uma área administrativa válida.",
       invalidFiscalCountryCode: "Seleciona um país válido.",
       selectCountry: "Seleciona um país",
-      languageCountries: "Países dos idiomas configurados",
+      languageCountries: "Linguagens adicionadas",
       otherCountries: "Outros países",
+      invalidPostalCode: "Introduz um código postal válido para {country}.",
+      invalidFiscalPostalCode:
+        "Introduz um código postal válido para {country}.",
+      phoneDigitsOnly: "O telefone fixo deve conter apenas dígitos.",
+      mobilePhoneDigitsOnly: "O telemóvel deve conter apenas dígitos.",
+      invalidTaxId: "Introduz um NIF válido para o país fiscal.",
+      fiscalAdministrativeAreaRequired:
+        "Seleciona uma área administrativa fiscal.",
+      invalidFiscalAdministrativeArea:
+        "Seleciona uma área administrativa fiscal válida.",
+      phoneTooShort: "O telefone fixo deve ter pelo menos 9 dígitos.",
+      mobilePhoneTooShort: "O telemóvel deve ter pelo menos 9 dígitos.",
+      phoneCountry: "Indicativo telefónico",
+      adminLanguageCountries: "Países das línguas do backoffice",
+      invalidPhoneNumber:
+        "Introduz um telefone fixo válido para o país selecionado.",
+      invalidMobilePhoneNumber:
+        "Introduz um telemóvel válido para o país selecionado.",
     },
   },
 
@@ -813,7 +853,13 @@ export const adminTranslations = {
       generalData: "Datos generales",
       name: "Nombre",
       email: "Email",
-      phone: "Teléfono",
+      phone: "Teléfono fijo",
+      mobilePhone: "Teléfono móvil",
+      phoneContactRequired:
+        "Indica al menos un teléfono fijo o un teléfono móvil.",
+      phoneTooLong: "El teléfono fijo no puede superar los 50 caracteres.",
+      mobilePhoneTooLong:
+        "El teléfono móvil no puede superar los 50 caracteres.",
       addressLine1: "Dirección",
       addressLine2: "Complemento de la dirección",
       postalCode: "Código postal",
@@ -840,11 +886,11 @@ export const adminTranslations = {
       invalidUrl: "Introduce una URL válida.",
       urlTooLong: "La URL es demasiado larga.",
       emailRequired: "El email es obligatorio.",
-      phoneRequired: "El teléfono es obligatorio.",
       addressRequired: "La dirección es obligatoria.",
       postalCodeRequired: "El código postal es obligatorio.",
       cityRequired: "La ciudad es obligatoria.",
       countryRequired: "El país es obligatorio.",
+      selectAdministrativeArea: "Selecciona un área",
       taxId: "NIF",
       taxIdRequired: "El NIF es obligatorio.",
       taxIdTooLong: "El NIF no puede superar los 50 caracteres.",
@@ -871,9 +917,29 @@ export const adminTranslations = {
         "La ciudad de la dirección fiscal no puede superar los 120 caracteres.",
       fiscalCountryRequired: "El país de la dirección fiscal es obligatorio.",
       invalidFiscalCountryCode: "Selecciona un país válido.",
-      selectCountry: "Seleciona um país",
-      languageCountries: "Países dos idiomas configurados",
-      otherCountries: "Outros países",
+      administrativeAreaRequired: "Selecciona un área administrativa.",
+      invalidAdministrativeArea: "Selecciona un área administrativa válida.",
+      selectCountry: "Selecciona um país",
+      languageCountries: "Idiomas añadidos",
+      otherCountries: "Otros países",
+      invalidPostalCode: "Introduce un código postal válido para {country}.",
+      invalidFiscalPostalCode:
+        "Introduce un código postal válido para {country}.",
+      phoneDigitsOnly: "El teléfono fijo debe contener solo dígitos.",
+      mobilePhoneDigitsOnly: "El teléfono móvil debe contener solo dígitos.",
+      invalidTaxId: "Introduce un NIF válido para el país fiscal.",
+      fiscalAdministrativeAreaRequired:
+        "Selecciona un área administrativa fiscal.",
+      invalidFiscalAdministrativeArea:
+        "Selecciona un área administrativa fiscal válida.",
+      phoneTooShort: "El teléfono fijo debe tener al menos 9 dígitos.",
+      mobilePhoneTooShort: "El teléfono móvil debe tener al menos 9 dígitos.",
+      phoneCountry: "Prefijo telefónico",
+      adminLanguageCountries: "Países de los idiomas del backoffice",
+      invalidPhoneNumber:
+        "Introduce un teléfono fijo válido para el país seleccionado.",
+      invalidMobilePhoneNumber:
+        "Introduce un teléfono móvil válido para el país seleccionado.",
     },
   },
 
@@ -1247,7 +1313,12 @@ export const adminTranslations = {
       generalData: "General details",
       name: "Name",
       email: "Email",
-      phone: "Phone",
+      phone: "Landline",
+      mobilePhone: "Mobile phone",
+      phoneContactRequired:
+        "Enter at least one landline or mobile phone number.",
+      phoneTooLong: "The landline cannot exceed 50 characters.",
+      mobilePhoneTooLong: "The mobile phone cannot exceed 50 characters.",
       addressLine1: "Address",
       addressLine2: "Address line 2",
       postalCode: "Postal code",
@@ -1273,11 +1344,11 @@ export const adminTranslations = {
       invalidUrl: "Enter a valid URL.",
       urlTooLong: "The URL is too long.",
       emailRequired: "Email is required.",
-      phoneRequired: "Phone is required.",
       addressRequired: "Address is required.",
       postalCodeRequired: "Postal code is required.",
       cityRequired: "City is required.",
       countryRequired: "Country is required.",
+      selectAdministrativeArea: "Select an area",
       taxId: "Tax ID",
       taxIdRequired: "The tax ID is required.",
       taxIdTooLong: "The tax ID cannot exceed 50 characters.",
@@ -1301,10 +1372,29 @@ export const adminTranslations = {
       fiscalCityRequired: "The tax address city is required.",
       fiscalCityTooLong: "The tax address city cannot exceed 120 characters.",
       fiscalCountryRequired: "The tax address country is required.",
+      administrativeAreaRequired: "Select an administrative area.",
+      invalidAdministrativeArea: "Select a valid administrative area.",
       invalidFiscalCountryCode: "Select a valid country.",
-      selectCountry: "Seleciona um país",
-      languageCountries: "Países dos idiomas configurados",
-      otherCountries: "Outros países",
+      selectCountry: "Select a country",
+      languageCountries: "Added countries",
+      otherCountries: "Other countries",
+      invalidPostalCode: "Enter a valid postal code for {country}.",
+      invalidFiscalPostalCode: "Enter a valid postal code for {country}.",
+      phoneDigitsOnly: "The landline must contain digits only.",
+      mobilePhoneDigitsOnly:
+        "The mobile phone number must contain digits only.",
+      invalidTaxId: "Enter a valid tax ID for the tax country.",
+      fiscalAdministrativeAreaRequired:
+        "Select a tax address administrative area.",
+      invalidFiscalAdministrativeArea:
+        "Select a valid tax address administrative area.",
+      phoneTooShort: "The landline must contain at least 9 digits.",
+      mobilePhoneTooShort: "The mobile phone must contain at least 9 digits.",
+      phoneCountry: "Phone country code",
+      adminLanguageCountries: "Backoffice language countries",
+      invalidPhoneNumber: "Enter a valid landline for the selected country.",
+      invalidMobilePhoneNumber:
+        "Enter a valid mobile phone number for the selected country.",
     },
   },
 };

@@ -1,64 +1,7 @@
 import { useMemo } from "react";
 
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
-
-const COUNTRY_CODES = [
-  // Europa
-  "AD",
-  "AT",
-  "BE",
-  "BG",
-  "CH",
-  "CY",
-  "CZ",
-  "DE",
-  "DK",
-  "EE",
-  "ES",
-  "FI",
-  "FR",
-  "GB",
-  "GR",
-  "HR",
-  "HU",
-  "IE",
-  "IS",
-  "IT",
-  "LI",
-  "LT",
-  "LU",
-  "LV",
-  "MC",
-  "MT",
-  "NL",
-  "NO",
-  "PL",
-  "PT",
-  "RO",
-  "SE",
-  "SI",
-  "SK",
-
-  // Países lusófonos
-  "AO",
-  "BR",
-  "CV",
-  "GW",
-  "MZ",
-  "ST",
-  "TL",
-
-  // América
-  "AR",
-  "CA",
-  "CL",
-  "CO",
-  "MX",
-  "PE",
-  "US",
-  "UY",
-  "VE",
-];
+import { COUNTRY_CODES } from "../../data/countries";
 
 function getCountryCodeFromLocale(locale) {
   if (!locale) {
@@ -115,21 +58,11 @@ export default function CountrySelect({
     }
 
     return codes
-      .filter(
-        (countryCode) =>
-          !priorityCountryCodes.includes(countryCode)
-      )
+      .filter((countryCode) => !priorityCountryCodes.includes(countryCode))
       .sort((first, second) =>
-        displayNames
-          .of(first)
-          .localeCompare(displayNames.of(second), language)
+        displayNames.of(first).localeCompare(displayNames.of(second), language)
       );
-  }, [
-    displayNames,
-    language,
-    priorityCountryCodes,
-    value,
-  ]);
+  }, [displayNames, language, priorityCountryCodes, value]);
 
   return (
     <select
@@ -141,9 +74,7 @@ export default function CountrySelect({
       onChange={onChange}
       onBlur={onBlur}
     >
-      <option value="">
-        {t("settings.selectCountry")}
-      </option>
+      <option value="">{t("settings.selectCountry")}</option>
 
       {priorityCountryCodes.length > 0 && (
         <optgroup label={t("settings.languageCountries")}>

@@ -75,6 +75,7 @@ export function AdminLanguageProvider({ children }) {
     <AdminLanguageContext.Provider
       value={{
         language,
+        languages: ADMIN_LANGUAGES,
         changeLanguage,
         t,
       }}

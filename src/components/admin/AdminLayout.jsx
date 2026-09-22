@@ -8,7 +8,7 @@ import { useAdminLanguage } from "../../context/AdminLanguageContext";
 
 export default function AdminLayout({ admin, children }) {
   const router = useRouter();
-  const { language, changeLanguage, t } = useAdminLanguage();
+  const { language, languages, changeLanguage, t } = useAdminLanguage();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   async function handleSignOut() {
@@ -38,23 +38,29 @@ export default function AdminLayout({ admin, children }) {
               <span>{admin.email}</span>
             </div>
           </div>
-          <select
-            value={language}
-            onChange={(event) => changeLanguage(event.target.value)}
-            aria-label={t("layout.language")}
-          >
-            <option value="pt">PT</option>
-            <option value="es">ES</option>
-            <option value="en">EN</option>
-          </select>
-          <button
-            className={styles.logoutButton}
-            type="button"
-            disabled={isSigningOut}
-            onClick={handleSignOut}
-          >
-            {isSigningOut ? t("common.signingOut") : t("common.logout")}
-          </button>
+          <div className={styles.topbarActions}>
+            <select
+              className={styles.topbarLanguageSelect}
+              value={language}
+              onChange={(event) => changeLanguage(event.target.value)}
+              aria-label={t("layout.language")}
+            >
+              {languages.map((adminLanguage) => (
+                <option key={adminLanguage} value={adminLanguage}>
+                  {adminLanguage.toUpperCase()}
+                </option>
+              ))}
+            </select>
+
+            <button
+              className={styles.logoutButton}
+              type="button"
+              disabled={isSigningOut}
+              onClick={handleSignOut}
+            >
+              {isSigningOut ? t("common.signingOut") : t("common.logout")}
+            </button>
+          </div>
         </header>
         {router.pathname !== "/admin" && (
           <div className={styles.adminBackNavigation}>
