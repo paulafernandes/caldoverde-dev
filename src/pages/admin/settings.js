@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
@@ -26,10 +26,22 @@ import {
   parseStoredPhoneNumber,
   toE164PhoneNumber,
 } from "../../utils/phoneValidation";
+import { ADMIN_LANGUAGE_OPTIONS } from "../../data/adminTranslations";
 import styles from "../../styles/Admin.module.css";
+
+function getDefaultCountryCode(language) {
+  return (
+    ADMIN_LANGUAGE_OPTIONS.find(({ code }) => code === language)?.countryCode ??
+    ""
+  );
+}
 
 export default function AdminSettings({ admin, businessSettings }) {
   const { language, t } = useAdminLanguage();
+
+  const countryWasManuallySelected = useRef(
+    Boolean(businessSettings.countryCode)
+  );
 
   const initialPhone = parseStoredPhoneNumber(
     businessSettings.phone,
@@ -78,6 +90,40 @@ export default function AdminSettings({ admin, businessSettings }) {
   const [success, setSuccess] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [isSessionExpired, setIsSessionExpired] = useState(false);
+
+  useEffect(() => {
+    if (businessSettings.countryCode || countryWasManuallySelected.current) {
+      return;
+    }
+
+    const defaultCountryCode = getDefaultCountryCode(language);
+
+    if (!defaultCountryCode) {
+      return;
+    }
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      if (countryWasManuallySelected.current) {
+        return;
+      }
+
+      setFormValues((current) => {
+        if (current.countryCode === defaultCountryCode) {
+          return current;
+        }
+
+        return {
+          ...current,
+          countryCode: defaultCountryCode,
+          administrativeAreaCode: "",
+        };
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [language, businessSettings.countryCode]);
 
   const [reauthEmail, setReauthEmail] = useState(admin.email);
   const [reauthPassword, setReauthPassword] = useState("");
@@ -310,6 +356,9 @@ export default function AdminSettings({ admin, businessSettings }) {
     const { name, value } = event.target;
 
     const isFiscal = name === "fiscalCountryCode";
+    if (!isFiscal) {
+      countryWasManuallySelected.current = true;
+    }
 
     const administrativeAreaField = isFiscal
       ? "fiscalAdministrativeAreaCode"
@@ -533,6 +582,12 @@ export default function AdminSettings({ admin, businessSettings }) {
       businessSettings.mobilePhone,
       businessSettings.countryCode
     );
+
+    const resetCountryCode =
+      businessSettings.countryCode ?? getDefaultCountryCode(language);
+
+    countryWasManuallySelected.current = Boolean(businessSettings.countryCode);
+
     setFormValues({
       name: businessSettings.name ?? "",
       email: businessSettings.email ?? "",
@@ -542,7 +597,7 @@ export default function AdminSettings({ admin, businessSettings }) {
       addressLine2: businessSettings.addressLine2 ?? "",
       postalCode: businessSettings.postalCode ?? "",
       city: businessSettings.city ?? "",
-      countryCode: businessSettings.countryCode ?? "",
+      countryCode: resetCountryCode,
       administrativeAreaCode: businessSettings.administrativeAreaCode ?? "",
       taxId: businessSettings.taxId ?? "",
       fiscalAddressSameAsBusiness:
@@ -558,6 +613,7 @@ export default function AdminSettings({ admin, businessSettings }) {
     });
     setPhoneCountryCode(resetPhone.countryCode);
     setMobilePhoneCountryCode(resetMobilePhone.countryCode);
+    countryWasManuallySelected.current = true;
     setError("");
     setSuccess("");
     setFieldErrors({});
