@@ -8,9 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "backup-business-settings": "tsx scripts/backupBusinessSettings.js",
-    "restore-business-settings": "tsx scripts/restoreBusinessSettings.js"
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.0",

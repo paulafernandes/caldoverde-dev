@@ -13,31 +13,32 @@ datasource db {
 }
 
 model BusinessSettings {
-  id               String   @id @default("business")
-  name             String
-  logoPath         String?
-  faviconPath      String?
-  email                       String?
-  phone                       String?
-  mobilePhone                 String?
+  id          String  @id @default("business")
+  name        String
+  logoPath    String?
+  faviconPath String?
+  email       String?
+  phone       String?
+  mobilePhone String?
 
-  addressLine1                String?
-  addressLine2                String?
-  postalCode                  String?
-  city                        String?
-  countryCode                 String?
-  administrativeAreaCode      String?
+  addressLine1           String?
+  addressLine2           String?
+  postalCode             String?
+  city                   String?
+  countryCode            String?
+  administrativeAreaCode String?
+  locationUrl            String?
 
-  taxId                       String?
-  fiscalAddressSameAsBusiness Boolean  @default(true)
-  fiscalAddressLine1          String?
-  fiscalAddressLine2          String?
-  fiscalPostalCode            String?
-  fiscalCity                  String?
-  fiscalCountryCode           String?
+  taxId                        String?
+  fiscalAddressSameAsBusiness  Boolean @default(true)
+  fiscalAddressLine1           String?
+  fiscalAddressLine2           String?
+  fiscalPostalCode             String?
+  fiscalCity                   String?
+  fiscalCountryCode            String?
   fiscalAdministrativeAreaCode String?
 
-  primaryActionUrl            String?
+  primaryActionUrl String?
   defaultLanguage  String
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

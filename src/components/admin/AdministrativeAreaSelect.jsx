@@ -1,5 +1,6 @@
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getAdministrativeAreaConfig } from "../../data/administrativeAreas";
+import styles from "../../styles/Admin.module.css";
 
 export default function AdministrativeAreaSelect({
   id,
@@ -23,6 +24,12 @@ export default function AdministrativeAreaSelect({
     <>
       <label htmlFor={id}>
         {config.label[language] ?? config.label.en}
+
+        {required && (
+          <span className={styles.requiredMark} aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
 
       <select
@@ -34,9 +41,7 @@ export default function AdministrativeAreaSelect({
         onChange={onChange}
         onBlur={onBlur}
       >
-        <option value="">
-          {t("settings.selectAdministrativeArea")}
-        </option>
+        <option value="">{t("settings.selectAdministrativeArea")}</option>
 
         {config.areas.map((area) => (
           <option key={area.code} value={area.code}>

@@ -139,6 +139,7 @@ export const updateBusinessSettingsSchema = z
       .max(50, "FISCAL_ADMINISTRATIVE_AREA_CODE_TOO_LONG")
       .nullable(),
 
+    locationUrl: optionalUrlSchema,
     primaryActionUrl: optionalUrlSchema,
   })
   .superRefine((data, context) => {

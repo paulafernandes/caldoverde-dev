@@ -44,6 +44,7 @@ export function isValidTaxId(countryCode, taxId) {
 const TAX_ID_EXAMPLES = {
   PT: "123456789",
   ES: "12345678Z",
+  GB: "GB123456789",
 };
 
 export function getTaxIdExample(countryCode) {

@@ -81,6 +81,8 @@ export default async function handler(request, response) {
       settings,
     });
   } catch (error) {
+    console.error("BUSINESS_SETTINGS_UPDATE_FAILED:", error);
+
     return response.status(500).json({
       error: "BUSINESS_SETTINGS_UPDATE_FAILED",
     });

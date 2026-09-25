@@ -401,6 +401,9 @@ export const adminTranslations = {
       city: "Cidade",
       countryCode: "País",
       primaryActionUrl: "URL da ação principal",
+      countryCode: "País",
+      locationUrl: "URL do Google Maps",
+      primaryActionUrl: "URL da ação principal",
       save: "Guardar alterações",
       saving: "A guardar...",
       cancel: "Cancelar",
@@ -475,6 +478,11 @@ export const adminTranslations = {
         "Introduz um telefone fixo válido para o país selecionado.",
       invalidMobilePhoneNumber:
         "Introduz um telemóvel válido para o país selecionado.",
+      requiredField: "Campo obrigatório",
+      phoneRequiredNote:
+        "É obrigatório preencher pelo menos um telefone fixo ou telemóvel.",
+      edit: "Editar",
+      notDefined: "Não definido",
     },
   },
 
@@ -866,6 +874,9 @@ export const adminTranslations = {
       city: "Ciudad",
       countryCode: "País",
       primaryActionUrl: "URL de la acción principal",
+      countryCode: "País",
+      locationUrl: "URL de Google Maps",
+      primaryActionUrl: "URL de la acción principal",
       save: "Guardar cambios",
       saving: "Guardando...",
       cancel: "Cancelar",
@@ -940,6 +951,11 @@ export const adminTranslations = {
         "Introduce un teléfono fijo válido para el país seleccionado.",
       invalidMobilePhoneNumber:
         "Introduce un teléfono móvil válido para el país seleccionado.",
+      requiredField: "Campo obligatorio",
+      phoneRequiredNote:
+        "Es obligatorio indicar al menos un teléfono fijo o móvil.",
+      edit: "Editar",
+      notDefined: "No definido",
     },
   },
 
@@ -1325,6 +1341,9 @@ export const adminTranslations = {
       city: "City",
       countryCode: "Country",
       primaryActionUrl: "Primary action URL",
+      countryCode: "Country",
+      locationUrl: "Google Maps URL",
+      primaryActionUrl: "Primary action URL",
       save: "Save changes",
       saving: "Saving...",
       cancel: "Cancel",
@@ -1395,6 +1414,11 @@ export const adminTranslations = {
       invalidPhoneNumber: "Enter a valid landline for the selected country.",
       invalidMobilePhoneNumber:
         "Enter a valid mobile phone number for the selected country.",
+      requiredField: "Required field",
+      phoneRequiredNote:
+        "At least one landline or mobile phone number is required.",
+      edit: "Edit",
+      notDefined: "Not defined",
     },
   },
 };

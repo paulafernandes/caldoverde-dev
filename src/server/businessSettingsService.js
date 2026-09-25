@@ -76,6 +76,7 @@ export async function getBusinessSettings() {
     fiscalCountryCode: settings.fiscalCountryCode,
     fiscalAdministrativeAreaCode: settings.fiscalAdministrativeAreaCode,
 
+    locationUrl: settings.locationUrl,
     primaryActionUrl: settings.primaryActionUrl,
     defaultLanguage: settings.defaultLanguage,
 
@@ -139,6 +140,7 @@ export async function updateBusinessSettings(input) {
       fiscalCity: input.fiscalCity,
       fiscalCountryCode: input.fiscalCountryCode,
       fiscalAdministrativeAreaCode: input.fiscalAdministrativeAreaCode,
+      locationUrl: input.locationUrl,
       primaryActionUrl: input.primaryActionUrl,
     },
   });
