@@ -138,9 +138,6 @@ export default function AdminSettings({ admin, businessSettings }) {
       if (!initialMobilePhoneCountryCodeRef.current) {
         setMobilePhoneCountryCode(defaultCountryCode);
       }
-
-      setSuccess("settings.saveSuccess");
-      setIsEditing(false);
     });
 
     return () => {
