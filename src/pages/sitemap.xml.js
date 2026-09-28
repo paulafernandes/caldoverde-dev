@@ -8,7 +8,7 @@ function generateSitemap() {
   const urls = languages
     .flatMap((language) =>
       pages.map((page) => {
-        const path = page ? `/${page}` : "/";
+        const path = page ? `/${page}` : "";
 
         return `
   <url>

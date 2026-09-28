@@ -31,7 +31,7 @@ export default function LanguageHome({ menuCategories }) {
     }
 
     if (!supportedLanguages.includes(lang)) {
-      router.replace("/es/about");
+      router.replace("/es");
       return;
     }
 
@@ -39,8 +39,7 @@ export default function LanguageHome({ menuCategories }) {
   }, [lang, router, changeLanguage]);
 
   const seoData = translations[lang].seo;
-  const canonicalUrl = `${SITE_URL}/${lang}/`;
-
+  const canonicalUrl = `${SITE_URL}/${lang}`;
   return (
     <>
       <Head>
@@ -52,13 +51,13 @@ export default function LanguageHome({ menuCategories }) {
 
         <link rel="canonical" href={canonicalUrl} />
 
-        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es/`} />
+        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es`} />
 
-        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt/`} />
+        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt`} />
 
-        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en/`} />
+        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en`} />
 
-        <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}/es/`} />
+        <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}/es`} />
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -96,7 +95,7 @@ export async function getServerSideProps({ params }) {
   if (!supportedLanguages.includes(lang)) {
     return {
       redirect: {
-        destination: "/es/",
+        destination: "/es",
         permanent: false,
       },
     };
