@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { authClient } from "../../lib/authClient";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import { ADMIN_LANGUAGE_OPTIONS } from "../../data/adminTranslations";
 import styles from "../../styles/Admin.module.css";
 
 export default function AdminResetPassword() {
@@ -125,9 +126,11 @@ export default function AdminResetPassword() {
               value={language}
               onChange={(event) => changeLanguage(event.target.value)}
             >
-              <option value="pt">PT</option>
-              <option value="es">ES</option>
-              <option value="en">EN</option>
+              {ADMIN_LANGUAGE_OPTIONS.map(({ code }) => (
+                <option key={code} value={code}>
+                  {code.toUpperCase()}
+                </option>
+              ))}
             </select>
           </div>
 
