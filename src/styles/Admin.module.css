@@ -35,7 +35,7 @@
 }
 
 .subtitle {
-  margin: 10px 0 28px;
+  margin: 25px 0 28px;
   text-align: center;
   color: #637067;
 }
@@ -96,6 +96,27 @@
 .button:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.authLink {
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  color: #315c45;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.authLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+.authLink:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid rgba(49, 92, 69, 0.16);
+  outline-offset: 3px;
 }
 
 .error {
@@ -775,7 +796,7 @@
 }
 
 .successMessage {
-  margin: 0 0 18px;
+  margin: 25px 0 18px;
   padding: 12px 15px;
   border: 1px solid #bcd8c5;
   border-radius: 9px;

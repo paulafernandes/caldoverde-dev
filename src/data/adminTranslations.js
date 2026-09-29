@@ -53,6 +53,40 @@ export const adminTranslations = {
       submitting: "A entrar...",
       invalidCredentials: "Email ou palavra-passe incorretos.",
     },
+    passwordRecovery: {
+      forgotLink: "Esqueci-me da palavra-passe",
+
+      requestPageTitle: "Recuperar palavra-passe | Caldo Verde",
+      requestTitle: "Recuperar palavra-passe",
+      requestSubtitle:
+        "Introduz o email associado à tua conta de administração.",
+      requestSubmit: "Enviar instruções",
+      requestSubmitting: "A enviar...",
+      requestSuccess:
+        "Se existir uma conta associada a este email, receberás as instruções para recuperar a palavra-passe.",
+      requestFailed: "Não foi possível enviar as instruções de recuperação.",
+      backToLogin: "Voltar ao início de sessão",
+
+      resetPageTitle: "Definir nova palavra-passe | Caldo Verde",
+      resetTitle: "Definir nova palavra-passe",
+      resetSubtitle: "Escolhe uma nova palavra-passe para a tua conta.",
+      newPassword: "Nova palavra-passe",
+      confirmPassword: "Confirmar nova palavra-passe",
+      resetSubmit: "Guardar nova palavra-passe",
+      resetSubmitting: "A guardar...",
+      passwordMismatch: "A confirmação da nova palavra-passe não coincide.",
+      invalidToken: "O link de recuperação é inválido ou expirou.",
+      resetFailed: "Não foi possível alterar a palavra-passe.",
+      resetSuccess: "Palavra-passe alterada com sucesso.",
+
+      emailSubject: "Recuperação de palavra-passe — Caldo Verde",
+      emailIntro:
+        "Foi solicitado um pedido de recuperação da palavra-passe do backoffice Caldo Verde.",
+      emailAction: "Definir nova palavra-passe",
+      emailExpires: "Este link é válido durante 1 hora.",
+      emailIgnore:
+        "Se não solicitaste esta alteração, podes ignorar este email.",
+    },
     validation: {
       emailRequired: "O email é obrigatório.",
       emailInvalid: "Introduz um endereço de email válido.",
@@ -522,6 +556,41 @@ export const adminTranslations = {
       submit: "Entrar",
       submitting: "Entrando...",
       invalidCredentials: "El email o la contraseña son incorrectos.",
+    },
+    passwordRecovery: {
+      forgotLink: "He olvidado mi contraseña",
+
+      requestPageTitle: "Recuperar contraseña | Caldo Verde",
+      requestTitle: "Recuperar contraseña",
+      requestSubtitle:
+        "Introduce el email asociado a tu cuenta de administración.",
+      requestSubmit: "Enviar instrucciones",
+      requestSubmitting: "Enviando...",
+      requestSuccess:
+        "Si existe una cuenta asociada a este email, recibirás las instrucciones para recuperar la contraseña.",
+      requestFailed:
+        "No ha sido posible enviar las instrucciones de recuperación.",
+      backToLogin: "Volver al inicio de sesión",
+
+      resetPageTitle: "Definir nueva contraseña | Caldo Verde",
+      resetTitle: "Definir nueva contraseña",
+      resetSubtitle: "Elige una nueva contraseña para tu cuenta.",
+      newPassword: "Nueva contraseña",
+      confirmPassword: "Confirmar nueva contraseña",
+      resetSubmit: "Guardar nueva contraseña",
+      resetSubmitting: "Guardando...",
+      passwordMismatch: "La confirmación de la nueva contraseña no coincide.",
+      invalidToken: "El enlace de recuperación no es válido o ha caducado.",
+      resetFailed: "No ha sido posible cambiar la contraseña.",
+      resetSuccess: "Contraseña actualizada correctamente.",
+
+      emailSubject: "Recuperación de contraseña — Caldo Verde",
+      emailIntro:
+        "Se ha solicitado la recuperación de la contraseña del backoffice de Caldo Verde.",
+      emailAction: "Definir nueva contraseña",
+      emailExpires: "Este enlace es válido durante 1 hora.",
+      emailIgnore:
+        "Si no has solicitado este cambio, puedes ignorar este email.",
     },
     validation: {
       emailRequired: "El email es obligatorio.",
@@ -995,6 +1064,40 @@ export const adminTranslations = {
       submit: "Sign in",
       submitting: "Signing in...",
       invalidCredentials: "Invalid email or password.",
+    },
+    passwordRecovery: {
+      forgotLink: "Forgot your password?",
+
+      requestPageTitle: "Reset password | Caldo Verde",
+      requestTitle: "Reset password",
+      requestSubtitle:
+        "Enter the email associated with your administration account.",
+      requestSubmit: "Send instructions",
+      requestSubmitting: "Sending...",
+      requestSuccess:
+        "If an account exists for this email, you will receive instructions to reset your password.",
+      requestFailed: "We could not send the password reset instructions.",
+      backToLogin: "Back to sign in",
+
+      resetPageTitle: "Set new password | Caldo Verde",
+      resetTitle: "Set new password",
+      resetSubtitle: "Choose a new password for your account.",
+      newPassword: "New password",
+      confirmPassword: "Confirm new password",
+      resetSubmit: "Save new password",
+      resetSubmitting: "Saving...",
+      passwordMismatch: "The password confirmation does not match.",
+      invalidToken: "The password reset link is invalid or has expired.",
+      resetFailed: "We could not change the password.",
+      resetSuccess: "Password changed successfully.",
+
+      emailSubject: "Password reset — Caldo Verde",
+      emailIntro:
+        "A password reset was requested for the Caldo Verde backoffice.",
+      emailAction: "Set new password",
+      emailExpires: "This link is valid for 1 hour.",
+      emailIgnore:
+        "If you did not request this change, you can ignore this email.",
     },
     validation: {
       emailRequired: "Email is required.",

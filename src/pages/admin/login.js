@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Link from "next/link";
 
 import { authClient } from "../../lib/authClient";
 import { getAdminSession } from "../../server/getAdminSession";
@@ -154,11 +155,9 @@ export default function AdminLogin() {
               )}
             </div>
 
-            {errorKey && (
-              <p className={styles.error} role="alert">
-                {t(errorKey)}
-              </p>
-            )}
+            <Link href="/admin/forgot-password" className={styles.authLink}>
+              {t("passwordRecovery.forgotLink")}
+            </Link>
 
             <button
               className={styles.button}
