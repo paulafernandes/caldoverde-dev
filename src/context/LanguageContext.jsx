@@ -1,21 +1,15 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 const LanguageContext = createContext(undefined);
 
 const supportedLanguages = ["pt", "es", "en"];
 
-export function LanguageProvider({ children }) {
-  const [language, setLanguage] = useState("pt");
+export function LanguageProvider({ children, routeLanguage }) {
+  const [selectedLanguage, setLanguage] = useState("pt");
 
-  useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+  const language = supportedLanguages.includes(routeLanguage)
+    ? routeLanguage
+    : selectedLanguage;
 
   const changeLanguage = useCallback((newLanguage) => {
     if (!supportedLanguages.includes(newLanguage)) {
