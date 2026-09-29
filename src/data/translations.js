@@ -12,6 +12,9 @@ const translations = {
       reservation: "Reservar",
       languageLabel: "Selecionar idioma",
       aboutUs: "Sobre nós",
+      openMenu: "Abrir menu",
+      closeMenu: "Fechar menu",
+      mainNavigation: "Navegação principal",
     },
 
     banner: {
@@ -120,6 +123,9 @@ const translations = {
       reservation: "Reservar",
       languageLabel: "Seleccionar idioma",
       aboutUs: "Sobre nosotros",
+      openMenu: "Abrir menú",
+      closeMenu: "Cerrar menú",
+      mainNavigation: "Navegación principal",
     },
 
     banner: {
@@ -228,6 +234,9 @@ const translations = {
       reservation: "Book a table",
       languageLabel: "Select language",
       aboutUs: "About us",
+      openMenu: "Open menu",
+      closeMenu: "Close menu",
+      mainNavigation: "Main navigation",
     },
 
     banner: {

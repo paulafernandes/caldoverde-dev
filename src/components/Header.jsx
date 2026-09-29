@@ -83,7 +83,7 @@ export default function Header() {
           <button
             type="button"
             className={`mobile-menu-button ${isMenuOpen ? "is-active" : ""}`}
-            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-label={isMenuOpen ? text.closeMenu : text.openMenu}
             aria-expanded={isMenuOpen}
             aria-controls="main-navigation"
             onClick={() => setIsMenuOpen((previousValue) => !previousValue)}
@@ -96,7 +96,7 @@ export default function Header() {
           <nav
             id="main-navigation"
             className={`main-navigation ${isMenuOpen ? "is-open" : ""}`}
-            aria-label="Navegação principal"
+            aria-label={text.mainNavigation}
           >
             <a
               className="is-active"
