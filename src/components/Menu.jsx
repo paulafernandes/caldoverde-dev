@@ -11,6 +11,7 @@ const priceLocales = {
 
 export default function Menu({ menuCategories = [] }) {
   const menuListRef = useRef(null);
+  const tabRefs = useRef([]);
 
   const [activeCategoryId, setActiveCategoryId] = useState(
     menuCategories[0]?.id ?? null
@@ -23,6 +24,30 @@ export default function Menu({ menuCategories = [] }) {
     menuCategories.find((category) => category.id === activeCategoryId) ??
     menuCategories[0] ??
     null;
+
+  function handleTabKeyDown(event, index) {
+    let nextIndex;
+
+    switch (event.key) {
+      case "ArrowRight":
+        nextIndex = (index + 1) % menuCategories.length;
+        break;
+      case "ArrowLeft":
+        nextIndex = (index - 1 + menuCategories.length) % menuCategories.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = menuCategories.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    tabRefs.current[nextIndex]?.focus();
+  }
 
   useEffect(() => {
     const isMobile = window.matchMedia("(max-width: 900px)").matches;
@@ -55,18 +80,23 @@ export default function Menu({ menuCategories = [] }) {
               role="tablist"
               aria-label={text.categoriesLabel}
             >
-              {menuCategories.map((category) => {
+              {menuCategories.map((category, index) => {
                 const isActive = category.id === activeCategory.id;
 
                 return (
                   <button
                     key={category.id}
+                    ref={(element) => {
+                      tabRefs.current[index] = element;
+                    }}
                     id={`tab-${category.id}`}
                     type="button"
                     role="tab"
                     className={`menu-tab-button ${isActive ? "is-active" : ""}`}
                     aria-selected={isActive}
                     aria-controls={`panel-${category.id}`}
+                    tabIndex={isActive ? 0 : -1}
+                    onKeyDown={(event) => handleTabKeyDown(event, index)}
                     onClick={() => setActiveCategoryId(category.id)}
                   >
                     {category.label[language]}
@@ -80,6 +110,7 @@ export default function Menu({ menuCategories = [] }) {
               id={`panel-${activeCategory.id}`}
               role="tabpanel"
               aria-labelledby={`tab-${activeCategory.id}`}
+              tabIndex={0}
             >
               <div className="menu-panel-image">
                 <Image
