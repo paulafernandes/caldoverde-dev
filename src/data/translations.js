@@ -21,6 +21,8 @@ const translations = {
       subtitle: "Bem-vindo ao Restaurante Caldo Verde",
       title: "Encontre o melhor sabor da cozinha portuguesa",
       button: "Descobrir mais",
+      pauseVideo: "Pausar vídeo",
+      playVideo: "Reproduzir vídeo",
     },
 
     about: {
@@ -132,6 +134,8 @@ const translations = {
       subtitle: "Bienvenido al Restaurante Caldo Verde",
       title: "Descubre el mejor sabor de la cocina portuguesa",
       button: "Descubrir más",
+      pauseVideo: "Pausar vídeo",
+      playVideo: "Reproducir vídeo",
     },
 
     about: {
@@ -243,6 +247,8 @@ const translations = {
       subtitle: "Welcome to Caldo Verde Restaurant",
       title: "Discover the finest flavours of Portuguese cuisine",
       button: "Discover more",
+      pauseVideo: "Pause video",
+      playVideo: "Play video",
     },
 
     about: {
