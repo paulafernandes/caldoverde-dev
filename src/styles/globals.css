@@ -763,6 +763,7 @@ img {
 .menu-tabs {
   max-width: 950px;
   margin: 0 auto 55px;
+  scroll-margin-top: 110px;
 
   display: flex;
   justify-content: center;
@@ -827,6 +828,10 @@ img {
   box-shadow: 0 15px 40px rgb(17 48 36 / 10%);
 }
 
+.menu-panel[hidden] {
+  display: none;
+}
+
 .menu-panel-image {
   position: sticky;
   top: 90px;
@@ -850,6 +855,12 @@ img {
 
 .menu-list {
   padding: 25px;
+  scroll-margin-top: 110px;
+}
+
+.menu-list:focus {
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: -3px;
 }
 
 .menu-highlight {
@@ -989,11 +1000,14 @@ img {
   }
 
   .menu-tabs {
-    margin-bottom: 38px;
+    max-width: 950px;
+    margin: 0 auto 55px;
+    scroll-margin-top: 110px;
 
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 18px;
   }
 
   .menu-tab-button:last-child:nth-child(odd) {

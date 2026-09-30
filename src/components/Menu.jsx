@@ -12,6 +12,7 @@ const priceLocales = {
 export default function Menu({ menuCategories = [] }) {
   const menuListRef = useRef(null);
   const tabRefs = useRef([]);
+  const [navigationRequest, setNavigationRequest] = useState(null);
 
   const [activeCategoryId, setActiveCategoryId] = useState(
     menuCategories[0]?.id ?? null
@@ -49,21 +50,47 @@ export default function Menu({ menuCategories = [] }) {
     tabRefs.current[nextIndex]?.focus();
   }
 
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+  function activateCategory(event, categoryId) {
+    setActiveCategoryId(categoryId);
 
-    if (!isMobile) {
+    setNavigationRequest({
+      focusContent: event.detail === 0,
+    });
+  }
+
+  useEffect(() => {
+    if (!navigationRequest) {
       return;
     }
 
-    requestAnimationFrame(() => {
-      menuListRef.current?.scrollIntoView({
-        behavior: "smooth",
+    const content = menuListRef.current;
+
+    if (!content) {
+      return;
+    }
+
+    if (navigationRequest.focusContent) {
+      content.focus({ preventScroll: true });
+      content.scrollIntoView({
+        behavior: "instant",
         block: "start",
       });
-    });
-  }, [activeCategoryId]);
+      return;
+    }
 
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+
+    if (isMobile) {
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      content.scrollIntoView({
+        behavior: reduceMotion ? "instant" : "smooth",
+        block: "start",
+      });
+    }
+  }, [navigationRequest]);
   return (
     <section className="menu-group" id="ementa">
       <div className="menu-container">
@@ -77,8 +104,16 @@ export default function Menu({ menuCategories = [] }) {
           <>
             <div
               className="menu-tabs"
-              role="tablist"
+              role="group"
               aria-label={text.categoriesLabel}
+              onFocus={(event) => {
+                if (menuListRef.current?.contains(event.relatedTarget)) {
+                  event.currentTarget.scrollIntoView({
+                    behavior: "instant",
+                    block: "start",
+                  });
+                }
+              }}
             >
               {menuCategories.map((category, index) => {
                 const isActive = category.id === activeCategory.id;
@@ -91,13 +126,11 @@ export default function Menu({ menuCategories = [] }) {
                     }}
                     id={`tab-${category.id}`}
                     type="button"
-                    role="tab"
                     className={`menu-tab-button ${isActive ? "is-active" : ""}`}
-                    aria-selected={isActive}
+                    aria-pressed={isActive}
                     aria-controls={`panel-${category.id}`}
-                    tabIndex={isActive ? 0 : -1}
                     onKeyDown={(event) => handleTabKeyDown(event, index)}
-                    onClick={() => setActiveCategoryId(category.id)}
+                    onClick={(event) => activateCategory(event, category.id)}
                   >
                     {category.label[language]}
                   </button>
@@ -105,58 +138,75 @@ export default function Menu({ menuCategories = [] }) {
               })}
             </div>
 
-            <div
-              className="menu-panel"
-              id={`panel-${activeCategory.id}`}
-              role="tabpanel"
-              aria-labelledby={`tab-${activeCategory.id}`}
-              tabIndex={0}
-            >
-              <div className="menu-panel-image">
-                <Image
-                  src={activeCategory.image}
-                  alt={activeCategory.title[language]}
-                  fill
-                  sizes="(max-width: 900px) 100vw, 50vw"
-                  unoptimized={activeCategory.image.startsWith("/uploads/")}
-                />
-              </div>
-              <div className="menu-list" ref={menuListRef}>
-                {activeCategory.highlightText?.[language] && (
-                  <div className="menu-highlight">
-                    {activeCategory.highlightText[language]}
-                  </div>
-                )}
-                {activeCategory.sections.map((section) => (
-                  <div className="menu-group" key={section.id}>
-                    <h3>{section.title[language]}</h3>
+            {menuCategories.map((category) => {
+              const isActive = category.id === activeCategory.id;
 
-                    <ul>
-                      {section.items.map((item) => (
-                        <li key={item.id} className="menu-dish">
-                          <div className="menu-dish-heading">
-                            <h4>{item.name[language]}</h4>
+              return (
+                <div
+                  key={category.id}
+                  className="menu-panel"
+                  id={`panel-${category.id}`}
+                  hidden={!isActive}
+                >
+                  {isActive && (
+                    <>
+                      <div className="menu-panel-image">
+                        <Image
+                          src={category.image}
+                          alt={category.title[language]}
+                          fill
+                          sizes="(max-width: 900px) 100vw, 50vw"
+                          unoptimized={category.image.startsWith("/uploads/")}
+                        />
+                      </div>
 
-                            <span
-                              className="menu-dish-separator"
-                              aria-hidden="true"
-                            />
-
-                            <span className="menu-dish-price">
-                              {item.price === null
-                                ? text.pricePending
-                                : item.price}
-                            </span>
+                      <div
+                        className="menu-list"
+                        ref={menuListRef}
+                        role="region"
+                        aria-labelledby={`tab-${category.id}`}
+                        tabIndex={-1}
+                      >
+                        {category.highlightText?.[language] && (
+                          <div className="menu-highlight">
+                            {category.highlightText[language]}
                           </div>
+                        )}
 
-                          <p>{item.description[language]}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
+                        {category.sections.map((section) => (
+                          <div className="menu-group" key={section.id}>
+                            <h3>{section.title[language]}</h3>
+
+                            <ul>
+                              {section.items.map((item) => (
+                                <li key={item.id} className="menu-dish">
+                                  <div className="menu-dish-heading">
+                                    <h4>{item.name[language]}</h4>
+
+                                    <span
+                                      className="menu-dish-separator"
+                                      aria-hidden="true"
+                                    />
+
+                                    <span className="menu-dish-price">
+                                      {item.price === null
+                                        ? text.pricePending
+                                        : item.price}
+                                    </span>
+                                  </div>
+
+                                  <p>{item.description[language]}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </>
         )}
       </div>
