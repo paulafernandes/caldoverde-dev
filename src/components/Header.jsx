@@ -35,6 +35,23 @@ export default function Header() {
     setIsMenuOpen(false);
   }
 
+  function skipToContent(event) {
+    const content = document.getElementById("main-content");
+
+    if (!content) {
+      return;
+    }
+
+    event.preventDefault();
+    closeMenu();
+
+    content.focus({ preventScroll: true });
+    content.scrollIntoView({
+      behavior: "instant",
+      block: "start",
+    });
+  }
+
   function selectLanguage(languageCode) {
     changeLanguage(languageCode);
     closeMenu();
@@ -50,9 +67,11 @@ export default function Header() {
       scroll: false,
     });
   }
-
   return (
     <>
+      <a className="skip-link" href="#main-content" onClick={skipToContent}>
+        {text.skipToContent}
+      </a>
       <div className="top-bar">
         <div className="top-bar-container">
           <p>{text.welcome}</p>
@@ -64,7 +83,6 @@ export default function Header() {
           </div>
         </div>
       </div>
-
       <header className="site-header">
         <div className="header-container">
           <Link

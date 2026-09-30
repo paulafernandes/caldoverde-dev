@@ -83,7 +83,7 @@ export default function AboutPage({ lang }) {
 
       <Header />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <section className="about-page">
           <div className="about-page-container">
             <header className="about-page-header">

@@ -47,6 +47,34 @@ img {
   max-width: 100%;
 }
 
+.skip-link {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 2000;
+
+  max-width: calc(100% - 32px);
+  padding: 12px 20px;
+
+  color: var(--color-primary-dark);
+  background-color: #ffffff;
+  border: 2px solid var(--color-primary-dark);
+  border-radius: 6px;
+  font-weight: 600;
+
+  transform: translateY(calc(-100% - 32px));
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 3px solid var(--color-primary-dark);
+  outline-offset: 3px;
+}
+
+#main-content {
+  scroll-margin-top: 110px;
+}
+
 /* Barra superior */
 
 .top-bar {

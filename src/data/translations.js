@@ -15,6 +15,7 @@ const translations = {
       openMenu: "Abrir menu",
       closeMenu: "Fechar menu",
       mainNavigation: "Navegação principal",
+      skipToContent: "Saltar para o conteúdo",
     },
 
     banner: {
@@ -128,6 +129,7 @@ const translations = {
       openMenu: "Abrir menú",
       closeMenu: "Cerrar menú",
       mainNavigation: "Navegación principal",
+      skipToContent: "Saltar al contenido",
     },
 
     banner: {
@@ -241,6 +243,7 @@ const translations = {
       openMenu: "Open menu",
       closeMenu: "Close menu",
       mainNavigation: "Main navigation",
+      skipToContent: "Skip to main content",
     },
 
     banner: {

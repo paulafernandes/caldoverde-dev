@@ -78,7 +78,7 @@ export default function LanguageHome({ menuCategories }) {
 
       <Header />
 
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Banner />
         <About />
         <Menu menuCategories={menuCategories} />
