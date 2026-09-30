@@ -6,6 +6,7 @@ import { authClient } from "../../lib/authClient";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
+import AdminReauthentication from "../../components/admin/AdminReauthentication";
 
 export default function AdminAccount({ admin }) {
   const { t } = useAdminLanguage();
@@ -21,15 +22,8 @@ export default function AdminAccount({ admin }) {
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [isSessionExpired, setIsSessionExpired] = useState(false);
-
-  const [reauthEmail, setReauthEmail] = useState(admin.email);
-  const [reauthPassword, setReauthPassword] = useState("");
-  const [reauthError, setReauthError] = useState("");
-  const [isReauthenticating, setIsReauthenticating] = useState(false);
-  const [showReauthForm, setShowReauthForm] = useState(false);
   const [profileFieldErrors, setProfileFieldErrors] = useState({});
   const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
-  const [reauthFieldErrors, setReauthFieldErrors] = useState({});
 
   useEffect(() => {
     function handleSessionExpired() {
@@ -49,24 +43,6 @@ export default function AdminAccount({ admin }) {
       window.removeEventListener("admin-session-expired", handleSessionExpired);
     };
   }, []);
-  function validateReauthForm() {
-    const errors = {};
-    const trimmedEmail = reauthEmail.trim();
-
-    if (!trimmedEmail) {
-      errors.email = "validation.emailRequired";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      errors.email = "validation.emailInvalid";
-    }
-
-    if (!reauthPassword) {
-      errors.password = "validation.passwordRequired";
-    }
-
-    setReauthFieldErrors(errors);
-
-    return Object.keys(errors).length === 0;
-  }
 
   function validateProfileForm() {
     const errors = {};
@@ -116,34 +92,6 @@ export default function AdminAccount({ admin }) {
     }
 
     return false;
-  }
-
-  async function handleReauthenticate(event) {
-    event.preventDefault();
-
-    setReauthError("");
-    if (!validateReauthForm()) {
-      return;
-    }
-    setIsReauthenticating(true);
-
-    const { error: signInError } = await authClient.signIn.email({
-      email: reauthEmail.trim(),
-      password: reauthPassword,
-    });
-
-    if (signInError) {
-      setReauthError("session.signInFailed");
-
-      setIsReauthenticating(false);
-      return;
-    }
-
-    setIsSessionExpired(false);
-    setShowReauthForm(false);
-    setReauthPassword("");
-    setReauthError("");
-    setIsReauthenticating(false);
   }
 
   async function handleUpdateProfile(event) {
@@ -252,114 +200,11 @@ export default function AdminAccount({ admin }) {
             <p>{t("account.subtitle")}</p>
           </div>
         </section>
-        {isSessionExpired && (
-          <div className={styles.sessionExpiredNotice} role="alert">
-            <strong>{t("session.expiredTitle")}</strong>
-
-            <p>{t("session.expiredDescription")}</p>
-
-            {!showReauthForm ? (
-              <button
-                className={styles.saveButton}
-                type="button"
-                onClick={() => setShowReauthForm(true)}
-              >
-                {t("session.reauthenticate")}
-              </button>
-            ) : (
-              <form
-                className={styles.reauthForm}
-                onSubmit={handleReauthenticate}
-                noValidate
-              >
-                <label>
-                  <span>{t("session.email")}</span>
-
-                  <input
-                    className={styles.editorInput}
-                    type="email"
-                    autoComplete="username"
-                    required
-                    disabled={isReauthenticating}
-                    value={reauthEmail}
-                    onChange={(event) => {
-                      setReauthEmail(event.target.value);
-
-                      if (reauthFieldErrors.email) {
-                        setReauthFieldErrors((current) => ({
-                          ...current,
-                          email: "",
-                        }));
-                      }
-                    }}
-                  />
-                  {reauthFieldErrors.email && (
-                    <p className={styles.errorMessage} role="alert">
-                      {t(reauthFieldErrors.email)}
-                    </p>
-                  )}
-                </label>
-
-                <label>
-                  <span>{t("session.password")}</span>
-
-                  <input
-                    className={styles.editorInput}
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    disabled={isReauthenticating}
-                    value={reauthPassword}
-                    onChange={(event) => {
-                      setReauthPassword(event.target.value);
-
-                      if (reauthFieldErrors.password) {
-                        setReauthFieldErrors((current) => ({
-                          ...current,
-                          password: "",
-                        }));
-                      }
-                    }}
-                  />
-                  {reauthFieldErrors.password && (
-                    <p className={styles.errorMessage} role="alert">
-                      {t(reauthFieldErrors.password)}
-                    </p>
-                  )}
-                </label>
-
-                {reauthError && (
-                  <p className={styles.errorMessage}>{t(reauthError)}</p>
-                )}
-
-                <div className={styles.reauthActions}>
-                  <button
-                    className={styles.cancelButton}
-                    type="button"
-                    disabled={isReauthenticating}
-                    onClick={() => {
-                      setShowReauthForm(false);
-                      setReauthPassword("");
-                      setReauthError("");
-                    }}
-                  >
-                    {t("session.cancel")}
-                  </button>
-
-                  <button
-                    className={styles.saveButton}
-                    type="submit"
-                    disabled={isReauthenticating}
-                  >
-                    {isReauthenticating
-                      ? t("session.signingIn")
-                      : t("session.signIn")}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
+        <AdminReauthentication
+          email={admin.email}
+          isSessionExpired={isSessionExpired}
+          onSuccess={() => setIsSessionExpired(false)}
+        />
         <section className={styles.userFormCard}>
           <h2>{t("account.accountData")}</h2>
 

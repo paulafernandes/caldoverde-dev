@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
 
-import { authClient } from "../../lib/authClient";
 import { getAdminMenuCategories } from "../../server/adminMenuService";
 import { getAdminSession } from "../../server/getAdminSession";
 import styles from "../../styles/Admin.module.css";
@@ -13,6 +12,7 @@ import { adminFetch } from "../../lib/adminFetch";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getAdminApiErrorKey } from "../../lib/adminApiError";
+import AdminReauthentication from "../../components/admin/AdminReauthentication";
 
 const languages = ["pt", "es", "en"];
 
@@ -32,11 +32,6 @@ export default function AdminMenuPage({ admin, menuCategories }) {
   const [saveMessageVariables, setSaveMessageVariables] = useState({});
   const [saveMessageCategoryId, setSaveMessageCategoryId] = useState(null);
   const [isSessionExpired, setIsSessionExpired] = useState(false);
-  const [reauthEmail, setReauthEmail] = useState(admin.email);
-  const [reauthPassword, setReauthPassword] = useState("");
-  const [reauthError, setReauthError] = useState("");
-  const [isReauthenticating, setIsReauthenticating] = useState(false);
-  const [showReauthForm, setShowReauthForm] = useState(false);
   const totalItems = menuCategories.reduce(
     (total, category) => total + category.items.length,
     0
@@ -365,45 +360,6 @@ export default function AdminMenuPage({ admin, menuCategories }) {
     scrollToGlobalSuccess();
   }
 
-  async function handleReauthenticate(event) {
-    event.preventDefault();
-
-    setReauthError("");
-    if (!reauthEmail.trim()) {
-      setReauthError("validation.emailRequired");
-      return;
-    }
-
-    if (!/\S+@\S+\.\S+/.test(reauthEmail.trim())) {
-      setReauthError("validation.emailInvalid");
-      return;
-    }
-
-    if (!reauthPassword) {
-      setReauthError("validation.passwordRequired");
-      return;
-    }
-    setIsReauthenticating(true);
-
-    const { error } = await authClient.signIn.email({
-      email: reauthEmail.trim(),
-      password: reauthPassword,
-    });
-
-    if (error) {
-      setReauthError("session.signInFailed");
-
-      setIsReauthenticating(false);
-      return;
-    }
-
-    setIsSessionExpired(false);
-    setShowReauthForm(false);
-    setReauthPassword("");
-    setReauthError("");
-    setIsReauthenticating(false);
-  }
-
   function toggleCategoryCreator() {
     setEditingItemId(null);
     setEditingCategoryId(null);
@@ -501,93 +457,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
               : t("menu.page.addCategory")}
           </button>
         </div>
-        {isSessionExpired && (
-          <div className={styles.sessionExpiredNotice} role="alert">
-            <strong>{t("session.expiredTitle")}</strong>
 
-            <p>{t("session.expiredDescription")}</p>
-
-            {!showReauthForm ? (
-              <button
-                className={styles.saveButton}
-                type="button"
-                onClick={() => setShowReauthForm(true)}
-              >
-                {t("session.reauthenticate")}
-              </button>
-            ) : (
-              <form
-                className={styles.reauthForm}
-                noValidate
-                onSubmit={handleReauthenticate}
-              >
-                <label>
-                  <span>{t("session.email")}</span>
-
-                  <input
-                    className={styles.editorInput}
-                    type="email"
-                    autoComplete="username"
-                    required
-                    disabled={isReauthenticating}
-                    value={reauthEmail}
-                    onChange={(event) => {
-                      setReauthEmail(event.target.value);
-                      setReauthError("");
-                    }}
-                  />
-                </label>
-
-                <label>
-                  <span>{t("session.password")}</span>
-
-                  <input
-                    className={styles.editorInput}
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    disabled={isReauthenticating}
-                    value={reauthPassword}
-                    onChange={(event) => {
-                      setReauthPassword(event.target.value);
-                      setReauthError("");
-                    }}
-                  />
-                </label>
-
-                {reauthError && (
-                  <p className={styles.errorMessage}>{t(reauthError)}</p>
-                )}
-
-                <div className={styles.reauthActions}>
-                  <button
-                    className={styles.cancelButton}
-                    type="button"
-                    disabled={isReauthenticating}
-                    onClick={() => {
-                      setShowReauthForm(false);
-                      setReauthPassword("");
-                      setReauthError("");
-                    }}
-                  >
-                    {t("session.cancel")}
-                  </button>
-
-                  <button
-                    className={styles.saveButton}
-                    type="submit"
-                    disabled={isReauthenticating}
-                  >
-                    {isReauthenticating
-                      ? t("session.signingIn")
-                      : t("session.signIn")}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
-
+        <AdminReauthentication
+          email={admin.email}
+          isSessionExpired={isSessionExpired}
+          onSuccess={() => setIsSessionExpired(false)}
+        />
         {saveMessage && saveMessageCategoryId === null && (
           <p
             id="menu-global-success"
