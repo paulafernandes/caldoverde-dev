@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useLanguage } from "../../../context/LanguageContext";
 import { SITE_URL } from "../../../config/site";
 import Image from "next/image";
+import { getPublicBusinessSettings } from "../../../server/businessSettingsService";
 
 const supportedLanguages = ["pt", "es", "en"];
 
@@ -32,7 +33,7 @@ const aboutImageAltTexts = {
   },
 };
 
-export default function AboutPage({ lang }) {
+export default function AboutPage({ lang, businessSettings }) {
   const { changeLanguage } = useLanguage();
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function AboutPage({ lang }) {
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
 
-      <Header />
+      <Header businessSettings={businessSettings} />
 
       <main id="main-content" tabIndex={-1}>
         <section className="about-page">
@@ -144,7 +145,7 @@ export default function AboutPage({ lang }) {
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer businessSettings={businessSettings} />
     </>
   );
 }
@@ -160,9 +161,12 @@ export async function getServerSideProps({ params }) {
     };
   }
 
+  const businessSettings = await getPublicBusinessSettings();
+
   return {
     props: {
       lang,
+      businessSettings,
     },
   };
 }

@@ -4,6 +4,7 @@ import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { getBusinessAddressLines } from "../utils/businessAddress";
 
 const languageOptions = [
   {
@@ -23,7 +24,7 @@ const languageOptions = [
   },
 ];
 
-export default function Header() {
+export default function Header({ businessSettings }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuButtonRef = useRef(null);
@@ -32,6 +33,9 @@ export default function Header() {
   const { language, changeLanguage } = useLanguage();
   const text = translations[language].header;
   const imageText = translations[language].images;
+  const address = getBusinessAddressLines(businessSettings, language).join(
+    ", "
+  );
 
   function closeMenu() {
     setIsMenuOpen(false);
@@ -115,9 +119,12 @@ export default function Header() {
           <p>{text.welcome}</p>
 
           <div className="top-bar-contact">
-            <a href="mailto:info@caldoverde.es">info@caldoverde.es</a>
-
-            <span>{text.address}</span>
+            {businessSettings?.email && (
+              <a href={`mailto:${businessSettings.email}`}>
+                {businessSettings.email}
+              </a>
+            )}
+            {address && <span>{address}</span>}
           </div>
         </div>
       </div>

@@ -2,9 +2,6 @@ const translations = {
   pt: {
     header: {
       welcome: "Bem-vindo ao Restaurante Caldo Verde!",
-      address:
-        "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Sevilla, Spain",
-
       home: "Início",
       about: "O Restaurante",
       menu: "Ementa",
@@ -53,13 +50,10 @@ const translations = {
       contactTitle: "Contactos",
       emailLabel: "Email",
       phoneLabel: "Telefone",
-      phone: "603 269 410",
+      mobilePhoneLabel: "Telemóvel",
       addressLabel: "Morada",
-      addressLines: [
-        "Centro Comercial los altos de Simón Verde",
-        "Ctra. San Juan Palomares",
-        "41927 Mairena del Aljarafe, Sevilla, Spain",
-      ],
+      mapLink: "Ver no mapa",
+      opensInNewTab: "abre num novo separador",
       reservationsTitle: "Horário e reservas",
       hoursLabel: "Horário",
       hours: ["Terça a sábado: 08:00 - 20:00", "Domingo: 10:00 - 16:00"],
@@ -116,9 +110,6 @@ const translations = {
   es: {
     header: {
       welcome: "¡Bienvenido al Restaurante Caldo Verde!",
-      address:
-        "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Sevilla, España",
-
       home: "Inicio",
       about: "El restaurante",
       menu: "Carta",
@@ -167,13 +158,10 @@ const translations = {
       contactTitle: "Contacto",
       emailLabel: "Email",
       phoneLabel: "Teléfono",
-      phone: "603 269 410",
+      mobilePhoneLabel: "Móvil",
       addressLabel: "Dirección",
-      addressLines: [
-        "Centro Comercial los altos de Simón Verde",
-        "Ctra. San Juan Palomares",
-        "41927 Mairena del Aljarafe, Sevilla, España",
-      ],
+      mapLink: "Ver en el mapa",
+      opensInNewTab: "se abre en una pestaña nueva",
       reservationsTitle: "Horario y reservas",
       hoursLabel: "Horario",
       hours: ["Martes a sábado: 08:00 - 20:00", "Domingo: 10:00 - 16:00"],
@@ -230,9 +218,6 @@ const translations = {
   en: {
     header: {
       welcome: "Welcome to Caldo Verde Restaurant!",
-      address:
-        "Centro Comercial los altos de Simón Verde, Ctra. San Juan Palomares, 41927 Mairena del Aljarafe, Seville, Spain",
-
       home: "Home",
       about: "The restaurant",
       menu: "Menu",
@@ -281,13 +266,10 @@ const translations = {
       contactTitle: "Contact",
       emailLabel: "Email",
       phoneLabel: "Phone",
-      phone: "603 269 410",
+      mobilePhoneLabel: "Mobile",
       addressLabel: "Address",
-      addressLines: [
-        "Centro Comercial los altos de Simón Verde",
-        "Ctra. San Juan Palomares",
-        "41927 Mairena del Aljarafe, Seville, Spain",
-      ],
+      mapLink: "View on map",
+      opensInNewTab: "opens in a new tab",
       reservationsTitle: "Opening hours and reservations",
       hoursLabel: "Opening hours",
       hours: ["Tuesday to Saturday: 08:00 - 20:00", "Sunday: 10:00 - 16:00"],

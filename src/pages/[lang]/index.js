@@ -12,6 +12,7 @@ import translations from "../../data/translations";
 import { SITE_URL } from "../../config/site";
 import RestaurantSchema from "../../components/RestaurantSchema";
 import { getPublicMenuCategories } from "../../server/menuService";
+import { getPublicBusinessSettings } from "../../server/businessSettingsService";
 
 const supportedLanguages = ["pt", "es", "en"];
 const openGraphLocales = {
@@ -20,7 +21,7 @@ const openGraphLocales = {
   en: "en_GB",
 };
 
-export default function LanguageHome({ menuCategories }) {
+export default function LanguageHome({ menuCategories, businessSettings }) {
   const router = useRouter();
   const { lang } = router.query;
   const { changeLanguage } = useLanguage();
@@ -44,8 +45,6 @@ export default function LanguageHome({ menuCategories }) {
     <>
       <Head>
         <title>{seoData.title}</title>
-
-        <RestaurantSchema url={canonicalUrl} />
 
         <meta name="description" content={seoData.description} />
 
@@ -75,8 +74,12 @@ export default function LanguageHome({ menuCategories }) {
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
-
-      <Header />
+      <RestaurantSchema
+        url={canonicalUrl}
+        businessSettings={businessSettings}
+        language={lang}
+      />
+      <Header businessSettings={businessSettings} />
 
       <main id="main-content" tabIndex={-1}>
         <Banner />
@@ -84,7 +87,7 @@ export default function LanguageHome({ menuCategories }) {
         <Menu menuCategories={menuCategories} />
       </main>
 
-      <Footer />
+      <Footer businessSettings={businessSettings} />
     </>
   );
 }
@@ -101,11 +104,15 @@ export async function getServerSideProps({ params }) {
     };
   }
 
-  const menuCategories = await getPublicMenuCategories();
+  const [menuCategories, businessSettings] = await Promise.all([
+    getPublicMenuCategories(),
+    getPublicBusinessSettings(),
+  ]);
 
   return {
     props: {
       menuCategories,
+      businessSettings,
     },
   };
 }

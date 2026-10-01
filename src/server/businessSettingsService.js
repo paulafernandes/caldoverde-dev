@@ -14,6 +14,28 @@ function mapTranslations(translations) {
   );
 }
 
+export async function getPublicBusinessSettings() {
+  return prisma.businessSettings.findUnique({
+    where: {
+      id: BUSINESS_SETTINGS_ID,
+    },
+
+    select: {
+      name: true,
+      email: true,
+      phone: true,
+      mobilePhone: true,
+      addressLine1: true,
+      addressLine2: true,
+      postalCode: true,
+      city: true,
+      countryCode: true,
+      administrativeAreaCode: true,
+      locationUrl: true,
+    },
+  });
+}
+
 export async function getBusinessSettings() {
   const settings = await prisma.businessSettings.findUnique({
     where: {
