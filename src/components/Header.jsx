@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import translations from "../data/translations";
 import { useRouter } from "next/router";
@@ -26,6 +26,8 @@ const languageOptions = [
 export default function Header() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuButtonRef = useRef(null);
+  const navigationRef = useRef(null);
 
   const { language, changeLanguage } = useLanguage();
   const text = translations[language].header;
@@ -33,6 +35,42 @@ export default function Header() {
 
   function closeMenu() {
     setIsMenuOpen(false);
+  }
+
+  function handleMenuKeyDown(event) {
+    const isMobile = window.matchMedia("(max-width: 900px)").matches;
+
+    if (!isMobile || !isMenuOpen) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeMenu();
+      menuButtonRef.current?.focus();
+      return;
+    }
+
+    if (event.key !== "Tab" || event.shiftKey) {
+      return;
+    }
+
+    const navigation = navigationRef.current;
+
+    if (!navigation) {
+      return;
+    }
+
+    const controls = [
+      ...navigation.querySelectorAll("a[href], button:not([disabled])"),
+    ].filter((element) => element.getClientRects().length > 0);
+
+    const lastControl = controls[controls.length - 1];
+
+    if (event.target === lastControl) {
+      event.preventDefault();
+      menuButtonRef.current?.focus();
+    }
   }
 
   function skipToContent(event) {
@@ -84,7 +122,7 @@ export default function Header() {
         </div>
       </div>
       <header className="site-header">
-        <div className="header-container">
+        <div className="header-container" onKeyDown={handleMenuKeyDown}>
           <Link
             href={`/${language}/`}
             className="header-logo"
@@ -99,6 +137,7 @@ export default function Header() {
           </Link>
 
           <button
+            ref={menuButtonRef}
             type="button"
             className={`mobile-menu-button ${isMenuOpen ? "is-active" : ""}`}
             aria-label={isMenuOpen ? text.closeMenu : text.openMenu}
@@ -112,6 +151,7 @@ export default function Header() {
           </button>
 
           <nav
+            ref={navigationRef}
             id="main-navigation"
             className={`main-navigation ${isMenuOpen ? "is-open" : ""}`}
             aria-label={text.mainNavigation}
