@@ -1,64 +1,81 @@
 import prisma from "./prisma";
 
-const supportedLanguages = ["pt", "es", "en"];
-
 const defaultCategoryImage = "/assets/images/bg/azulejo_portugues.jpg";
 
-function mapTranslations(translations, field) {
-  const valuesByLanguage = Object.fromEntries(
-    translations.map((translation) => [
-      translation.language,
-      translation[field],
-    ])
-  );
+function createTranslationMappers(languages, defaultLanguage) {
+  const languageCodes = languages.map(({ language }) => language);
 
-  const fallback =
-    supportedLanguages
-      .map((language) => valuesByLanguage[language])
-      .find((value) => typeof value === "string" && value.trim().length > 0) ??
-    "";
+  const fallbackOrder = languageCodes.includes(defaultLanguage)
+    ? [
+        defaultLanguage,
+        ...languageCodes.filter((language) => language !== defaultLanguage),
+      ]
+    : languageCodes;
 
-  return Object.fromEntries(
-    supportedLanguages.map((language) => {
-      const value = valuesByLanguage[language];
+  function mapTranslations(translations, field) {
+    const valuesByLanguage = Object.fromEntries(
+      translations.map((translation) => [
+        translation.language,
+        translation[field],
+      ])
+    );
 
-      const translatedValue =
-        typeof value === "string" && value.trim().length > 0 ? value : fallback;
+    const fallback =
+      fallbackOrder
+        .map((language) => valuesByLanguage[language])
+        .find(
+          (value) => typeof value === "string" && value.trim().length > 0
+        ) ?? "";
 
-      return [language, translatedValue];
-    })
-  );
-}
+    return Object.fromEntries(
+      languageCodes.map((language) => {
+        const value = valuesByLanguage[language];
 
-function mapOptionalTranslations(translations, field) {
-  const valuesByLanguage = Object.fromEntries(
-    translations.map((translation) => [
-      translation.language,
-      translation[field] ?? "",
-    ])
-  );
+        const translatedValue =
+          typeof value === "string" && value.trim().length > 0
+            ? value
+            : fallback;
 
-  return Object.fromEntries(
-    supportedLanguages.map((language) => [
-      language,
-      valuesByLanguage[language] ?? "",
-    ])
-  );
-}
+        return [language, translatedValue];
+      })
+    );
+  }
 
-function mapPublicItem(item) {
+  function mapOptionalTranslations(translations, field) {
+    const valuesByLanguage = Object.fromEntries(
+      translations.map((translation) => [
+        translation.language,
+        translation[field] ?? "",
+      ])
+    );
+
+    return Object.fromEntries(
+      languageCodes.map((language) => [
+        language,
+        valuesByLanguage[language] ?? "",
+      ])
+    );
+  }
+
+  function mapPublicItem(item) {
+    return {
+      id: item.id,
+      name: mapTranslations(item.translations, "name"),
+      description: mapTranslations(item.translations, "description"),
+      price: item.priceText,
+    };
+  }
+
   return {
-    id: item.id,
-
-    name: mapTranslations(item.translations, "name"),
-
-    description: mapTranslations(item.translations, "description"),
-
-    price: item.priceText,
+    mapTranslations,
+    mapOptionalTranslations,
+    mapPublicItem,
   };
 }
 
-export async function getPublicMenuCategories() {
+export async function getPublicMenuCategories({ languages, defaultLanguage }) {
+  const { mapTranslations, mapOptionalTranslations, mapPublicItem } =
+    createTranslationMappers(languages, defaultLanguage);
   const categories = await prisma.menuCategory.findMany({
     where: {
       isVisible: true,

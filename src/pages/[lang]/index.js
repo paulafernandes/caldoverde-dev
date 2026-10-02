@@ -129,7 +129,10 @@ export async function getServerSideProps({ params }) {
     return { notFound: true };
   }
 
-  const menuCategories = await getPublicMenuCategories();
+  const menuCategories = await getPublicMenuCategories({
+    languages,
+    defaultLanguage,
+  });
 
   return {
     props: {
