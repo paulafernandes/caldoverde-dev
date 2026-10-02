@@ -1,7 +1,5 @@
 import NextDocument, { Html, Head, Main, NextScript } from "next/document";
 
-const supportedLanguages = ["pt", "es", "en"];
-
 export default function Document({ language }) {
   return (
     <Html lang={language}>
@@ -25,7 +23,7 @@ Document.getInitialProps = async (ctx) => {
 
   let language = "en";
 
-  if (isPublicLanguagePage && supportedLanguages.includes(ctx.query.lang)) {
+  if (isPublicLanguagePage && typeof ctx.query.lang === "string") {
     language = ctx.query.lang;
   } else if (isAdminPage) {
     language = "pt";

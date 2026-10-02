@@ -1,26 +1,50 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 const LanguageContext = createContext(undefined);
 
-const supportedLanguages = ["pt", "es", "en"];
+export function LanguageProvider({
+  children,
+  routeLanguage,
+  businessSettings,
+}) {
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
 
-export function LanguageProvider({ children, routeLanguage }) {
-  const [selectedLanguage, setLanguage] = useState("pt");
+  const languages = useMemo(
+    () => businessSettings?.languages.map(({ language }) => language) ?? [],
+    [businessSettings]
+  );
 
-  const language = supportedLanguages.includes(routeLanguage)
+  const defaultLanguage = languages.includes(businessSettings?.defaultLanguage)
+    ? businessSettings.defaultLanguage
+    : null;
+
+  const language = languages.includes(routeLanguage)
     ? routeLanguage
-    : selectedLanguage;
+    : languages.includes(selectedLanguage)
+      ? selectedLanguage
+      : defaultLanguage;
 
-  const changeLanguage = useCallback((newLanguage) => {
-    if (!supportedLanguages.includes(newLanguage)) {
-      return;
-    }
+  const changeLanguage = useCallback(
+    (newLanguage) => {
+      if (!languages.includes(newLanguage)) {
+        return;
+      }
 
-    setLanguage(newLanguage);
-  }, []);
+      setSelectedLanguage(newLanguage);
+    },
+    [languages]
+  );
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
+    <LanguageContext.Provider
+      value={{ language, languages, defaultLanguage, changeLanguage }}
+    >
       {children}
     </LanguageContext.Provider>
   );

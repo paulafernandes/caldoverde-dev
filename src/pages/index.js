@@ -1,8 +1,24 @@
+import { getPublicBusinessSettings } from "../server/businessSettingsService";
+
 export async function getServerSideProps() {
+  const businessSettings = await getPublicBusinessSettings();
+
+  const defaultLanguage = businessSettings?.defaultLanguage;
+
+  const isDefaultLanguageEnabled = businessSettings?.languages.some(
+    ({ language }) => language === defaultLanguage
+  );
+
+  if (!defaultLanguage || !isDefaultLanguageEnabled) {
+    return {
+      notFound: true,
+    };
+  }
+
   return {
     redirect: {
-      destination: "/es/",
-      permanent: true,
+      destination: `/${defaultLanguage}`,
+      permanent: false,
     },
   };
 }

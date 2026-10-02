@@ -104,6 +104,10 @@ const translations = {
 
         "Porque preservar uma tradição não é mantê-la imóvel. É permitir que continue a viver.",
       ],
+      imageAlt: {
+        memories: "Alexandre com a avó Prazeres",
+        portrait: "Alexandre com a avó Prazeres",
+      },
     },
   },
 
@@ -212,6 +216,10 @@ const translations = {
 
         "Porque preservar una tradición no significa mantenerla inmóvil. Significa permitir que siga viva.",
       ],
+      imageAlt: {
+        memories: "Fotografía antigua de Alexandre con la abuela Prazeres",
+        portrait: "Retrato de Alexandre con la abuela Prazeres",
+      },
     },
   },
 
@@ -320,6 +328,10 @@ const translations = {
 
         "Because preserving a tradition does not mean keeping it unchanged. It means allowing it to live on.",
       ],
+      imageAlt: {
+        memories: "Old photograph of Alexandre with Grandmother Prazeres",
+        portrait: "Portrait of Alexandre with Grandmother Prazeres",
+      },
     },
   },
 };

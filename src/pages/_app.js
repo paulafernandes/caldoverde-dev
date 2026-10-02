@@ -39,7 +39,12 @@ export default function App({ Component, pageProps }) {
   const routeLanguage = isPublicLanguagePage ? router.query.lang : undefined;
 
   return (
-    <LanguageProvider routeLanguage={routeLanguage}>
+    <LanguageProvider
+      routeLanguage={routeLanguage}
+      businessSettings={
+        isPublicLanguagePage ? pageProps.businessSettings : null
+      }
+    >
       <AdminLanguageProvider>
         <DocumentLanguage
           isAdminPage={isAdminPage}

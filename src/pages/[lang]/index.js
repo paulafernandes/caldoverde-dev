@@ -1,46 +1,33 @@
 import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 import Header from "../../components/Header";
 import Banner from "../../components/Banner";
 import About from "../../components/About";
 import Menu from "../../components/Menu";
 import Footer from "../../components/Footer";
-import { useLanguage } from "../../context/LanguageContext";
 import translations from "../../data/translations";
 import { SITE_URL } from "../../config/site";
 import RestaurantSchema from "../../components/RestaurantSchema";
 import { getPublicMenuCategories } from "../../server/menuService";
 import { getPublicBusinessSettings } from "../../server/businessSettingsService";
 
-const supportedLanguages = ["pt", "es", "en"];
-const openGraphLocales = {
-  pt: "pt_PT",
-  es: "es_ES",
-  en: "en_GB",
-};
-
-export default function LanguageHome({ menuCategories, businessSettings }) {
-  const router = useRouter();
-  const { lang } = router.query;
-  const { changeLanguage } = useLanguage();
-
-  useEffect(() => {
-    if (!router.isReady) {
-      return;
-    }
-
-    if (!supportedLanguages.includes(lang)) {
-      router.replace("/es");
-      return;
-    }
-
-    changeLanguage(lang);
-  }, [lang, router, changeLanguage]);
-
+export default function LanguageHome({
+  lang,
+  menuCategories,
+  businessSettings,
+}) {
   const seoData = translations[lang].seo;
   const canonicalUrl = `${SITE_URL}/${lang}`;
+  const pageSuffix = "";
+
+  const availableLanguages = businessSettings.languages.filter(
+    ({ language }) =>
+      Object.hasOwn(translations, language) && translations[language]?.seo
+  );
+
+  const currentLocale = availableLanguages.find(
+    ({ language }) => language === lang
+  )?.locale;
   return (
     <>
       <Head>
@@ -50,13 +37,25 @@ export default function LanguageHome({ menuCategories, businessSettings }) {
 
         <link rel="canonical" href={canonicalUrl} />
 
-        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es`} />
+        {availableLanguages.map(({ language }) => (
+          <link
+            key={`alternate-${language}`}
+            rel="alternate"
+            hrefLang={language}
+            href={`${SITE_URL}/${language}${pageSuffix}`}
+          />
+        ))}
 
-        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt`} />
-
-        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en`} />
-
-        <link rel="alternate" hrefLang="x-default" href={`${SITE_URL}/es`} />
+        {availableLanguages.some(
+          ({ language }) => language === businessSettings.defaultLanguage
+        ) && (
+          <link
+            key="alternate-default"
+            rel="alternate"
+            hrefLang="x-default"
+            href={`${SITE_URL}/${businessSettings.defaultLanguage}${pageSuffix}`}
+          />
+        )}
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -70,7 +69,12 @@ export default function LanguageHome({ menuCategories, businessSettings }) {
 
         <meta property="og:site_name" content="Caldo Verde" />
 
-        <meta property="og:locale" content={openGraphLocales[lang]} />
+        {currentLocale && (
+          <meta
+            property="og:locale"
+            content={currentLocale.replace(/-/g, "_")}
+          />
+        )}
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
@@ -94,23 +98,42 @@ export default function LanguageHome({ menuCategories, businessSettings }) {
 
 export async function getServerSideProps({ params }) {
   const { lang } = params;
+  const businessSettings = await getPublicBusinessSettings();
 
-  if (!supportedLanguages.includes(lang)) {
+  if (!businessSettings) {
+    return { notFound: true };
+  }
+
+  const { languages, defaultLanguage } = businessSettings;
+
+  const isDefaultLanguageEnabled = languages.some(
+    ({ language }) => language === defaultLanguage
+  );
+
+  if (!isDefaultLanguageEnabled) {
+    return { notFound: true };
+  }
+
+  const isLanguageEnabled = languages.some(({ language }) => language === lang);
+
+  if (!isLanguageEnabled) {
     return {
       redirect: {
-        destination: "/es",
+        destination: `/${defaultLanguage}`,
         permanent: false,
       },
     };
   }
 
-  const [menuCategories, businessSettings] = await Promise.all([
-    getPublicMenuCategories(),
-    getPublicBusinessSettings(),
-  ]);
+  if (!Object.hasOwn(translations, lang) || !translations[lang]?.seo) {
+    return { notFound: true };
+  }
+
+  const menuCategories = await getPublicMenuCategories();
 
   return {
     props: {
+      lang,
       menuCategories,
       businessSettings,
     },

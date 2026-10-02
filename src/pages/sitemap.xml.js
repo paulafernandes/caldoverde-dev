@@ -1,22 +1,45 @@
 import { SITE_URL } from "../config/site";
+import translations from "../data/translations";
+import { getPublicBusinessSettings } from "../server/businessSettingsService";
 
-const languages = ["es", "pt", "en"];
+function escapeXml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
-function generateSitemap() {
-  const pages = ["", "about"];
-
+function generateSitemap(languages) {
   const urls = languages
-    .flatMap((language) =>
-      pages.map((page) => {
-        const path = page ? `/${page}` : "";
+    .flatMap(({ language }) => {
+      if (!Object.hasOwn(translations, language)) {
+        return [];
+      }
 
-        return `
-  <url>
-    <loc>${SITE_URL}/${language}${path}</loc>
+      const pages = [];
+
+      if (translations[language]?.seo) {
+        pages.push("");
+      }
+
+      if (
+        translations[language]?.aboutPage?.seo &&
+        translations[language]?.aboutPage?.imageAlt
+      ) {
+        pages.push("/about");
+      }
+
+      return pages.map((path) => {
+        const url = `${SITE_URL}/${encodeURIComponent(language)}${path}`;
+
+        return `  <url>
+    <loc>${escapeXml(url)}</loc>
   </url>`;
-      })
-    )
-    .join("");
+      });
+    })
+    .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -25,11 +48,24 @@ ${urls}
 }
 
 export async function getServerSideProps({ res }) {
-  const sitemap = generateSitemap();
+  const businessSettings = await getPublicBusinessSettings();
 
-  res.setHeader("Content-Type", "text/xml");
-  res.write(sitemap);
-  res.end();
+  if (!businessSettings) {
+    return { notFound: true };
+  }
+
+  const { languages, defaultLanguage } = businessSettings;
+
+  const isDefaultLanguageEnabled = languages.some(
+    ({ language }) => language === defaultLanguage
+  );
+
+  if (!isDefaultLanguageEnabled) {
+    return { notFound: true };
+  }
+
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.end(generateSitemap(languages));
 
   return {
     props: {},

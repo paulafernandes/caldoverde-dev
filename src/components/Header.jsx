@@ -5,24 +5,7 @@ import translations from "../data/translations";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { getBusinessAddressLines } from "../utils/businessAddress";
-
-const languageOptions = [
-  {
-    code: "pt",
-    flag: "🇵🇹",
-    label: "Português",
-  },
-  {
-    code: "es",
-    flag: "🇪🇸",
-    label: "Español",
-  },
-  {
-    code: "en",
-    flag: "🇬🇧",
-    label: "English",
-  },
-];
+import { getBusinessLanguageOption } from "../utils/businessLanguages";
 
 export default function Header({ businessSettings }) {
   const router = useRouter();
@@ -35,6 +18,9 @@ export default function Header({ businessSettings }) {
   const imageText = translations[language].images;
   const address = getBusinessAddressLines(businessSettings, language).join(
     ", "
+  );
+  const languageOptions = (businessSettings?.languages ?? []).map(
+    getBusinessLanguageOption
   );
 
   function closeMenu() {

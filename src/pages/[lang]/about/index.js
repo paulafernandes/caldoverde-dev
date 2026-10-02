@@ -3,46 +3,26 @@ import Head from "next/head";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import translations from "../../../data/translations";
-import { useEffect } from "react";
-
-import { useLanguage } from "../../../context/LanguageContext";
 import { SITE_URL } from "../../../config/site";
 import Image from "next/image";
 import { getPublicBusinessSettings } from "../../../server/businessSettingsService";
 
-const supportedLanguages = ["pt", "es", "en"];
-
-const openGraphLocales = {
-  pt: "pt_PT",
-  es: "es_ES",
-  en: "en_GB",
-};
-
-const aboutImageAltTexts = {
-  pt: {
-    memories: "Alexandre com a avó Prazeres",
-    portrait: "Alexandre com a avó Prazeres",
-  },
-  es: {
-    memories: "Fotografía antigua de Alexandre con la abuela Prazeres",
-    portrait: "Retrato de Alexandre con la abuela Prazeres",
-  },
-  en: {
-    memories: "Old photograph of Alexandre with Grandmother Prazeres",
-    portrait: "Portrait of Alexandre with Grandmother Prazeres",
-  },
-};
-
 export default function AboutPage({ lang, businessSettings }) {
-  const { changeLanguage } = useLanguage();
-
-  useEffect(() => {
-    changeLanguage(lang);
-  }, [lang, changeLanguage]);
-
   const text = translations[lang].aboutPage;
   const seoData = text.seo;
   const canonicalUrl = `${SITE_URL}/${lang}/about`;
+  const pageSuffix = "/about";
+
+  const availableLanguages = businessSettings.languages.filter(
+    ({ language }) =>
+      Object.hasOwn(translations, language) &&
+      translations[language]?.aboutPage?.seo &&
+      translations[language]?.aboutPage?.imageAlt
+  );
+
+  const currentLocale = availableLanguages.find(
+    ({ language }) => language === lang
+  )?.locale;
 
   return (
     <>
@@ -53,18 +33,25 @@ export default function AboutPage({ lang, businessSettings }) {
 
         <link rel="canonical" href={canonicalUrl} />
 
-        <link rel="alternate" hrefLang="es" href={`${SITE_URL}/es/about`} />
+        {availableLanguages.map(({ language }) => (
+          <link
+            key={`alternate-${language}`}
+            rel="alternate"
+            hrefLang={language}
+            href={`${SITE_URL}/${language}${pageSuffix}`}
+          />
+        ))}
 
-        <link rel="alternate" hrefLang="pt" href={`${SITE_URL}/pt/about`} />
-
-        <link rel="alternate" hrefLang="en" href={`${SITE_URL}/en/about`} />
-
-        <link
-          rel="alternate"
-          hrefLang="x-default"
-          href={`${SITE_URL}/es/about`}
-        />
-
+        {availableLanguages.some(
+          ({ language }) => language === businessSettings.defaultLanguage
+        ) && (
+          <link
+            key="alternate-default"
+            rel="alternate"
+            hrefLang="x-default"
+            href={`${SITE_URL}/${businessSettings.defaultLanguage}${pageSuffix}`}
+          />
+        )}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <meta property="og:type" content="website" />
@@ -77,7 +64,12 @@ export default function AboutPage({ lang, businessSettings }) {
 
         <meta property="og:site_name" content="Caldo Verde" />
 
-        <meta property="og:locale" content={openGraphLocales[lang]} />
+        {currentLocale && (
+          <meta
+            property="og:locale"
+            content={currentLocale.replace(/-/g, "_")}
+          />
+        )}
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
@@ -105,8 +97,8 @@ export default function AboutPage({ lang, businessSettings }) {
               >
                 <Image
                   src="/assets/images/bg/alexandre_avo_prazeres.png"
-                  alt={aboutImageAltTexts[lang].memories}
-                  title={aboutImageAltTexts[lang].memories}
+                  alt={text.imageAlt.memories}
+                  title={text.imageAlt.memories}
                   width={941}
                   height={1354}
                   sizes="(max-width: 750px) calc(100vw - 32px), 345px"
@@ -127,8 +119,8 @@ export default function AboutPage({ lang, businessSettings }) {
               >
                 <Image
                   src="/assets/images/bg/avo-prazeres.png"
-                  alt={aboutImageAltTexts[lang].portrait}
-                  title={aboutImageAltTexts[lang].portrait}
+                  alt={text.imageAlt.portrait}
+                  title={text.imageAlt.portrait}
                   width={941}
                   height={1431}
                   sizes="(max-width: 750px) calc(100vw - 32px), 345px"
@@ -149,19 +141,43 @@ export default function AboutPage({ lang, businessSettings }) {
     </>
   );
 }
+
 export async function getServerSideProps({ params }) {
   const { lang } = params;
+  const businessSettings = await getPublicBusinessSettings();
 
-  if (!supportedLanguages.includes(lang)) {
+  if (!businessSettings) {
+    return { notFound: true };
+  }
+
+  const { languages, defaultLanguage } = businessSettings;
+
+  const isDefaultLanguageEnabled = languages.some(
+    ({ language }) => language === defaultLanguage
+  );
+
+  if (!isDefaultLanguageEnabled) {
+    return { notFound: true };
+  }
+
+  const isLanguageEnabled = languages.some(({ language }) => language === lang);
+
+  if (!isLanguageEnabled) {
     return {
       redirect: {
-        destination: "/es/about",
+        destination: `/${defaultLanguage}/about`,
         permanent: false,
       },
     };
   }
 
-  const businessSettings = await getPublicBusinessSettings();
+  if (
+    !Object.hasOwn(translations, lang) ||
+    !translations[lang]?.aboutPage?.seo ||
+    !translations[lang]?.aboutPage?.imageAlt
+  ) {
+    return { notFound: true };
+  }
 
   return {
     props: {

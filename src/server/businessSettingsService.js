@@ -32,6 +32,18 @@ export async function getPublicBusinessSettings() {
       countryCode: true,
       administrativeAreaCode: true,
       locationUrl: true,
+      defaultLanguage: true,
+      languages: {
+        where: {
+          isEnabled: true,
+        },
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+        select: {
+          language: true,
+          locale: true,
+          position: true,
+        },
+      },
     },
   });
 }
