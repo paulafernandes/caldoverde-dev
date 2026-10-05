@@ -97,6 +97,17 @@ export default async function handler(request, response) {
       subcategory,
     });
   } catch (error) {
+    if (error.code === "INVALID_MENU_LANGUAGE") {
+      return response.status(400).json({
+        error: "INVALID_SUBCATEGORY_DATA",
+        details: [
+          {
+            field: `translations.${error.language}`,
+            code: "INVALID_LANGUAGE",
+          },
+        ],
+      });
+    }
     return response.status(500).json({
       error: "SUBCATEGORY_UPDATE_FAILED",
     });

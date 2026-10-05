@@ -104,6 +104,17 @@ export default async function handler(request, response) {
       category: updatedCategory,
     });
   } catch (error) {
+    if (error.code === "INVALID_MENU_LANGUAGE") {
+      return response.status(400).json({
+        error: "INVALID_CATEGORY_DATA",
+        details: [
+          {
+            field: `translations.${error.language}`,
+            code: "INVALID_LANGUAGE",
+          },
+        ],
+      });
+    }
     return response.status(500).json({
       error: "CATEGORY_UPDATE_FAILED",
     });

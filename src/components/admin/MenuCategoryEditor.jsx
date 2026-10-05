@@ -1,25 +1,12 @@
 import { useEffect, useState } from "react";
-import styles from "../../styles/Admin.module.css";
 import Image from "next/image";
 import MenuSubcategoryEditor from "./MenuSubcategoryEditor";
 import { adminFetch } from "../../lib/adminFetch";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getAdminApiErrorKey } from "../../lib/adminApiError";
+import { getBusinessLanguageOption } from "../../utils/businessLanguages";
 
-const languages = [
-  {
-    code: "pt",
-    label: "Português",
-  },
-  {
-    code: "es",
-    label: "Español",
-  },
-  {
-    code: "en",
-    label: "English",
-  },
-];
+import styles from "../../styles/Admin.module.css";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
@@ -49,31 +36,35 @@ export default function MenuCategoryEditor({
   onSubcategoriesChanged,
   onSubcategoryCreationFinished,
   startCreatingSubcategory = false,
+  businessLanguages,
+  defaultLanguage,
 }) {
   const { language, t } = useAdminLanguage();
+  const languages = businessLanguages.map(getBusinessLanguageOption);
+
+  const fallbackLanguages = [
+    language,
+    defaultLanguage,
+    ...languages.map(({ code }) => code),
+  ];
   const isCreating = category === null;
   const formIdentifier = isCreating ? "new" : category.id;
   const [formValues, setFormValues] = useState(() => {
-    if (isCreating && initialFormValues) {
-      return initialFormValues;
-    }
+    const initialValues = isCreating ? initialFormValues : category;
 
     return {
-      imagePath: category?.imagePath ?? "",
+      imagePath: initialValues?.imagePath ?? "",
+      isVisible: initialValues?.isVisible ?? false,
 
-      isVisible: category?.isVisible ?? false,
-
-      translations: category
-        ? {
-            pt: { ...category.translations.pt },
-            es: { ...category.translations.es },
-            en: { ...category.translations.en },
-          }
-        : {
-            pt: createEmptyTranslation(),
-            es: createEmptyTranslation(),
-            en: createEmptyTranslation(),
+      translations: Object.fromEntries(
+        languages.map(({ code }) => [
+          code,
+          {
+            ...createEmptyTranslation(),
+            ...initialValues?.translations?.[code],
           },
+        ])
+      ),
     };
   });
   const [errorMessage, setErrorMessage] = useState("");
@@ -183,7 +174,8 @@ export default function MenuCategoryEditor({
     setErrorMessage("");
 
     const hasCompleteTranslation = languages.some(({ code }) => {
-      const translation = formValues.translations[code];
+      const translation =
+        formValues.translations[code] ?? createEmptyTranslation();
 
       return translation.label.trim() && translation.title.trim();
     });
@@ -221,7 +213,12 @@ export default function MenuCategoryEditor({
         body: JSON.stringify({
           imagePath: imagePath || null,
           isVisible: formValues.isVisible,
-          translations: formValues.translations,
+          translations: Object.fromEntries(
+            languages.map(({ code }) => [
+              code,
+              formValues.translations[code] ?? createEmptyTranslation(),
+            ])
+          ),
         }),
       });
 
@@ -342,10 +339,9 @@ export default function MenuCategoryEditor({
     }
   }
   const categoryName =
-    category?.translations?.[language]?.label ||
-    category?.translations?.pt?.label ||
-    category?.translations?.es?.label ||
-    category?.translations?.en?.label ||
+    fallbackLanguages
+      .map((code) => category?.translations?.[code]?.label)
+      .find((value) => typeof value === "string" && value.trim().length > 0) ||
     category?.slug ||
     "";
   return (
@@ -365,7 +361,8 @@ export default function MenuCategoryEditor({
       </div>
       <div className={styles.translationEditorList}>
         {languages.map((language) => {
-          const translation = formValues.translations[language.code];
+          const translation =
+            formValues.translations[language.code] ?? createEmptyTranslation();
           const labelId = `category-${formIdentifier}-${language.code}-label`;
           const titleId = `category-${formIdentifier}-${language.code}-title`;
           const highlightTextId = `category-${formIdentifier}-${language.code}-highlightText`;
@@ -473,10 +470,12 @@ export default function MenuCategoryEditor({
 
             {category.subcategories.map((subcategory, subcategoryIndex) => {
               const subcategoryName =
-                subcategory.translations[language]?.name ||
-                subcategory.translations.pt.name ||
-                subcategory.translations.es.name ||
-                subcategory.translations.en.name ||
+                fallbackLanguages
+                  .map((code) => subcategory.translations[code]?.name)
+                  .find(
+                    (value) =>
+                      typeof value === "string" && value.trim().length > 0
+                  ) ||
                 t("menu.subcategory.fallbackWithPosition", {
                   position: subcategory.position,
                 });
@@ -568,6 +567,8 @@ export default function MenuCategoryEditor({
                       subcategory={subcategory}
                       categoryId={category.id}
                       onCancel={() => setEditingSubcategoryId(null)}
+                      businessLanguages={businessLanguages}
+                      defaultLanguage={defaultLanguage}
                       onSaved={async () => {
                         setEditingSubcategoryId(null);
 
@@ -593,6 +594,8 @@ export default function MenuCategoryEditor({
                 embedded
                 subcategory={null}
                 categoryId={category.id}
+                businessLanguages={businessLanguages}
+                defaultLanguage={defaultLanguage}
                 onCancel={() => {
                   setIsCreatingSubcategory(false);
                   onSubcategoryCreationFinished?.();

@@ -1,7 +1,5 @@
 import prisma from "./prisma";
 
-const supportedLanguages = ["pt", "es", "en"];
-
 function createSlug(value) {
   const slug = value
     .normalize("NFD")
@@ -38,9 +36,9 @@ async function createUniqueCategorySlug(transaction, label) {
   return slug;
 }
 
-function mapTranslationRecords(translations, fields) {
+function mapTranslationRecords(translations, fields, languageCodes) {
   return Object.fromEntries(
-    supportedLanguages.map((language) => {
+    languageCodes.map((language) => {
       const translation = translations.find(
         (record) => record.language === language
       );
@@ -54,14 +52,18 @@ function mapTranslationRecords(translations, fields) {
   );
 }
 
-function mapAdminSubcategory(subcategory) {
+function mapAdminSubcategory(subcategory, languageCodes) {
   return {
     id: subcategory.id,
     categoryId: subcategory.categoryId,
     position: subcategory.position,
     isVisible: subcategory.isVisible,
 
-    translations: mapTranslationRecords(subcategory.translations, ["name"]),
+    translations: mapTranslationRecords(
+      subcategory.translations,
+      ["name"],
+      languageCodes
+    ),
   };
 }
 
@@ -88,7 +90,7 @@ async function subcategoryBelongsToCategory(
   return Boolean(subcategory);
 }
 
-export async function getAdminMenuCategories() {
+export async function getAdminMenuCategories(languageCodes) {
   const categories = await prisma.menuCategory.findMany({
     orderBy: [
       {
@@ -141,14 +143,16 @@ export async function getAdminMenuCategories() {
     position: category.position,
     isVisible: category.isVisible,
 
-    subcategories: category.subcategories.map(mapAdminSubcategory),
+    subcategories: category.subcategories.map((subcategory) =>
+      mapAdminSubcategory(subcategory, languageCodes)
+    ),
 
-    translations: mapTranslationRecords(category.translations, [
-      "label",
-      "title",
-      "highlightText",
-    ]),
-
+    translations: mapTranslationRecords(
+      category.translations,
+      ["label", "title", "highlightText"],
+      languageCodes
+    ),
+http://87.106.236.149/es
     items: category.items.map((item) => ({
       id: item.id,
       subcategoryId: item.subcategoryId,
@@ -157,12 +161,54 @@ export async function getAdminMenuCategories() {
       position: item.position,
       isVisible: item.isVisible,
 
-      translations: mapTranslationRecords(item.translations, [
-        "name",
-        "description",
-      ]),
+      translations: mapTranslationRecords(
+        item.translations,
+        ["name", "description"],
+        languageCodes
+      ),
     })),
   }));
+}
+
+async function getMenuLanguageConfiguration(transaction, translations) {
+  const settings = await transaction.businessSettings.findUnique({
+    where: {
+      id: "business",
+    },
+
+    select: {
+      defaultLanguage: true,
+
+      languages: {
+        orderBy: [{ position: "asc" }, { id: "asc" }],
+
+        select: {
+          language: true,
+        },
+      },
+    },
+  });
+
+  if (!settings || settings.languages.length === 0) {
+    throw new Error("BUSINESS_LANGUAGES_NOT_CONFIGURED");
+  }
+
+  const languageCodes = settings.languages.map(({ language }) => language);
+  const allowedLanguages = new Set(languageCodes);
+
+  for (const language of Object.keys(translations)) {
+    if (!allowedLanguages.has(language)) {
+      const error = new Error("INVALID_MENU_LANGUAGE");
+      error.code = "INVALID_MENU_LANGUAGE";
+      error.language = language;
+      throw error;
+    }
+  }
+
+  return {
+    languageCodes,
+    defaultLanguage: settings.defaultLanguage,
+  };
 }
 
 export async function updateAdminMenuItem(itemId, input) {
@@ -192,6 +238,11 @@ export async function updateAdminMenuItem(itemId, input) {
       return false;
     }
 
+    const { languageCodes } = await getMenuLanguageConfiguration(
+      transaction,
+      input.translations
+    );
+
     await transaction.menuItem.update({
       where: {
         id: itemId,
@@ -205,9 +256,7 @@ export async function updateAdminMenuItem(itemId, input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuItemTranslation.upsert({
         where: {
           itemId_language: {
@@ -248,10 +297,11 @@ export async function updateAdminMenuItem(itemId, input) {
       position: updatedItem.position,
       isVisible: updatedItem.isVisible,
 
-      translations: mapTranslationRecords(updatedItem.translations, [
-        "name",
-        "description",
-      ]),
+      translations: mapTranslationRecords(
+        updatedItem.translations,
+        ["name", "description"],
+        languageCodes
+      ),
     };
   });
 }
@@ -272,6 +322,11 @@ export async function updateAdminMenuCategory(categoryId, input) {
       return null;
     }
 
+    const { languageCodes } = await getMenuLanguageConfiguration(
+      transaction,
+      input.translations
+    );
+
     await transaction.menuCategory.update({
       where: {
         id: categoryId,
@@ -283,9 +338,7 @@ export async function updateAdminMenuCategory(categoryId, input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuCategoryTranslation.upsert({
         where: {
           categoryId_language: {
@@ -327,11 +380,11 @@ export async function updateAdminMenuCategory(categoryId, input) {
       position: updatedCategory.position,
       isVisible: updatedCategory.isVisible,
 
-      translations: mapTranslationRecords(updatedCategory.translations, [
-        "label",
-        "title",
-        "highlightText",
-      ]),
+      translations: mapTranslationRecords(
+        updatedCategory.translations,
+        ["label", "title", "highlightText"],
+        languageCodes
+      ),
     };
   });
 }
@@ -361,6 +414,10 @@ export async function createAdminMenuItem(input) {
     if (!hasValidSubcategory) {
       return false;
     }
+    const { languageCodes } = await getMenuLanguageConfiguration(
+      transaction,
+      input.translations
+    );
 
     const positionResult = await transaction.menuItem.aggregate({
       where: {
@@ -385,9 +442,7 @@ export async function createAdminMenuItem(input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuItemTranslation.create({
         data: {
           itemId: createdItem.id,
@@ -417,10 +472,11 @@ export async function createAdminMenuItem(input) {
       position: item.position,
       isVisible: item.isVisible,
 
-      translations: mapTranslationRecords(item.translations, [
-        "name",
-        "description",
-      ]),
+      translations: mapTranslationRecords(
+        item.translations,
+        ["name", "description"],
+        languageCodes
+      ),
     };
   });
 }
@@ -666,10 +722,17 @@ export async function moveAdminMenuCategory(categoryId, direction) {
 
 export async function createAdminMenuCategory(input) {
   return prisma.$transaction(async (transaction) => {
-    const slugSource =
-      input.translations.pt.label ||
-      input.translations.es.label ||
-      input.translations.en.label;
+    const { languageCodes, defaultLanguage } =
+      await getMenuLanguageConfiguration(transaction, input.translations);
+
+    const fallbackOrder = [
+      defaultLanguage,
+      ...languageCodes.filter((language) => language !== defaultLanguage),
+    ];
+
+    const slugSource = fallbackOrder
+      .map((language) => input.translations[language]?.label)
+      .find((label) => typeof label === "string" && label.trim().length > 0);
 
     const slug = await createUniqueCategorySlug(transaction, slugSource);
 
@@ -690,9 +753,7 @@ export async function createAdminMenuCategory(input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuCategoryTranslation.create({
         data: {
           categoryId: createdCategory.id,
@@ -721,11 +782,11 @@ export async function createAdminMenuCategory(input) {
       position: category.position,
       isVisible: category.isVisible,
 
-      translations: mapTranslationRecords(category.translations, [
-        "label",
-        "title",
-        "highlightText",
-      ]),
+      translations: mapTranslationRecords(
+        category.translations,
+        ["label", "title", "highlightText"],
+        languageCodes
+      ),
 
       subcategories: [],
       items: [],
@@ -818,6 +879,10 @@ export async function createAdminMenuSubcategory(input) {
     if (!category) {
       return null;
     }
+    const { languageCodes } = await getMenuLanguageConfiguration(
+      transaction,
+      input.translations
+    );
 
     const positionResult = await transaction.menuSubcategory.aggregate({
       where: {
@@ -839,9 +904,7 @@ export async function createAdminMenuSubcategory(input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuSubcategoryTranslation.create({
         data: {
           subcategoryId: createdSubcategory.id,
@@ -861,7 +924,7 @@ export async function createAdminMenuSubcategory(input) {
       },
     });
 
-    return mapAdminSubcategory(subcategory);
+    return mapAdminSubcategory(subcategory, languageCodes);
   });
 }
 
@@ -880,6 +943,10 @@ export async function updateAdminMenuSubcategory(subcategoryId, input) {
     if (!existingSubcategory) {
       return null;
     }
+    const { languageCodes } = await getMenuLanguageConfiguration(
+      transaction,
+      input.translations
+    );
 
     await transaction.menuSubcategory.update({
       where: {
@@ -891,9 +958,7 @@ export async function updateAdminMenuSubcategory(subcategoryId, input) {
       },
     });
 
-    for (const language of supportedLanguages) {
-      const translation = input.translations[language];
-
+    for (const [language, translation] of Object.entries(input.translations)) {
       await transaction.menuSubcategoryTranslation.upsert({
         where: {
           subcategoryId_language: {
@@ -924,7 +989,7 @@ export async function updateAdminMenuSubcategory(subcategoryId, input) {
       },
     });
 
-    return mapAdminSubcategory(updatedSubcategory);
+    return mapAdminSubcategory(updatedSubcategory, languageCodes);
   });
 }
 

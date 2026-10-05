@@ -1,10 +1,8 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { Fragment, useEffect, useState } from "react";
-
 import { getAdminMenuCategories } from "../../server/adminMenuService";
 import { getAdminSession } from "../../server/getAdminSession";
-import styles from "../../styles/Admin.module.css";
 import MenuItemEditor from "../../components/admin/MenuItemEditor";
 import MenuCategoryEditor from "../../components/admin/MenuCategoryEditor";
 import Image from "next/image";
@@ -13,11 +11,20 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getAdminApiErrorKey } from "../../lib/adminApiError";
 import AdminReauthentication from "../../components/admin/AdminReauthentication";
+import { getBusinessSettings } from "../../server/businessSettingsService";
 
-const languages = ["pt", "es", "en"];
+import styles from "../../styles/Admin.module.css";
 
-export default function AdminMenuPage({ admin, menuCategories }) {
+export default function AdminMenuPage({
+  admin,
+  menuCategories,
+  businessLanguages,
+  defaultLanguage,
+}) {
   const { language, t } = useAdminLanguage();
+  const languages = businessLanguages.map(({ language }) => language);
+  const fallbackLanguages = [language, defaultLanguage, ...languages];
+
   const router = useRouter();
   const [expandedCategoryId, setExpandedCategoryId] = useState(
     menuCategories[0]?.id ?? null
@@ -493,6 +500,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
               onSubcategoryCreationFinished={() =>
                 setNewSubcategoryCategoryId(null)
               }
+              businessLanguages={businessLanguages}
+              defaultLanguage={defaultLanguage}
             />
           </section>
         )}
@@ -510,11 +519,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
               const isCreatingItem = creatingItem?.categoryId === category.id;
               const itemCreatorId = `item-creator-${category.id}`;
               const categoryName =
-                category.translations[language]?.label ||
-                category.translations.pt.label ||
-                category.translations.es.label ||
-                category.translations.en.label ||
-                category.slug;
+                fallbackLanguages
+                  .map((code) => category.translations[code]?.label)
+                  .find(
+                    (value) =>
+                      typeof value === "string" && value.trim().length > 0
+                  ) || category.slug;
               const itemsWithoutSubcategory = category.items.filter(
                 (item) => item.subcategoryId === null
               );
@@ -532,9 +542,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                 ...category.subcategories.map((subcategory) => ({
                   id: `subcategory-${subcategory.id}`,
                   name:
-                    subcategory.translations.pt.name ||
-                    subcategory.translations.es.name ||
-                    subcategory.translations.en.name ||
+                    fallbackLanguages
+                      .map((code) => subcategory.translations[code]?.name)
+                      .find(
+                        (value) =>
+                          typeof value === "string" && value.trim().length > 0
+                      ) ||
                     t("menu.subcategory.fallbackWithPosition", {
                       position: subcategory.position,
                     }),
@@ -621,10 +634,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                         >
                           <span className={styles.categoryIdentity}>
                             <span className={styles.categoryTitleLine}>
-                              <strong>
-                                {category.translations.pt.label ||
-                                  category.slug}
-                              </strong>
+                              <strong>{categoryName}</strong>
 
                               <span className={styles.categoryItemCount}>
                                 - {category.items.length}{" "}
@@ -722,7 +732,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                             {languages.map((language) => (
                               <span key={language}>
                                 <strong>{language.toUpperCase()}</strong>{" "}
-                                {category.translations[language].label}
+                                {category.translations[language]?.label ?? ""}
                               </span>
                             ))}
                           </div>
@@ -753,6 +763,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                               onSubcategoryCreationFinished={() =>
                                 setNewSubcategoryCategoryId(null)
                               }
+                              businessLanguages={businessLanguages}
+                              defaultLanguage={defaultLanguage}
                             />
                           </div>
                         )}
@@ -765,6 +777,8 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                               item={null}
                               categoryId={category.id}
                               subcategories={category.subcategories}
+                              businessLanguages={businessLanguages}
+                              defaultLanguage={defaultLanguage}
                               initialSubcategoryId={
                                 creatingItem?.subcategoryId ?? null
                               }
@@ -792,12 +806,29 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                   const isEditing = editingItemId === item.id;
 
                                   const editorId = `item-editor-${item.id}`;
+                                  const primaryLanguage =
+                                    fallbackLanguages.find((code) =>
+                                      item.translations[code]?.name?.trim()
+                                    );
+
+                                  const primaryTranslation = primaryLanguage
+                                    ? item.translations[primaryLanguage]
+                                    : null;
+
                                   const itemName =
-                                    item.translations[language]?.name ||
-                                    item.translations.pt.name ||
-                                    item.translations.es.name ||
-                                    item.translations.en.name ||
-                                    `#${item.id}`;
+                                    primaryTranslation?.name || `#${item.id}`;
+
+                                  const alternateTranslations = languages
+                                    .filter((code) => code !== primaryLanguage)
+                                    .map((code) => ({
+                                      code,
+                                      translation: item.translations[code],
+                                    }))
+                                    .filter(
+                                      ({ translation }) =>
+                                        translation?.name?.trim() ||
+                                        translation?.description?.trim()
+                                    );
                                   return (
                                     <Fragment key={item.id}>
                                       <article className={styles.dishRow}>
@@ -806,7 +837,7 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                           aria-label={t(
                                             "menu.page.changeItemOrder",
                                             {
-                                              name: item.translations.pt.name,
+                                              name: itemName,
                                             }
                                           )}
                                         >
@@ -814,12 +845,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                             className={styles.orderButton}
                                             type="button"
                                             title={t("menu.page.moveItemUp", {
-                                              name: item.translations.pt.name,
+                                              name: itemName,
                                             })}
                                             aria-label={t(
                                               "menu.page.moveItemUp",
                                               {
-                                                name: item.translations.pt.name,
+                                                name: itemName,
                                               }
                                             )}
                                             disabled={
@@ -847,12 +878,12 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                             className={styles.orderButton}
                                             type="button"
                                             title={t("menu.page.moveItemDown", {
-                                              name: item.translations.pt.name,
+                                              name: itemName,
                                             })}
                                             aria-label={t(
                                               "menu.page.moveItemDown",
                                               {
-                                                name: item.translations.pt.name,
+                                                name: itemName,
                                               }
                                             )}
                                             disabled={
@@ -875,35 +906,34 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                         </div>
 
                                         <div className={styles.dishPrimary}>
-                                          <strong>
-                                            {item.translations.pt.name}
-                                          </strong>
+                                          <strong>{itemName}</strong>
 
-                                          <span>
-                                            {item.translations.pt.description}
-                                          </span>
+                                          {primaryTranslation?.description && (
+                                            <span>
+                                              {primaryTranslation.description}
+                                            </span>
+                                          )}
                                         </div>
 
                                         <div className={styles.dishAlternate}>
-                                          <div>
-                                            <strong>
-                                              ES · {item.translations.es.name}
-                                            </strong>
+                                          {alternateTranslations.map(
+                                            ({ code, translation }) => (
+                                              <div key={code}>
+                                                <strong>
+                                                  {code.toUpperCase()}
+                                                  {translation.name
+                                                    ? ` · ${translation.name}`
+                                                    : ""}
+                                                </strong>
 
-                                            <span>
-                                              {item.translations.es.description}
-                                            </span>
-                                          </div>
-
-                                          <div>
-                                            <strong>
-                                              EN · {item.translations.en.name}
-                                            </strong>
-
-                                            <span>
-                                              {item.translations.en.description}
-                                            </span>
-                                          </div>
+                                                {translation.description && (
+                                                  <span>
+                                                    {translation.description}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            )
+                                          )}
                                         </div>
 
                                         <span className={styles.dishPrice}>
@@ -946,6 +976,10 @@ export default function AdminMenuPage({ admin, menuCategories }) {
                                           <MenuItemEditor
                                             item={item}
                                             categoryId={category.id}
+                                            businessLanguages={
+                                              businessLanguages
+                                            }
+                                            defaultLanguage={defaultLanguage}
                                             subcategories={
                                               category.subcategories
                                             }
@@ -999,7 +1033,17 @@ export async function getServerSideProps({ req }) {
     };
   }
 
-  const menuCategories = await getAdminMenuCategories();
+  const settings = await getBusinessSettings();
+
+  if (!settings || settings.languages.length === 0) {
+    return { notFound: true };
+  }
+
+  const businessLanguages = settings.languages;
+
+  const menuCategories = await getAdminMenuCategories(
+    businessLanguages.map(({ language }) => language)
+  );
 
   return {
     props: {
@@ -1008,6 +1052,8 @@ export async function getServerSideProps({ req }) {
         email: session.user.email,
       },
       menuCategories,
+      businessLanguages,
+      defaultLanguage: settings.defaultLanguage,
     },
   };
 }

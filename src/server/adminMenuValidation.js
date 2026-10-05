@@ -28,11 +28,14 @@ const menuItemTranslationSchema = z
   });
 
 const menuItemTranslationsSchema = z
-  .strictObject({
-    pt: menuItemTranslationSchema,
-    es: menuItemTranslationSchema,
-    en: menuItemTranslationSchema,
-  })
+  .record(
+    z
+      .string()
+      .min(2)
+      .max(20)
+      .regex(/^[a-z0-9-]+$/, "INVALID_LANGUAGE"),
+    menuItemTranslationSchema
+  )
   .refine(
     (translations) =>
       Object.values(translations).some(
@@ -102,11 +105,14 @@ const menuCategoryTranslationSchema = z
   });
 
 const menuCategoryTranslationsSchema = z
-  .strictObject({
-    pt: menuCategoryTranslationSchema,
-    es: menuCategoryTranslationSchema,
-    en: menuCategoryTranslationSchema,
-  })
+  .record(
+    z
+      .string()
+      .min(2)
+      .max(20)
+      .regex(/^[a-z0-9-]+$/, "INVALID_LANGUAGE"),
+    menuCategoryTranslationSchema
+  )
   .refine(
     (translations) =>
       Object.values(translations).some(
@@ -123,11 +129,14 @@ const menuSubcategoryTranslationSchema = z.strictObject({
 });
 
 const menuSubcategoryTranslationsSchema = z
-  .strictObject({
-    pt: menuSubcategoryTranslationSchema,
-    es: menuSubcategoryTranslationSchema,
-    en: menuSubcategoryTranslationSchema,
-  })
+  .record(
+    z
+      .string()
+      .min(2)
+      .max(20)
+      .regex(/^[a-z0-9-]+$/, "INVALID_LANGUAGE"),
+    menuSubcategoryTranslationSchema
+  )
   .refine(
     (translations) =>
       Object.values(translations).some(

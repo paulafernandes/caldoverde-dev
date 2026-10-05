@@ -1,24 +1,11 @@
 import { useState } from "react";
 
-import styles from "../../styles/Admin.module.css";
 import { adminFetch } from "../../lib/adminFetch";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { getAdminApiErrorKey } from "../../lib/adminApiError";
+import { getBusinessLanguageOption } from "../../utils/businessLanguages";
 
-const languages = [
-  {
-    code: "pt",
-    label: "Português",
-  },
-  {
-    code: "es",
-    label: "Español",
-  },
-  {
-    code: "en",
-    label: "English",
-  },
-];
+import styles from "../../styles/Admin.module.css";
 
 function createEmptyTranslation() {
   return {
@@ -33,8 +20,17 @@ export default function MenuSubcategoryEditor({
   onSaved,
   onDeleted,
   embedded = false,
+  businessLanguages,
+  defaultLanguage,
 }) {
   const { language, t } = useAdminLanguage();
+  const languages = businessLanguages.map(getBusinessLanguageOption);
+
+  const fallbackLanguages = [
+    language,
+    defaultLanguage,
+    ...languages.map(({ code }) => code),
+  ];
   const isCreating = subcategory === null;
 
   const formIdentifier = isCreating ? `new-${categoryId}` : subcategory.id;
@@ -42,17 +38,15 @@ export default function MenuSubcategoryEditor({
   const [formValues, setFormValues] = useState(() => ({
     isVisible: subcategory?.isVisible ?? true,
 
-    translations: subcategory
-      ? {
-          pt: { ...subcategory.translations.pt },
-          es: { ...subcategory.translations.es },
-          en: { ...subcategory.translations.en },
-        }
-      : {
-          pt: createEmptyTranslation(),
-          es: createEmptyTranslation(),
-          en: createEmptyTranslation(),
+    translations: Object.fromEntries(
+      languages.map(({ code }) => [
+        code,
+        {
+          ...createEmptyTranslation(),
+          ...subcategory?.translations?.[code],
         },
+      ])
+    ),
   }));
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -87,7 +81,7 @@ export default function MenuSubcategoryEditor({
     setErrorMessage("");
 
     const hasAnyName = languages.some(({ code }) =>
-      formValues.translations[code].name.trim()
+      (formValues.translations[code]?.name ?? "").trim()
     );
 
     if (!hasAnyName) {
@@ -119,7 +113,12 @@ export default function MenuSubcategoryEditor({
             : {}),
 
           isVisible: formValues.isVisible,
-          translations: formValues.translations,
+          translations: Object.fromEntries(
+            languages.map(({ code }) => [
+              code,
+              formValues.translations[code] ?? createEmptyTranslation(),
+            ])
+          ),
         }),
       });
 
@@ -182,10 +181,9 @@ export default function MenuSubcategoryEditor({
   }
 
   const subcategoryName =
-    subcategory?.translations[language]?.name ||
-    subcategory?.translations.pt.name ||
-    subcategory?.translations.es.name ||
-    subcategory?.translations.en.name ||
+    fallbackLanguages
+      .map((code) => subcategory?.translations?.[code]?.name)
+      .find((value) => typeof value === "string" && value.trim().length > 0) ||
     t("menu.subcategory.fallbackName");
 
   const EditorContainer = embedded ? "div" : "form";
@@ -211,7 +209,8 @@ export default function MenuSubcategoryEditor({
 
       <div className={styles.translationEditorList}>
         {languages.map((language) => {
-          const translation = formValues.translations[language.code];
+          const translation =
+            formValues.translations[language.code] ?? createEmptyTranslation();
 
           const nameId = `subcategory-${formIdentifier}-${language.code}-name`;
 
