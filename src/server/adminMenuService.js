@@ -152,7 +152,6 @@ export async function getAdminMenuCategories(languageCodes) {
       ["label", "title", "highlightText"],
       languageCodes
     ),
-http://87.106.236.149/es
     items: category.items.map((item) => ({
       id: item.id,
       subcategoryId: item.subcategoryId,
