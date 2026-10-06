@@ -10,11 +10,15 @@ const DEFAULT_LANGUAGE = "pt";
 const listeners = new Set();
 
 function getLanguage() {
-  const storedLanguage = localStorage.getItem(STORAGE_KEY);
+  try {
+    const storedLanguage = localStorage.getItem(STORAGE_KEY);
 
-  return ADMIN_LANGUAGES.includes(storedLanguage)
-    ? storedLanguage
-    : DEFAULT_LANGUAGE;
+    return ADMIN_LANGUAGES.includes(storedLanguage)
+      ? storedLanguage
+      : DEFAULT_LANGUAGE;
+  } catch {
+    return DEFAULT_LANGUAGE;
+  }
 }
 
 function getServerLanguage() {
@@ -50,7 +54,11 @@ export function AdminLanguageProvider({ children }) {
       return;
     }
 
-    localStorage.setItem(STORAGE_KEY, newLanguage);
+    try {
+      localStorage.setItem(STORAGE_KEY, newLanguage);
+    } catch {
+      return;
+    }
 
     listeners.forEach((listener) => listener());
   }
