@@ -50,3 +50,6 @@ next-env.d.ts
 
 # local uploaded images
 /public/uploads/
+
+# Claude Code (notas locais, não versionar)
+CLAUDE.local.md
