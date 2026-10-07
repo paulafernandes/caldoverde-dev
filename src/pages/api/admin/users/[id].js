@@ -21,7 +21,9 @@ export default async function handler(req, res) {
   }
 
   const userId = req.query.id;
-  const name = req.body?.name?.trim();
+  const rawName = req.body?.name;
+
+  const name = typeof rawName === "string" ? rawName.trim() : "";
 
   if (!userId || !name) {
     return res.status(400).json({
