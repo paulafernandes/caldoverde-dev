@@ -40,8 +40,12 @@ export default async function handler(req, res) {
     }
   }
 
-  const name = req.body?.name?.trim();
-  const email = req.body?.email?.trim().toLowerCase();
+  const rawName = req.body?.name;
+  const rawEmail = req.body?.email;
+
+  const name = typeof rawName === "string" ? rawName.trim() : "";
+  const email =
+    typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
   const password = req.body?.password;
 
   if (!name || !email || !password) {
