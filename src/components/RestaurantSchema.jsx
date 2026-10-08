@@ -1,3 +1,4 @@
+import { SITE_URL } from "../config/site";
 import { getAdministrativeAreaConfig } from "../data/administrativeAreas";
 import { getBusinessLocationUrl } from "../utils/businessAddress";
 
@@ -37,22 +38,20 @@ export default function RestaurantSchema({
 
   const hasAddress = Object.values(addressFields).some(Boolean);
 
-  const phones = [
-    ...new Set(
-      [
-        optionalText(businessSettings.phone),
-        optionalText(businessSettings.mobilePhone),
-      ].filter(Boolean)
-    ),
-  ];
+  const telephone =
+    optionalText(businessSettings.phone) ??
+    optionalText(businessSettings.mobilePhone);
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
+    "@id": `${SITE_URL}/#restaurant`,
     name: optionalText(businessSettings.name),
     url,
+    image: `${SITE_URL}/og-image.png`,
+    logo: `${SITE_URL}/assets/images/logo_andorinha.png`,
     email: optionalText(businessSettings.email),
-    telephone: phones.length > 0 ? phones : undefined,
+    telephone,
     address: hasAddress
       ? {
           "@type": "PostalAddress",
@@ -60,6 +59,7 @@ export default function RestaurantSchema({
         }
       : undefined,
     hasMap: getBusinessLocationUrl(businessSettings) ?? undefined,
+    menu: `${url}#ementa`,
     servesCuisine: "Portuguese",
   };
 
