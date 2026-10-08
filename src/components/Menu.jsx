@@ -149,61 +149,59 @@ export default function Menu({ menuCategories = [] }) {
                   hidden={!isActive}
                 >
                   {isActive && (
-                    <>
-                      <div className="menu-panel-image">
-                        <Image
-                          src={category.image}
-                          alt={category.title[language]}
-                          fill
-                          sizes="(max-width: 900px) 100vw, 50vw"
-                          unoptimized={category.image.startsWith("/uploads/")}
-                        />
-                      </div>
-
-                      <div
-                        className="menu-list"
-                        ref={menuListRef}
-                        role="region"
-                        aria-labelledby={`tab-${category.id}`}
-                        tabIndex={-1}
-                      >
-                        {category.highlightText?.[language] && (
-                          <div className="menu-highlight">
-                            {category.highlightText[language]}
-                          </div>
-                        )}
-
-                        {category.sections.map((section) => (
-                          <div className="menu-group" key={section.id}>
-                            <h3>{section.title[language]}</h3>
-
-                            <ul>
-                              {section.items.map((item) => (
-                                <li key={item.id} className="menu-dish">
-                                  <div className="menu-dish-heading">
-                                    <h4>{item.name[language]}</h4>
-
-                                    <span
-                                      className="menu-dish-separator"
-                                      aria-hidden="true"
-                                    />
-
-                                    <span className="menu-dish-price">
-                                      {item.price === null
-                                        ? text.pricePending
-                                        : item.price}
-                                    </span>
-                                  </div>
-
-                                  <p>{item.description[language]}</p>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
-                    </>
+                    <div className="menu-panel-image">
+                      <Image
+                        src={category.image}
+                        alt={category.title[language]}
+                        fill
+                        sizes="(max-width: 900px) 100vw, 50vw"
+                        unoptimized={category.image.startsWith("/uploads/")}
+                      />
+                    </div>
                   )}
+
+                  <div
+                    className="menu-list"
+                    ref={isActive ? menuListRef : undefined}
+                    role="region"
+                    aria-labelledby={`tab-${category.id}`}
+                    tabIndex={-1}
+                  >
+                    {category.highlightText?.[language] && (
+                      <div className="menu-highlight">
+                        {category.highlightText[language]}
+                      </div>
+                    )}
+
+                    {category.sections.map((section) => (
+                      <div className="menu-group" key={section.id}>
+                        <h3>{section.title[language]}</h3>
+
+                        <ul>
+                          {section.items.map((item) => (
+                            <li key={item.id} className="menu-dish">
+                              <div className="menu-dish-heading">
+                                <h4>{item.name[language]}</h4>
+
+                                <span
+                                  className="menu-dish-separator"
+                                  aria-hidden="true"
+                                />
+
+                                <span className="menu-dish-price">
+                                  {item.price === null
+                                    ? text.pricePending
+                                    : item.price}
+                                </span>
+                              </div>
+
+                              <p>{item.description[language]}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })}
