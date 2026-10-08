@@ -1724,3 +1724,33 @@ img {
     font-size: 26px;
   }
 }
+
+/* Página 404 */
+
+.not-found-page {
+  min-height: 100vh;
+  padding: 48px 16px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  text-align: center;
+}
+
+.not-found-page h1 {
+  color: var(--color-primary);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 46px;
+  font-weight: 600;
+}
+
+.not-found-page p {
+  font-size: 20px;
+}
+
+.not-found-page .about-button {
+  margin-top: 16px;
+}
