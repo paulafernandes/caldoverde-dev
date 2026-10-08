@@ -131,6 +131,11 @@ export default function LanguageHome({
 
 export async function getServerSideProps({ params }) {
   const { lang } = params;
+
+  if (!Object.hasOwn(translations, lang)) {
+    return { notFound: true };
+  }
+
   const businessSettings = await getPublicBusinessSettings();
 
   if (!businessSettings) {
