@@ -65,9 +65,9 @@ const translations = {
       privacyPolicy: "Política de privacidade",
     },
     seo: {
-      title: "Caldo Verde | Restaurante português",
+      title: "Caldo Verde | Restaurante português em Mairena del Aljarafe",
       description:
-        "Descubra os sabores tradicionais de Portugal no Restaurante Caldo Verde.",
+        "Restaurante de cozinha portuguesa em Mairena del Aljarafe, perto de Sevilha. Consulte a ementa, o horário e como chegar.",
       locale: "pt_PT",
     },
     images: {
@@ -177,9 +177,9 @@ const translations = {
       privacyPolicy: "Política de privacidad",
     },
     seo: {
-      title: "Caldo Verde | Restaurante portugués",
+      title: "Caldo Verde | Restaurante portugués en Mairena del Aljarafe",
       description:
-        "Descubre los sabores tradicionales de Portugal en el Restaurante Caldo Verde.",
+        "Restaurante de cocina portuguesa en Mairena del Aljarafe, cerca de Sevilla. Consulta la carta, el horario y cómo llegar.",
       locale: "es_ES",
     },
     images: {
@@ -289,9 +289,9 @@ const translations = {
       privacyPolicy: "Privacy policy",
     },
     seo: {
-      title: "Caldo Verde | Portuguese restaurant",
+      title: "Caldo Verde | Portuguese restaurant in Mairena del Aljarafe",
       description:
-        "Discover traditional Portuguese flavours at Caldo Verde Restaurant.",
+        "Portuguese cuisine restaurant in Mairena del Aljarafe, near Seville. See the menu, opening hours and how to get there.",
       locale: "en_GB",
     },
     images: {
