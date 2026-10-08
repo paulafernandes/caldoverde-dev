@@ -27,7 +27,7 @@ export default function Footer({ businessSettings }) {
       <div className="footer-main">
         <div className="footer-container">
           <div className="footer-brand">
-            <Link href={`/${language}/`} className="footer-logo">
+            <Link href={`/${language}`} className="footer-logo">
               <Image
                 src="/assets/images/logo_dourado_andorinha.png"
                 alt={imageText.logo}

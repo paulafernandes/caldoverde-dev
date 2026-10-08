@@ -89,7 +89,7 @@ export default function Header({ businessSettings }) {
     const destination =
       router.pathname === "/[lang]/about"
         ? `/${languageCode}/about${currentHash}`
-        : `/${languageCode}/${currentHash}`;
+        : `/${languageCode}${currentHash}`;
 
     router.push(destination, undefined, {
       scroll: false,
@@ -117,7 +117,7 @@ export default function Header({ businessSettings }) {
       <header className="site-header">
         <div className="header-container" onKeyDown={handleMenuKeyDown}>
           <Link
-            href={`/${language}/`}
+            href={`/${language}`}
             className="header-logo"
             onClick={closeMenu}
           >
@@ -151,13 +151,13 @@ export default function Header({ businessSettings }) {
           >
             <a
               className="is-active"
-              href={`/${language}/#inicio`}
+              href={`/${language}#inicio`}
               onClick={closeMenu}
             >
               {text.home}
             </a>
 
-            <a href={`/${language}/#restaurante`} onClick={closeMenu}>
+            <a href={`/${language}#restaurante`} onClick={closeMenu}>
               {text.about}
             </a>
 
@@ -165,11 +165,11 @@ export default function Header({ businessSettings }) {
               {text.aboutUs}
             </Link>
 
-            <a href={`/${language}/#ementa`} onClick={closeMenu}>
+            <a href={`/${language}#ementa`} onClick={closeMenu}>
               {text.menu}
             </a>
 
-            <a href={`/${language}/#contactos`} onClick={closeMenu}>
+            <a href={`/${language}#contactos`} onClick={closeMenu}>
               {text.contact}
             </a>
             <div
