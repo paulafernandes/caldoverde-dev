@@ -24,6 +24,11 @@ export default function AboutPage({ lang, businessSettings }) {
     ({ language }) => language === lang
   )?.locale;
 
+  const ogImageUrl = `${SITE_URL}/og-image.png`;
+  const alternateLocales = availableLanguages
+    .filter(({ language }) => language !== lang)
+    .map(({ locale }) => locale.replace(/-/g, "_"));
+
   return (
     <>
       <Head>
@@ -62,7 +67,18 @@ export default function AboutPage({ lang, businessSettings }) {
 
         <meta property="og:url" content={canonicalUrl} />
 
-        <meta property="og:site_name" content="Caldo Verde" />
+        <meta property="og:site_name" content={businessSettings.name} />
+
+        <meta property="og:image" content={ogImageUrl} />
+
+        <meta property="og:image:width" content="1200" />
+
+        <meta property="og:image:height" content="630" />
+
+        <meta
+          property="og:image:alt"
+          content={translations[lang].images.logo}
+        />
 
         {currentLocale && (
           <meta
@@ -70,6 +86,22 @@ export default function AboutPage({ lang, businessSettings }) {
             content={currentLocale.replace(/-/g, "_")}
           />
         )}
+
+        {alternateLocales.map((locale) => (
+          <meta
+            key={`og-locale-alternate-${locale}`}
+            property="og:locale:alternate"
+            content={locale}
+          />
+        ))}
+
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <meta name="twitter:title" content={seoData.title} />
+
+        <meta name="twitter:description" content={seoData.description} />
+
+        <meta name="twitter:image" content={ogImageUrl} />
 
         <link rel="icon" href="/logo_cv.ico" />
       </Head>
