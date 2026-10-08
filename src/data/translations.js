@@ -79,9 +79,9 @@ const translations = {
       title: "Sobre nós",
 
       seo: {
-        title: "Sobre nós | Caldo Verde",
+        title: "Sobre nós | Caldo Verde, Mairena del Aljarafe",
         description:
-          "Conheça a filosofia do Caldo Verde e a nossa forma de preservar e reinterpretar a tradição da cozinha portuguesa.",
+          "Conheça a filosofia do Caldo Verde, restaurante português em Mairena del Aljarafe, e a nossa forma de preservar e reinterpretar a tradição da cozinha portuguesa.",
       },
 
       quote:
@@ -191,9 +191,9 @@ const translations = {
       title: "Sobre nosotros",
 
       seo: {
-        title: "Sobre nosotros | Caldo Verde",
+        title: "Sobre nosotros | Caldo Verde, Mairena del Aljarafe",
         description:
-          "Conoce la filosofía de Caldo Verde y nuestra forma de preservar y reinterpretar la tradición de la cocina portuguesa.",
+          "Conoce la filosofía de Caldo Verde, restaurante portugués en Mairena del Aljarafe, y nuestra forma de preservar y reinterpretar la tradición de la cocina portuguesa.",
       },
 
       quote:
@@ -303,9 +303,9 @@ const translations = {
       title: "About us",
 
       seo: {
-        title: "About us | Caldo Verde",
+        title: "About us | Caldo Verde, Mairena del Aljarafe",
         description:
-          "Discover the philosophy behind Caldo Verde and how we preserve and reinterpret the traditions of Portuguese cuisine.",
+          "Discover the philosophy behind Caldo Verde, a Portuguese restaurant in Mairena del Aljarafe, and how we preserve and reinterpret the traditions of Portuguese cuisine.",
       },
 
       quote:
