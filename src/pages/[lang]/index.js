@@ -109,7 +109,6 @@ export default function LanguageHome({
 
         <meta name="twitter:image" content={ogImageUrl} />
 
-        <link rel="icon" href="/logo_cv.ico" />
       </Head>
       <RestaurantSchema
         url={canonicalUrl}
