@@ -2043,3 +2043,93 @@ label.itemSubcategoryOption {
     grid-template-columns: 1fr;
   }
 }
+
+.openingHoursNote {
+  margin: 0;
+  color: #5d675f;
+}
+
+.openingHoursDay {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid #d8d3c7;
+  border-radius: 10px;
+}
+
+.openingHoursDay legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.openingHoursDay[data-day-error="true"] {
+  border-color: #d9a3a0;
+}
+
+.openingHoursInterval {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.openingHoursInterval .field label {
+  margin-top: 0;
+}
+
+.openingHoursInterval .field input.openingHoursTimeInput {
+  width: 9ch;
+  min-width: 90px;
+}
+
+.openingHoursInterval .field input[aria-invalid="true"] {
+  border-color: #a12622;
+}
+
+.openingHoursFieldError {
+  margin: 0;
+  color: #a12622;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.openingHoursDayActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.openingHoursDayActions .editButton {
+  margin-top: 0;
+}
+
+.openingHoursCopyMessage {
+  margin: 0;
+  color: #315c45;
+  font-weight: 600;
+}
+
+.openingHoursReadList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 32px;
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .openingHoursReadList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .openingHoursInterval {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .openingHoursInterval .field input.openingHoursTimeInput {
+    width: 100%;
+  }
+}

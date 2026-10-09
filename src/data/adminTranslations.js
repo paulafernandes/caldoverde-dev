@@ -517,6 +517,42 @@ export const adminTranslations = {
         "É obrigatório preencher pelo menos um telefone fixo ou telemóvel.",
       edit: "Editar",
       notDefined: "Não definido",
+      openingHours: {
+        title: "Horário",
+        days: [
+          "Segunda-feira",
+          "Terça-feira",
+          "Quarta-feira",
+          "Quinta-feira",
+          "Sexta-feira",
+          "Sábado",
+          "Domingo",
+        ],
+        open: "Aberto",
+        closed: "Fechado",
+        opensAt: "Abre",
+        closesAt: "Fecha",
+        addInterval: "Adicionar intervalo",
+        removeInterval: "Remover intervalo",
+        copyToOtherDays: "Copiar para os outros dias",
+        copiedToOtherDays:
+          "Horário de {day} copiado para os outros dias. Guarde para aplicar.",
+        overnightNote:
+          "Indique as horas no formato HH:MM. Se a hora de fecho for anterior à de abertura, o horário termina no dia seguinte (por exemplo, 20:00–02:00).",
+        notDefined:
+          "Horário não definido. O bloco de horário não aparece no site.",
+        saveSuccess: "O horário foi atualizado com sucesso.",
+        saveFailed: "Não foi possível atualizar o horário.",
+        fixErrors: "Corrija os erros assinalados no horário.",
+        invalidTimeFormat:
+          "Indique a hora no formato HH:MM, por exemplo 09:30.",
+        sameOpenCloseTime:
+          "A hora de fecho tem de ser diferente da hora de abertura.",
+        overlap:
+          "Este horário sobrepõe-se a outro intervalo do mesmo dia ou do dia seguinte.",
+        tooMany: "Há demasiados intervalos num dos dias.",
+        invalidDay: "Dia da semana inválido.",
+      },
     },
   },
 
@@ -1025,6 +1061,42 @@ export const adminTranslations = {
         "Es obligatorio indicar al menos un teléfono fijo o móvil.",
       edit: "Editar",
       notDefined: "No definido",
+      openingHours: {
+        title: "Horario",
+        days: [
+          "Lunes",
+          "Martes",
+          "Miércoles",
+          "Jueves",
+          "Viernes",
+          "Sábado",
+          "Domingo",
+        ],
+        open: "Abierto",
+        closed: "Cerrado",
+        opensAt: "Abre",
+        closesAt: "Cierra",
+        addInterval: "Añadir franja",
+        removeInterval: "Quitar franja",
+        copyToOtherDays: "Copiar a los demás días",
+        copiedToOtherDays:
+          "Horario de {day} copiado a los demás días. Guarda para aplicarlo.",
+        overnightNote:
+          "Indica las horas en formato HH:MM. Si la hora de cierre es anterior a la de apertura, el horario termina al día siguiente (por ejemplo, 20:00–02:00).",
+        notDefined:
+          "Horario no definido. El bloque de horario no aparece en la web.",
+        saveSuccess: "El horario se ha actualizado correctamente.",
+        saveFailed: "No se pudo actualizar el horario.",
+        fixErrors: "Corrige los errores señalados en el horario.",
+        invalidTimeFormat:
+          "Indica la hora en formato HH:MM, por ejemplo 09:30.",
+        sameOpenCloseTime:
+          "La hora de cierre debe ser distinta de la hora de apertura.",
+        overlap:
+          "Este horario se solapa con otra franja del mismo día o del día siguiente.",
+        tooMany: "Hay demasiadas franjas en uno de los días.",
+        invalidDay: "Día de la semana no válido.",
+      },
     },
   },
 
@@ -1522,6 +1594,41 @@ export const adminTranslations = {
         "At least one landline or mobile phone number is required.",
       edit: "Edit",
       notDefined: "Not defined",
+      openingHours: {
+        title: "Opening hours",
+        days: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        open: "Open",
+        closed: "Closed",
+        opensAt: "Opens",
+        closesAt: "Closes",
+        addInterval: "Add time slot",
+        removeInterval: "Remove time slot",
+        copyToOtherDays: "Copy to other days",
+        copiedToOtherDays:
+          "{day}'s hours were copied to the other days. Save to apply.",
+        overnightNote:
+          "Enter times as HH:MM. If the closing time is earlier than the opening time, the hours end on the next day (for example, 20:00–02:00).",
+        notDefined:
+          "Opening hours not defined. The opening hours block is not shown on the website.",
+        saveSuccess: "The opening hours were updated successfully.",
+        saveFailed: "The opening hours could not be updated.",
+        fixErrors: "Please fix the highlighted errors in the opening hours.",
+        invalidTimeFormat: "Enter the time as HH:MM, for example 09:30.",
+        sameOpenCloseTime:
+          "The closing time must be different from the opening time.",
+        overlap:
+          "These hours overlap another time slot on the same day or the next day.",
+        tooMany: "One of the days has too many time slots.",
+        invalidDay: "Invalid day of the week.",
+      },
     },
   },
 };

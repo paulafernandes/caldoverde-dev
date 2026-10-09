@@ -9,6 +9,7 @@ import CountrySelect from "../../components/admin/CountrySelect";
 import AdministrativeAreaSelect from "../../components/admin/AdministrativeAreaSelect";
 import { getAdministrativeAreaConfig } from "../../data/administrativeAreas";
 import AdminReauthentication from "../../components/admin/AdminReauthentication";
+import OpeningHoursEditor from "../../components/admin/OpeningHoursEditor";
 import {
   getPostalCodeExample,
   isValidPostalCode,
@@ -1803,6 +1804,10 @@ export default function AdminSettings({ admin, businessSettings }) {
             </>
           )}
         </section>
+        <OpeningHoursEditor
+          initialOpeningHours={businessSettings.openingHours}
+          isSessionExpired={isSessionExpired}
+        />
       </AdminLayout>
     </>
   );

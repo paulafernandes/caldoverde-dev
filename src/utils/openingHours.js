@@ -60,3 +60,16 @@ export function findOverlappingOpeningHours(openingHours) {
 
   return [...overlappingIndexes].sort((first, second) => first - second);
 }
+
+// Os 7 dias a partir de segunda, cada um com os intervalos por hora de abertura.
+export function groupOpeningHoursByDay(openingHours = []) {
+  return DAYS_OF_WEEK.map((dayOfWeek) => ({
+    dayOfWeek,
+    intervals: openingHours
+      .filter((openingHour) => openingHour.dayOfWeek === dayOfWeek)
+      .map(({ opensAt, closesAt }) => ({ opensAt, closesAt }))
+      .sort(
+        (first, second) => toMinutes(first.opensAt) - toMinutes(second.opensAt)
+      ),
+  }));
+}
