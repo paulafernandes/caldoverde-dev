@@ -2043,3 +2043,209 @@ label.itemSubcategoryOption {
     grid-template-columns: 1fr;
   }
 }
+
+.openingHoursVisuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.openingHoursStatus {
+  margin-top: 0;
+}
+
+.openingHoursTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.openingHoursTable th,
+.openingHoursTable td {
+  padding: 12px;
+  border-bottom: 1px solid #dde2de;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.openingHoursTable thead th {
+  background: #f4f6f4;
+  font-size: 0.9rem;
+}
+
+.openingHoursTable tbody th {
+  font-weight: 600;
+}
+
+.openingHoursCheckboxCell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.openingHoursCheckboxCell input {
+  width: 18px;
+  height: 18px;
+  accent-color: #315c45;
+}
+
+.openingHoursHours span {
+  display: block;
+  white-space: nowrap;
+}
+
+.openingHoursActionCell {
+  width: 1%;
+  text-align: right;
+}
+
+.openingHoursTable .openingHoursEditButton {
+  margin-top: 0;
+}
+
+.openingHoursActiveRow {
+  background: #eef5f0;
+}
+
+.openingHoursEmpty {
+  margin-top: 16px;
+}
+
+.openingHoursPanel {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #d8d3c7;
+  border-radius: 10px;
+}
+
+.openingHoursPanel h3 {
+  margin: 0;
+}
+
+.openingHoursPanel .deleteConfirmation {
+  margin-top: 0;
+}
+
+.openingHoursPanelForm {
+  display: grid;
+  gap: 16px;
+}
+
+.openingHoursNote {
+  margin: 0;
+  color: #5d675f;
+}
+
+.openingHoursInterval {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.openingHoursInterval .field label {
+  margin-top: 0;
+}
+
+.openingHoursInterval .field input.openingHoursTimeInput {
+  width: 9ch;
+  min-width: 90px;
+}
+
+.openingHoursInterval .field input[aria-invalid="true"] {
+  border-color: #a12622;
+}
+
+.openingHoursFieldError {
+  margin: 0;
+  color: #a12622;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.openingHoursPanelActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.openingHoursPanelActions .button,
+.openingHoursPanelActions .editButton {
+  margin-top: 0;
+}
+
+.openingHoursCopyDays {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 16px 16px;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+}
+
+.openingHoursCopyDays legend {
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.openingHoursCopyDayList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 20px;
+}
+
+.openingHoursCopyDayList .checkboxField {
+  font-weight: 600;
+}
+
+.openingHoursCopyDayList input[aria-invalid="true"] {
+  outline: 2px solid #a12622;
+  outline-offset: 2px;
+}
+
+.openingHoursCopyMessage {
+  margin: 0;
+  color: #315c45;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .openingHoursTable th,
+  .openingHoursTable td {
+    padding: 8px 6px;
+  }
+
+  .openingHoursTable .openingHoursEditButton {
+    min-height: 40px;
+    padding: 6px 10px;
+  }
+
+  .openingHoursPanel {
+    padding: 14px;
+  }
+
+  .openingHoursInterval {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .openingHoursInterval .field input.openingHoursTimeInput {
+    width: 100%;
+  }
+
+  .openingHoursCopyDayList {
+    flex-direction: column;
+  }
+
+  .openingHoursPanelActions .button,
+  .openingHoursPanelActions .editButton {
+    width: 100%;
+  }
+}

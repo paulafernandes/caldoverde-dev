@@ -9,6 +9,12 @@ import {
 } from "../utils/postalCodeValidation";
 import { isValidTaxId, normalizeTaxId } from "../utils/taxIdValidation";
 import { isValidE164PhoneNumber } from "../utils/phoneValidation";
+import {
+  DAYS_OF_WEEK,
+  MAX_OPENING_HOURS_PER_DAY,
+  findOverlappingOpeningHours,
+  isValidOpeningHourTime,
+} from "../utils/openingHours";
 
 const imagePathSchema = z
   .string()
@@ -379,6 +385,57 @@ export const createBusinessSocialLinkSchema = z.strictObject({
 });
 
 export const updateBusinessSocialLinkSchema = createBusinessSocialLinkSchema;
+
+const openingHourTimeSchema = z
+  .string("INVALID_TIME_FORMAT")
+  .refine(isValidOpeningHourTime, "INVALID_TIME_FORMAT");
+
+const openingHourSchema = z
+  .strictObject({
+    dayOfWeek: z
+      .number("INVALID_DAY_OF_WEEK")
+      .int("INVALID_DAY_OF_WEEK")
+      .min(1, "INVALID_DAY_OF_WEEK")
+      .max(7, "INVALID_DAY_OF_WEEK"),
+
+    opensAt: openingHourTimeSchema,
+    closesAt: openingHourTimeSchema,
+  })
+  .refine(({ opensAt, closesAt }) => opensAt !== closesAt, {
+    path: ["closesAt"],
+    message: "SAME_OPEN_CLOSE_TIME",
+  });
+
+export const replaceBusinessOpeningHoursSchema = z
+  .strictObject({
+    openingHours: z.array(openingHourSchema),
+  })
+  .superRefine(({ openingHours }, context) => {
+    const hasTooManyOpeningHours = DAYS_OF_WEEK.some(
+      (dayOfWeek) =>
+        openingHours.filter(
+          (openingHour) => openingHour.dayOfWeek === dayOfWeek
+        ).length > MAX_OPENING_HOURS_PER_DAY
+    );
+
+    if (hasTooManyOpeningHours) {
+      context.addIssue({
+        code: "custom",
+        path: ["openingHours"],
+        message: "TOO_MANY_OPENING_HOURS",
+      });
+
+      return;
+    }
+
+    for (const index of findOverlappingOpeningHours(openingHours)) {
+      context.addIssue({
+        code: "custom",
+        path: ["openingHours", index],
+        message: "OPENING_HOURS_OVERLAP",
+      });
+    }
+  });
 
 export const moveBusinessSocialLinkSchema = z.strictObject({
   socialLinkId: z

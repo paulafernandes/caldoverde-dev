@@ -44,6 +44,14 @@ export async function getPublicBusinessSettings() {
           position: true,
         },
       },
+      openingHours: {
+        orderBy: [{ dayOfWeek: "asc" }, { opensAt: "asc" }, { id: "asc" }],
+        select: {
+          dayOfWeek: true,
+          opensAt: true,
+          closesAt: true,
+        },
+      },
     },
   });
 }
@@ -77,6 +85,10 @@ export async function getBusinessSettings() {
             id: "asc",
           },
         ],
+      },
+
+      openingHours: {
+        orderBy: [{ dayOfWeek: "asc" }, { opensAt: "asc" }, { id: "asc" }],
       },
     },
   });
@@ -129,6 +141,12 @@ export async function getBusinessSettings() {
       url: socialLink.url,
       position: socialLink.position,
       isVisible: socialLink.isVisible,
+    })),
+
+    openingHours: settings.openingHours.map((openingHour) => ({
+      dayOfWeek: openingHour.dayOfWeek,
+      opensAt: openingHour.opensAt,
+      closesAt: openingHour.closesAt,
     })),
   };
 }
@@ -847,4 +865,46 @@ export async function moveBusinessSocialLink(socialLinkId, direction) {
       position: adjacentSocialLink.position,
     };
   });
+}
+
+// Substitui a semana inteira; uma lista vazia deixa o horário por definir.
+export async function replaceBusinessOpeningHours(openingHours) {
+  const result = await prisma.$transaction(async (transaction) => {
+    const settings = await transaction.businessSettings.findUnique({
+      where: {
+        id: BUSINESS_SETTINGS_ID,
+      },
+
+      select: {
+        id: true,
+      },
+    });
+
+    if (!settings) {
+      return null;
+    }
+
+    await transaction.businessOpeningHour.deleteMany({
+      where: {
+        settingsId: BUSINESS_SETTINGS_ID,
+      },
+    });
+
+    await transaction.businessOpeningHour.createMany({
+      data: openingHours.map((openingHour) => ({
+        settingsId: BUSINESS_SETTINGS_ID,
+        dayOfWeek: openingHour.dayOfWeek,
+        opensAt: openingHour.opensAt,
+        closesAt: openingHour.closesAt,
+      })),
+    });
+
+    return true;
+  });
+
+  if (result === null) {
+    return null;
+  }
+
+  return getBusinessSettings();
 }
