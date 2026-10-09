@@ -46,6 +46,7 @@ model BusinessSettings {
   translations BusinessSettingsTranslation[]
   languages    BusinessLanguage[]
   socialLinks  BusinessSocialLink[]
+  openingHours BusinessOpeningHour[]
 }
 
 model BusinessSettingsTranslation {
@@ -83,6 +84,19 @@ model BusinessSocialLink {
   settings   BusinessSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
 
   @@index([settingsId, position])
+}
+
+// dayOfWeek: 1 = segunda … 7 = domingo. Horas "HH:MM"; se closesAt for anterior
+// a opensAt, o intervalo termina no dia seguinte. Um dia sem linhas está fechado.
+model BusinessOpeningHour {
+  id         Int              @id @default(autoincrement())
+  settingsId String
+  dayOfWeek  Int
+  opensAt    String
+  closesAt   String
+  settings   BusinessSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+
+  @@index([settingsId, dayOfWeek])
 }
 
 model MediaAsset {
