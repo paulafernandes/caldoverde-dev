@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { adminFetch } from "../../lib/adminFetch";
 import {
+  DAYS_OF_WEEK,
   findOverlappingOpeningHours,
   groupOpeningHoursByDay,
   isValidOpeningHourTime,
+  normalizeTimeInput,
 } from "../../utils/openingHours";
 import styles from "../../styles/Admin.module.css";
 
@@ -14,93 +16,172 @@ const MAX_INTERVALS_IN_FORM = 2;
 
 const EMPTY_INTERVAL = { opensAt: "", closesAt: "" };
 
+const NO_ERRORS = { fields: {}, conflicts: {} };
+
+const PANEL_ID = "opening-hours-panel";
+
 const ERROR_MESSAGES = {
   INVALID_TIME_FORMAT: "settings.openingHours.invalidTimeFormat",
   SAME_OPEN_CLOSE_TIME: "settings.openingHours.sameOpenCloseTime",
-  OPENING_HOURS_OVERLAP: "settings.openingHours.overlap",
   TOO_MANY_OPENING_HOURS: "settings.openingHours.tooMany",
   INVALID_DAY_OF_WEEK: "settings.openingHours.invalidDay",
 };
 
-function toFormDays(openingHours) {
-  return groupOpeningHoursByDay(openingHours).map(
-    ({ dayOfWeek, intervals }) => ({
-      dayOfWeek,
-      isOpen: intervals.length > 0,
-      intervals,
-    })
+function formatInterval({ opensAt, closesAt }) {
+  return `${opensAt}–${closesAt}`;
+}
+
+function haveSameIntervals(first, second) {
+  return (
+    first.length === second.length &&
+    first.every(
+      (interval, index) =>
+        interval.opensAt === second[index].opensAt &&
+        interval.closesAt === second[index].closesAt
+    )
   );
 }
 
-// Lista enviada à API e, para cada posição, o dia e o intervalo de origem.
-function toOpeningHoursPayload(days) {
+// Semana enviada à API: o rascunho no dia editado e nos dias copiados, o
+// horário gravado nos restantes. Para cada posição, o dia e o intervalo de origem.
+function toOpeningHoursPayload(savedDays, draftDays, draftIntervals) {
   const openingHours = [];
   const sources = [];
 
-  days.forEach((day, dayIndex) => {
-    if (!day.isOpen) {
-      return;
-    }
+  for (const { dayOfWeek, intervals } of savedDays) {
+    const fromDraft = draftDays.includes(dayOfWeek);
 
-    day.intervals.forEach((interval, intervalIndex) => {
-      openingHours.push({
-        dayOfWeek: day.dayOfWeek,
-        opensAt: interval.opensAt.trim(),
-        closesAt: interval.closesAt.trim(),
-      });
+    (fromDraft ? draftIntervals : intervals).forEach(
+      (interval, intervalIndex) => {
+        openingHours.push({
+          dayOfWeek,
+          opensAt: interval.opensAt.trim(),
+          closesAt: interval.closesAt.trim(),
+        });
 
-      sources.push({ dayIndex, intervalIndex });
-    });
-  });
+        sources.push({ dayOfWeek, intervalIndex, fromDraft });
+      }
+    );
+  }
 
   return { openingHours, sources };
 }
 
-function getFieldKey(dayIndex, intervalIndex, field) {
-  return `${dayIndex}-${intervalIndex}-${field}`;
+function getFieldKey(intervalIndex, field) {
+  return `${intervalIndex}-${field}`;
 }
 
-function getFieldId(dayIndex, intervalIndex, field) {
-  return `opening-hours-${getFieldKey(dayIndex, intervalIndex, field)}`;
+function getFieldId(intervalIndex, field) {
+  return `opening-hours-${getFieldKey(intervalIndex, field)}`;
 }
 
-function validateOpeningHours(openingHours, sources) {
+function getConflictId(intervalIndex) {
+  return `opening-hours-interval-${intervalIndex}-error`;
+}
+
+function validateDraftIntervals(draftIntervals) {
   const errors = {};
 
-  openingHours.forEach((openingHour, index) => {
-    const { dayIndex, intervalIndex } = sources[index];
+  draftIntervals.forEach((interval, intervalIndex) => {
+    const opensAt = interval.opensAt.trim();
+    const closesAt = interval.closesAt.trim();
 
-    for (const field of ["opensAt", "closesAt"]) {
-      if (!isValidOpeningHourTime(openingHour[field])) {
-        errors[getFieldKey(dayIndex, intervalIndex, field)] =
-          "INVALID_TIME_FORMAT";
+    for (const [field, value] of [
+      ["opensAt", opensAt],
+      ["closesAt", closesAt],
+    ]) {
+      if (!isValidOpeningHourTime(value)) {
+        errors[getFieldKey(intervalIndex, field)] = "INVALID_TIME_FORMAT";
       }
     }
 
     if (
-      !errors[getFieldKey(dayIndex, intervalIndex, "opensAt")] &&
-      !errors[getFieldKey(dayIndex, intervalIndex, "closesAt")] &&
-      openingHour.opensAt === openingHour.closesAt
+      !errors[getFieldKey(intervalIndex, "opensAt")] &&
+      !errors[getFieldKey(intervalIndex, "closesAt")] &&
+      opensAt === closesAt
     ) {
-      errors[getFieldKey(dayIndex, intervalIndex, "closesAt")] =
-        "SAME_OPEN_CLOSE_TIME";
+      errors[getFieldKey(intervalIndex, "closesAt")] = "SAME_OPEN_CLOSE_TIME";
     }
   });
-
-  if (Object.keys(errors).length > 0) {
-    return errors;
-  }
-
-  for (const index of findOverlappingOpeningHours(openingHours)) {
-    errors[`day-${sources[index].dayIndex}`] = "OPENING_HOURS_OVERLAP";
-  }
 
   return errors;
 }
 
-// Converte os details da API (openingHours.N.campo) para as chaves do formulário.
+// Para cada intervalo do rascunho, o primeiro conflito encontrado, para indicar
+// no painel com que dia colide (mesmo dia, dia vizinho ou dia copiado).
+function findDraftConflicts(openingHours, sources, editedDayOfWeek) {
+  const overlappingIndexes = findOverlappingOpeningHours(openingHours);
+  const conflicts = {};
+
+  const isCopied = (source) =>
+    source.fromDraft && source.dayOfWeek !== editedDayOfWeek;
+
+  for (const firstIndex of overlappingIndexes) {
+    for (const secondIndex of overlappingIndexes) {
+      const first = sources[firstIndex];
+      const second = sources[secondIndex];
+
+      if (
+        firstIndex >= secondIndex ||
+        (!first.fromDraft && !second.fromDraft) ||
+        findOverlappingOpeningHours([
+          openingHours[firstIndex],
+          openingHours[secondIndex],
+        ]).length === 0
+      ) {
+        continue;
+      }
+
+      if (
+        first.fromDraft &&
+        second.fromDraft &&
+        first.dayOfWeek === second.dayOfWeek
+      ) {
+        // Num dia copiado, o mesmo conflito já aparece no dia editado.
+        if (first.dayOfWeek === editedDayOfWeek) {
+          for (const source of [first, second]) {
+            conflicts[source.intervalIndex] ??= { key: "overlapSameDay" };
+          }
+        }
+
+        continue;
+      }
+
+      if (isCopied(first) || isCopied(second)) {
+        const [copied, other, otherIndex] = isCopied(first)
+          ? [first, second, secondIndex]
+          : [second, first, firstIndex];
+
+        conflicts[copied.intervalIndex] ??= {
+          key: "overlapCopied",
+          dayOfWeek: copied.dayOfWeek,
+          otherDayOfWeek: other.dayOfWeek,
+          hours: formatInterval(openingHours[otherIndex]),
+        };
+
+        continue;
+      }
+
+      const [draft, other, otherIndex] = first.fromDraft
+        ? [first, second, secondIndex]
+        : [second, first, firstIndex];
+
+      conflicts[draft.intervalIndex] ??= {
+        key: "overlapWithDay",
+        dayOfWeek: other.dayOfWeek,
+        hours: formatInterval(openingHours[otherIndex]),
+      };
+    }
+  }
+
+  return conflicts;
+}
+
+// Converte os details da API (openingHours.N.campo) para os campos do painel.
 function mapServerErrors(details, sources) {
-  const errors = {};
+  const fields = {};
+  let formCode = "";
+  let hasOverlap = false;
 
   for (const detail of details) {
     const [root, rawIndex, field] = detail.field.split(".");
@@ -109,22 +190,53 @@ function mapServerErrors(details, sources) {
       continue;
     }
 
-    const source = sources[Number(rawIndex)];
-
-    if (!source) {
-      errors.form = detail.code;
+    if (detail.code === "OPENING_HOURS_OVERLAP") {
+      hasOverlap = true;
       continue;
     }
 
-    const key =
-      field === "opensAt" || field === "closesAt"
-        ? getFieldKey(source.dayIndex, source.intervalIndex, field)
-        : `day-${source.dayIndex}`;
+    const source = sources[Number(rawIndex)];
 
-    errors[key] ??= detail.code;
+    if (source?.fromDraft && (field === "opensAt" || field === "closesAt")) {
+      fields[getFieldKey(source.intervalIndex, field)] ??= detail.code;
+      continue;
+    }
+
+    formCode ||= detail.code;
   }
 
-  return errors;
+  return { fields, formCode, hasOverlap };
+}
+
+async function requestOpeningHoursUpdate(openingHours) {
+  const response = await adminFetch("/api/admin/business/opening-hours", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ openingHours }),
+  });
+
+  // A reautenticação aparece na página; o painel mantém o que foi escrito.
+  if (response.status === 401) {
+    return { status: "expired" };
+  }
+
+  const data = await response.json();
+
+  if (response.ok) {
+    return { status: "saved", openingHours: data.settings.openingHours ?? [] };
+  }
+
+  if (
+    response.status === 400 &&
+    data.error === "INVALID_OPENING_HOURS_DATA" &&
+    Array.isArray(data.details)
+  ) {
+    return { status: "invalid", details: data.details };
+  }
+
+  return { status: "failed" };
 }
 
 export default function OpeningHoursEditor({
@@ -136,192 +248,346 @@ export default function OpeningHoursEditor({
   const [savedOpeningHours, setSavedOpeningHours] = useState(
     initialOpeningHours ?? []
   );
-  const [days, setDays] = useState(() => toFormDays(initialOpeningHours));
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [panel, setPanel] = useState(null);
+  const [draftIntervals, setDraftIntervals] = useState([]);
+  const [copyTargetDays, setCopyTargetDays] = useState([]);
+  const [pendingSwitch, setPendingSwitch] = useState(null);
+  const [errors, setErrors] = useState(NO_ERRORS);
   const [formError, setFormError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [copyMessage, setCopyMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const checkboxRefs = useRef({});
+  const editButtonRefs = useRef({});
+  const panelRef = useRef(null);
+  const pendingFocusRef = useRef(null);
 
   const dayNames = t("settings.openingHours.days");
   const savedDays = groupOpeningHoursByDay(savedOpeningHours);
   const hasSavedOpeningHours = savedOpeningHours.length > 0;
 
-  function getErrorMessage(code) {
-    return t(ERROR_MESSAGES[code] ?? "settings.openingHours.saveFailed");
+  // O foco só é aplicado depois do render que mostra ou esconde o elemento.
+  useEffect(() => {
+    const target = pendingFocusRef.current;
+
+    if (!target) {
+      return;
+    }
+
+    pendingFocusRef.current = null;
+
+    if (target.type === "checkbox") {
+      checkboxRefs.current[target.dayOfWeek]?.focus();
+      return;
+    }
+
+    if (target.type === "edit") {
+      (
+        editButtonRefs.current[target.dayOfWeek] ??
+        checkboxRefs.current[target.dayOfWeek]
+      )?.focus();
+      return;
+    }
+
+    const selector = {
+      firstField: 'input[type="text"]',
+      firstError: '[aria-invalid="true"]',
+      autofocus: '[data-autofocus="true"]',
+    }[target.type];
+
+    const element = panelRef.current?.querySelector(selector);
+
+    if (!element) {
+      return;
+    }
+
+    if (target.type === "firstError") {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+      element.focus({ preventScroll: true });
+      return;
+    }
+
+    element.focus();
+  });
+
+  function focusAfterRender(type, dayOfWeek) {
+    pendingFocusRef.current = { type, dayOfWeek };
   }
 
-  function clearMessages() {
-    setErrors({});
+  function getDayName(dayOfWeek) {
+    return dayNames[dayOfWeek - 1];
+  }
+
+  function formatDayList(days) {
+    return days.map(getDayName).join(", ");
+  }
+
+  function getSavedIntervals(dayOfWeek) {
+    return savedDays[dayOfWeek - 1].intervals;
+  }
+
+  function isPanelDirty() {
+    if (!panel || panel.mode !== "edit") {
+      return false;
+    }
+
+    const baseline = panel.isNewDay
+      ? [EMPTY_INTERVAL]
+      : getSavedIntervals(panel.dayOfWeek);
+
+    return (
+      copyTargetDays.length > 0 || !haveSameIntervals(draftIntervals, baseline)
+    );
+  }
+
+  function openPanel(request) {
+    setPanel(request);
+    setDraftIntervals(
+      request.isNewDay
+        ? [{ ...EMPTY_INTERVAL }]
+        : getSavedIntervals(request.dayOfWeek).map((interval) => ({
+            ...interval,
+          }))
+    );
+    setCopyTargetDays([]);
+    setPendingSwitch(null);
+    setErrors(NO_ERRORS);
     setFormError("");
-    setSuccess("");
-    setCopyMessage("");
+    setStatusMessage(null);
+    focusAfterRender(request.mode === "remove" ? "autofocus" : "firstField");
   }
 
-  function updateDay(dayIndex, updateFn) {
-    setDays((current) =>
-      current.map((day, index) => (index === dayIndex ? updateFn(day) : day))
-    );
-  }
+  // Com alterações por gravar noutro dia (ou noutro modo), pede confirmação.
+  function requestPanel(request) {
+    const isSamePanel =
+      panel?.dayOfWeek === request.dayOfWeek && panel?.mode === request.mode;
 
-  function handleEdit() {
-    clearMessages();
-    setDays(toFormDays(savedOpeningHours));
-    setIsEditing(true);
-  }
-
-  function handleCancel() {
-    clearMessages();
-    setDays(toFormDays(savedOpeningHours));
-    setIsEditing(false);
-  }
-
-  function handleOpenChange(dayIndex, isOpen) {
-    setCopyMessage("");
-
-    updateDay(dayIndex, (day) => ({
-      ...day,
-      isOpen,
-      intervals:
-        isOpen && day.intervals.length === 0
-          ? [{ ...EMPTY_INTERVAL }]
-          : day.intervals,
-    }));
-  }
-
-  function handleTimeChange(dayIndex, intervalIndex, field, value) {
-    setCopyMessage("");
-
-    updateDay(dayIndex, (day) => ({
-      ...day,
-      intervals: day.intervals.map((interval, index) =>
-        index === intervalIndex ? { ...interval, [field]: value } : interval
-      ),
-    }));
-  }
-
-  function handleAddInterval(dayIndex) {
-    setCopyMessage("");
-
-    updateDay(dayIndex, (day) => ({
-      ...day,
-      intervals: [...day.intervals, { ...EMPTY_INTERVAL }],
-    }));
-  }
-
-  function handleRemoveInterval(dayIndex, intervalIndex) {
-    setCopyMessage("");
-
-    updateDay(dayIndex, (day) => ({
-      ...day,
-      intervals: day.intervals.filter((_, index) => index !== intervalIndex),
-    }));
-  }
-
-  function handleCopyToOtherDays(dayIndex) {
-    const sourceDay = days[dayIndex];
-
-    setErrors({});
-    setFormError("");
-    setDays((current) =>
-      current.map((day) => ({
-        ...day,
-        isOpen: sourceDay.isOpen,
-        intervals: sourceDay.intervals.map((interval) => ({ ...interval })),
-      }))
-    );
-    setCopyMessage(
-      t("settings.openingHours.copiedToOtherDays", {
-        day: dayNames[dayIndex],
-      })
-    );
-  }
-
-  function focusFirstError() {
-    requestAnimationFrame(() => {
-      const form = document.getElementById("opening-hours-form");
-
-      const firstInvalidField = form?.querySelector(
-        '[aria-invalid="true"], [data-day-error="true"] input[type="text"]'
-      );
-
-      if (!firstInvalidField) {
+    if (isSamePanel) {
+      if (pendingSwitch) {
+        setPendingSwitch(null);
+        focusAfterRender("firstField");
         return;
       }
 
-      firstInvalidField.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      // Sem mudança de estado não há render: o foco vai já para o painel.
+      panelRef.current
+        ?.querySelector(
+          request.mode === "remove"
+            ? '[data-autofocus="true"]'
+            : 'input[type="text"]'
+        )
+        ?.focus();
+      return;
+    }
 
-      firstInvalidField.focus({
-        preventScroll: true,
+    if (isPanelDirty()) {
+      setPendingSwitch(request);
+      focusAfterRender("autofocus");
+      return;
+    }
+
+    openPanel(request);
+  }
+
+  function closePanel() {
+    focusAfterRender(panel.origin, panel.dayOfWeek);
+    setPanel(null);
+    setDraftIntervals([]);
+    setCopyTargetDays([]);
+    setPendingSwitch(null);
+    setErrors(NO_ERRORS);
+    setFormError("");
+  }
+
+  function handleOpenChange(dayOfWeek, isOpen) {
+    if (isOpen) {
+      requestPanel({
+        mode: "edit",
+        dayOfWeek,
+        isNewDay: true,
+        origin: "checkbox",
       });
+      return;
+    }
+
+    // Desmarcar um dia aberto mas ainda não gravado é o mesmo que cancelar.
+    if (panel?.dayOfWeek === dayOfWeek && panel.isNewDay) {
+      closePanel();
+      return;
+    }
+
+    requestPanel({
+      mode: "remove",
+      dayOfWeek,
+      isNewDay: false,
+      origin: "checkbox",
     });
+  }
+
+  function handleEdit(dayOfWeek) {
+    requestPanel({
+      mode: "edit",
+      dayOfWeek,
+      isNewDay: false,
+      origin: "edit",
+    });
+  }
+
+  function handleKeepEditing() {
+    setPendingSwitch(null);
+    focusAfterRender("firstField");
+  }
+
+  function handlePanelKeyDown(event) {
+    if (event.key !== "Escape" || isSaving) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (pendingSwitch) {
+      handleKeepEditing();
+      return;
+    }
+
+    closePanel();
+  }
+
+  function updateInterval(intervalIndex, field, value) {
+    setDraftIntervals((current) =>
+      current.map((interval, index) =>
+        index === intervalIndex ? { ...interval, [field]: value } : interval
+      )
+    );
+  }
+
+  function handleAddInterval() {
+    setDraftIntervals((current) => [...current, { ...EMPTY_INTERVAL }]);
+  }
+
+  function handleRemoveInterval(intervalIndex) {
+    setDraftIntervals((current) =>
+      current.filter((_, index) => index !== intervalIndex)
+    );
+    setErrors(NO_ERRORS);
+  }
+
+  function updateCopyTargetDays(nextDays) {
+    setCopyTargetDays(nextDays);
+    setErrors((current) => ({ ...current, conflicts: {} }));
+  }
+
+  function handleCopyDayChange(dayOfWeek, isSelected) {
+    updateCopyTargetDays(
+      DAYS_OF_WEEK.filter((day) =>
+        day === dayOfWeek ? isSelected : copyTargetDays.includes(day)
+      )
+    );
+  }
+
+  function handleSelectAllCopyDays() {
+    updateCopyTargetDays(DAYS_OF_WEEK.filter((day) => day !== panel.dayOfWeek));
+  }
+
+  function applyServerErrors(details, sources, openingHours) {
+    const { fields, formCode, hasOverlap } = mapServerErrors(details, sources);
+
+    const conflicts = hasOverlap
+      ? findDraftConflicts(openingHours, sources, panel.dayOfWeek)
+      : {};
+
+    const hasPanelErrors =
+      Object.keys(fields).length > 0 || Object.keys(conflicts).length > 0;
+
+    setErrors({ fields, conflicts });
+    setFormError(
+      formCode
+        ? (ERROR_MESSAGES[formCode] ?? "settings.openingHours.saveFailed")
+        : hasPanelErrors
+          ? "settings.openingHours.fixErrors"
+          : "settings.openingHours.saveFailed"
+    );
+
+    if (hasPanelErrors) {
+      focusAfterRender("firstError");
+    }
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
-    clearMessages();
-
-    const { openingHours, sources } = toOpeningHoursPayload(days);
-    const nextErrors = validateOpeningHours(openingHours, sources);
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
-      setFormError("settings.openingHours.fixErrors");
-      focusFirstError();
+    if (isSaving || isSessionExpired) {
       return;
     }
 
+    const normalizedIntervals = draftIntervals.map((interval) => ({
+      opensAt: normalizeTimeInput(interval.opensAt),
+      closesAt: normalizeTimeInput(interval.closesAt),
+    }));
+
+    setDraftIntervals(normalizedIntervals);
+    setFormError("");
+    setStatusMessage(null);
+
+    const fieldErrors = validateDraftIntervals(normalizedIntervals);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setErrors({ fields: fieldErrors, conflicts: {} });
+      setFormError("settings.openingHours.fixErrors");
+      focusAfterRender("firstError");
+      return;
+    }
+
+    const { dayOfWeek, origin } = panel;
+
+    const { openingHours, sources } = toOpeningHoursPayload(
+      savedDays,
+      [dayOfWeek, ...copyTargetDays],
+      normalizedIntervals
+    );
+
+    const conflicts = findDraftConflicts(openingHours, sources, dayOfWeek);
+
+    if (Object.keys(conflicts).length > 0) {
+      setErrors({ fields: {}, conflicts });
+      setFormError("settings.openingHours.fixErrors");
+      focusAfterRender("firstError");
+      return;
+    }
+
+    setErrors(NO_ERRORS);
     setIsSaving(true);
 
     try {
-      const response = await adminFetch("/api/admin/business/opening-hours", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ openingHours }),
-      });
+      const result = await requestOpeningHoursUpdate(openingHours);
 
-      // A reautenticação aparece na página; o formulário mantém o que foi escrito.
-      if (response.status === 401) {
+      if (result.status === "expired") {
         return;
       }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (
-          response.status === 400 &&
-          data.error === "INVALID_OPENING_HOURS_DATA" &&
-          Array.isArray(data.details)
-        ) {
-          const serverErrors = mapServerErrors(data.details, sources);
-          const { form: formCode, ...fieldErrors } = serverErrors;
-
-          setErrors(fieldErrors);
-          setFormError(
-            formCode
-              ? (ERROR_MESSAGES[formCode] ?? "settings.openingHours.saveFailed")
-              : "settings.openingHours.fixErrors"
-          );
-          focusFirstError();
-          return;
-        }
-
-        throw new Error(data.error ?? "OPENING_HOURS_UPDATE_FAILED");
+      if (result.status === "invalid") {
+        applyServerErrors(result.details, sources, openingHours);
+        return;
       }
 
-      const nextOpeningHours = data.settings.openingHours ?? [];
+      if (result.status !== "saved") {
+        setFormError("settings.openingHours.saveFailed");
+        return;
+      }
 
-      setSavedOpeningHours(nextOpeningHours);
-      setDays(toFormDays(nextOpeningHours));
-      setIsEditing(false);
-      setSuccess("settings.openingHours.saveSuccess");
+      setSavedOpeningHours(result.openingHours);
+      setStatusMessage({
+        key:
+          copyTargetDays.length > 0
+            ? "settings.openingHours.daySavedAndCopied"
+            : "settings.openingHours.daySaved",
+        dayOfWeek,
+        copiedDays: copyTargetDays,
+      });
+      setPanel(null);
+      setDraftIntervals([]);
+      setCopyTargetDays([]);
+      focusAfterRender(origin, dayOfWeek);
     } catch {
       setFormError("settings.openingHours.saveFailed");
     } finally {
@@ -329,11 +595,68 @@ export default function OpeningHoursEditor({
     }
   }
 
-  function formatIntervals(intervals) {
-    return intervals
-      .map(({ opensAt, closesAt }) => `${opensAt}–${closesAt}`)
-      .join(", ");
+  async function handleConfirmRemove() {
+    if (isSaving || isSessionExpired) {
+      return;
+    }
+
+    const { dayOfWeek } = panel;
+    const { openingHours } = toOpeningHoursPayload(savedDays, [dayOfWeek], []);
+
+    setFormError("");
+    setIsSaving(true);
+
+    try {
+      const result = await requestOpeningHoursUpdate(openingHours);
+
+      if (result.status === "expired") {
+        return;
+      }
+
+      if (result.status !== "saved") {
+        setFormError("settings.openingHours.saveFailed");
+        return;
+      }
+
+      setSavedOpeningHours(result.openingHours);
+      setStatusMessage({
+        key: "settings.openingHours.dayRemoved",
+        dayOfWeek,
+        copiedDays: [],
+      });
+      setPanel(null);
+      focusAfterRender("checkbox", dayOfWeek);
+    } catch {
+      setFormError("settings.openingHours.saveFailed");
+    } finally {
+      setIsSaving(false);
+    }
   }
+
+  function getErrorMessage(code) {
+    return t(ERROR_MESSAGES[code] ?? "settings.openingHours.saveFailed");
+  }
+
+  function getConflictMessage(conflict) {
+    return t(`settings.openingHours.${conflict.key}`, {
+      day: conflict.dayOfWeek ? getDayName(conflict.dayOfWeek) : "",
+      otherDay: conflict.otherDayOfWeek
+        ? getDayName(conflict.otherDayOfWeek)
+        : "",
+      hours: conflict.hours ?? "",
+    });
+  }
+
+  // Dias copiados que colidem, para assinalar o checkbox respetivo.
+  const copyConflictIds = {};
+
+  Object.entries(errors.conflicts).forEach(([intervalIndex, conflict]) => {
+    if (conflict.key === "overlapCopied") {
+      copyConflictIds[conflict.dayOfWeek] ??= getConflictId(intervalIndex);
+    }
+  });
+
+  const panelDayName = panel ? getDayName(panel.dayOfWeek) : "";
 
   return (
     <section
@@ -342,77 +665,225 @@ export default function OpeningHoursEditor({
     >
       <div className={styles.settingsCardHeader}>
         <h2 id="opening-hours-title">{t("settings.openingHours.title")}</h2>
-
-        {!isEditing && (
-          <button
-            type="button"
-            className={styles.editButton}
-            onClick={handleEdit}
-          >
-            {t("settings.edit")}
-          </button>
-        )}
       </div>
 
-      {success && (
+      <p
+        className={
+          statusMessage
+            ? `${styles.successMessage} ${styles.openingHoursStatus}`
+            : undefined
+        }
+        role="status"
+      >
+        {statusMessage &&
+          t(statusMessage.key, {
+            day: getDayName(statusMessage.dayOfWeek),
+            days: formatDayList(statusMessage.copiedDays),
+          })}
+      </p>
+
+      <table className={styles.openingHoursTable}>
+        <caption className={styles.openingHoursVisuallyHidden}>
+          {t("settings.openingHours.caption")}
+        </caption>
+
+        <thead>
+          <tr>
+            <th scope="col">{t("settings.openingHours.columnOpen")}</th>
+            <th scope="col">{t("settings.openingHours.columnDay")}</th>
+            <th scope="col">{t("settings.openingHours.columnHours")}</th>
+            <th scope="col">
+              <span className={styles.openingHoursVisuallyHidden}>
+                {t("settings.openingHours.columnActions")}
+              </span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {savedDays.map(({ dayOfWeek, intervals }) => {
+            const dayName = getDayName(dayOfWeek);
+            const isOpen = intervals.length > 0;
+            const isPanelDay = panel?.dayOfWeek === dayOfWeek;
+            const isEditingDay = isPanelDay && panel.mode === "edit";
+
+            return (
+              <tr
+                key={dayOfWeek}
+                className={
+                  isPanelDay ? styles.openingHoursActiveRow : undefined
+                }
+              >
+                <td className={styles.openingHoursCheckboxCell}>
+                  <input
+                    ref={(element) => {
+                      checkboxRefs.current[dayOfWeek] = element;
+                    }}
+                    type="checkbox"
+                    checked={isOpen || (isPanelDay && panel.isNewDay)}
+                    disabled={isSaving}
+                    aria-label={t("settings.openingHours.openDayLabel", {
+                      day: dayName,
+                    })}
+                    onChange={(event) =>
+                      handleOpenChange(dayOfWeek, event.target.checked)
+                    }
+                  />
+                </td>
+
+                <th scope="row">{dayName}</th>
+
+                <td className={styles.openingHoursHours}>
+                  {isOpen
+                    ? intervals.map((interval) => (
+                        <span key={interval.opensAt}>
+                          {formatInterval(interval)}
+                        </span>
+                      ))
+                    : t("settings.openingHours.closed")}
+                </td>
+
+                <td className={styles.openingHoursActionCell}>
+                  {isOpen && (
+                    <button
+                      ref={(element) => {
+                        editButtonRefs.current[dayOfWeek] = element;
+                      }}
+                      type="button"
+                      className={`${styles.editButton} ${styles.openingHoursEditButton}`}
+                      disabled={isSaving}
+                      aria-label={t("settings.openingHours.editDayLabel", {
+                        day: dayName,
+                      })}
+                      aria-expanded={isEditingDay}
+                      aria-controls={isEditingDay ? PANEL_ID : undefined}
+                      onClick={() => handleEdit(dayOfWeek)}
+                    >
+                      {t("settings.edit")}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+
+      {!hasSavedOpeningHours && (
         <p
-          className={`${styles.successMessage} ${styles.formMessage}`}
-          role="status"
+          className={`${styles.settingsReadValue} ${styles.openingHoursEmpty}`}
         >
-          {t(success)}
+          {t("settings.openingHours.notDefined")}
         </p>
       )}
 
-      {isEditing ? (
-        <form
-          id="opening-hours-form"
-          className={styles.form}
-          onSubmit={handleSubmit}
-          noValidate
+      {panel && (
+        <div
+          id={PANEL_ID}
+          ref={panelRef}
+          className={styles.openingHoursPanel}
+          role="group"
+          aria-labelledby="opening-hours-panel-title"
+          onKeyDown={handlePanelKeyDown}
         >
-          <p className={styles.openingHoursNote}>
-            {t("settings.openingHours.overnightNote")}
-          </p>
+          <h3 id="opening-hours-panel-title">
+            {t("settings.openingHours.panelTitle", { day: panelDayName })}
+          </h3>
 
-          {days.map((day, dayIndex) => {
-            const dayErrorCode = errors[`day-${dayIndex}`];
-            const dayErrorId = `opening-hours-day-${dayIndex}-error`;
+          {pendingSwitch && (
+            <div className={styles.deleteConfirmation} role="alert">
+              <strong>
+                {t("settings.openingHours.unsavedQuestion", {
+                  day: panelDayName,
+                })}
+              </strong>
 
-            return (
-              <fieldset
-                key={day.dayOfWeek}
-                className={styles.openingHoursDay}
-                data-day-error={dayErrorCode ? "true" : undefined}
-                aria-describedby={dayErrorCode ? dayErrorId : undefined}
-                disabled={isSaving}
-              >
-                <legend>{dayNames[dayIndex]}</legend>
+              <div className={styles.deleteConfirmationActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  data-autofocus="true"
+                  onClick={handleKeepEditing}
+                >
+                  {t("settings.openingHours.keepEditing")}
+                </button>
 
-                <label className={styles.checkboxField}>
-                  <input
-                    type="checkbox"
-                    checked={day.isOpen}
-                    onChange={(event) =>
-                      handleOpenChange(dayIndex, event.target.checked)
-                    }
-                  />
-                  {t("settings.openingHours.open")}
-                </label>
+                <button
+                  type="button"
+                  className={styles.confirmDeleteButton}
+                  onClick={() => openPanel(pendingSwitch)}
+                >
+                  {pendingSwitch.dayOfWeek === panel.dayOfWeek
+                    ? t("settings.openingHours.discardChanges")
+                    : t("settings.openingHours.discardAndOpen", {
+                        day: getDayName(pendingSwitch.dayOfWeek),
+                      })}
+                </button>
+              </div>
+            </div>
+          )}
 
-                {day.isOpen &&
-                  day.intervals.map((interval, intervalIndex) => (
-                    <div
-                      key={intervalIndex}
-                      className={styles.openingHoursInterval}
-                    >
+          {panel.mode === "remove" ? (
+            <div className={styles.deleteConfirmation} role="alert">
+              <strong>
+                {t("settings.openingHours.removeQuestion", {
+                  day: panelDayName,
+                })}
+              </strong>
+              <p>{t("settings.openingHours.removeDescription")}</p>
+
+              {formError && <p>{t(formError)}</p>}
+
+              <div className={styles.deleteConfirmationActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  data-autofocus="true"
+                  disabled={isSaving}
+                  onClick={closePanel}
+                >
+                  {t("settings.openingHours.keepHours")}
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.confirmDeleteButton}
+                  disabled={isSaving || isSessionExpired}
+                  onClick={handleConfirmRemove}
+                >
+                  {isSaving
+                    ? t("settings.saving")
+                    : t("settings.openingHours.confirmRemove")}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form
+              className={styles.openingHoursPanelForm}
+              onSubmit={handleSubmit}
+              noValidate
+            >
+              <p className={styles.openingHoursNote}>
+                {t("settings.openingHours.overnightNote")}
+              </p>
+
+              {draftIntervals.map((interval, intervalIndex) => {
+                const conflict = errors.conflicts[intervalIndex];
+                const conflictId = getConflictId(intervalIndex);
+
+                return (
+                  <Fragment key={intervalIndex}>
+                    <div className={styles.openingHoursInterval}>
                       {["opensAt", "closesAt"].map((field) => {
-                        const fieldId = getFieldId(
-                          dayIndex,
-                          intervalIndex,
-                          field
-                        );
+                        const fieldId = getFieldId(intervalIndex, field);
                         const errorCode =
-                          errors[getFieldKey(dayIndex, intervalIndex, field)];
+                          errors.fields[getFieldKey(intervalIndex, field)];
+                        const describedBy = [
+                          errorCode && `${fieldId}-error`,
+                          conflict && conflictId,
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
 
                         return (
                           <div key={field} className={styles.field}>
@@ -429,16 +900,23 @@ export default function OpeningHoursEditor({
                               maxLength={5}
                               autoComplete="off"
                               value={interval[field]}
-                              aria-invalid={errorCode ? "true" : undefined}
-                              aria-describedby={
-                                errorCode ? `${fieldId}-error` : undefined
+                              disabled={isSaving}
+                              aria-invalid={
+                                errorCode || conflict ? "true" : undefined
                               }
+                              aria-describedby={describedBy || undefined}
                               onChange={(event) =>
-                                handleTimeChange(
-                                  dayIndex,
+                                updateInterval(
                                   intervalIndex,
                                   field,
                                   event.target.value
+                                )
+                              }
+                              onBlur={(event) =>
+                                updateInterval(
+                                  intervalIndex,
+                                  field,
+                                  normalizeTimeInput(event.target.value)
                                 )
                               }
                             />
@@ -459,93 +937,121 @@ export default function OpeningHoursEditor({
                         <button
                           type="button"
                           className={styles.cancelButton}
-                          onClick={() =>
-                            handleRemoveInterval(dayIndex, intervalIndex)
-                          }
+                          disabled={isSaving}
+                          onClick={() => handleRemoveInterval(intervalIndex)}
                         >
                           {t("settings.openingHours.removeInterval")}
                         </button>
                       )}
                     </div>
-                  ))}
 
-                {dayErrorCode && (
-                  <p id={dayErrorId} className={styles.openingHoursFieldError}>
-                    {getErrorMessage(dayErrorCode)}
-                  </p>
-                )}
-
-                <div className={styles.openingHoursDayActions}>
-                  {day.isOpen &&
-                    day.intervals.length < MAX_INTERVALS_IN_FORM && (
-                      <button
-                        type="button"
-                        className={styles.editButton}
-                        onClick={() => handleAddInterval(dayIndex)}
+                    {conflict && (
+                      <p
+                        id={conflictId}
+                        className={styles.openingHoursFieldError}
                       >
-                        {t("settings.openingHours.addInterval")}
-                      </button>
+                        {getConflictMessage(conflict)}
+                      </p>
                     )}
+                  </Fragment>
+                );
+              })}
 
+              {draftIntervals.length < MAX_INTERVALS_IN_FORM && (
+                <div className={styles.openingHoursPanelActions}>
                   <button
                     type="button"
                     className={styles.editButton}
-                    onClick={() => handleCopyToOtherDays(dayIndex)}
+                    disabled={isSaving}
+                    onClick={handleAddInterval}
                   >
-                    {t("settings.openingHours.copyToOtherDays")}
+                    {t("settings.openingHours.addInterval")}
                   </button>
                 </div>
+              )}
+
+              <fieldset
+                className={styles.openingHoursCopyDays}
+                disabled={isSaving}
+              >
+                <legend>{t("settings.openingHours.copyToOtherDays")}</legend>
+
+                <div className={styles.openingHoursCopyDayList}>
+                  {DAYS_OF_WEEK.filter((day) => day !== panel.dayOfWeek).map(
+                    (dayOfWeek) => (
+                      <label key={dayOfWeek} className={styles.checkboxField}>
+                        <input
+                          type="checkbox"
+                          checked={copyTargetDays.includes(dayOfWeek)}
+                          aria-invalid={
+                            copyConflictIds[dayOfWeek] ? "true" : undefined
+                          }
+                          aria-describedby={copyConflictIds[dayOfWeek]}
+                          onChange={(event) =>
+                            handleCopyDayChange(dayOfWeek, event.target.checked)
+                          }
+                        />
+                        {getDayName(dayOfWeek)}
+                      </label>
+                    )
+                  )}
+                </div>
+
+                <div className={styles.openingHoursPanelActions}>
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={handleSelectAllCopyDays}
+                  >
+                    {t("settings.openingHours.selectAllDays")}
+                  </button>
+
+                  {copyTargetDays.length > 0 && (
+                    <button
+                      type="button"
+                      className={styles.editButton}
+                      onClick={() => updateCopyTargetDays([])}
+                    >
+                      {t("settings.openingHours.undoCopy")}
+                    </button>
+                  )}
+                </div>
+
+                <p className={styles.openingHoursCopyMessage} role="status">
+                  {copyTargetDays.length > 0 &&
+                    t("settings.openingHours.copyPending", {
+                      days: formatDayList(copyTargetDays),
+                    })}
+                </p>
               </fieldset>
-            );
-          })}
 
-          <p className={styles.openingHoursCopyMessage} role="status">
-            {copyMessage}
-          </p>
+              <div className={styles.openingHoursPanelActions}>
+                <button
+                  type="submit"
+                  className={styles.button}
+                  disabled={isSaving || isSessionExpired}
+                >
+                  {isSaving ? t("settings.saving") : t("settings.save")}
+                </button>
 
-          <div className={styles.userFormActions}>
-            <button
-              type="submit"
-              className={styles.button}
-              disabled={isSaving || isSessionExpired}
-            >
-              {isSaving ? t("settings.saving") : t("settings.save")}
-            </button>
+                <button
+                  type="button"
+                  className={styles.editButton}
+                  disabled={isSaving}
+                  onClick={closePanel}
+                >
+                  {t("settings.cancel")}
+                </button>
+              </div>
 
-            <button
-              type="button"
-              className={styles.editButton}
-              disabled={isSaving}
-              onClick={handleCancel}
-            >
-              {t("settings.cancel")}
-            </button>
-          </div>
-
-          {formError && (
-            <p className={styles.error} role="alert">
-              {t(formError)}
-            </p>
+              {formError && (
+                <p className={styles.error} role="alert">
+                  {t(formError)}
+                </p>
+              )}
+            </form>
           )}
-        </form>
-      ) : hasSavedOpeningHours ? (
-        <dl className={styles.openingHoursReadList}>
-          {savedDays.map(({ dayOfWeek, intervals }, dayIndex) => (
-            <div key={dayOfWeek} className={styles.settingsReadItem}>
-              <dt className={styles.settingsReadLabel}>{dayNames[dayIndex]}</dt>
-
-              <dd className={styles.settingsReadValue}>
-                {intervals.length > 0
-                  ? formatIntervals(intervals)
-                  : t("settings.openingHours.closed")}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p className={styles.settingsReadValue}>
-          {t("settings.openingHours.notDefined")}
-        </p>
+        </div>
       )}
     </section>
   );

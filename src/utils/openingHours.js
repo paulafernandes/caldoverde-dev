@@ -73,3 +73,30 @@ export function groupOpeningHoursByDay(openingHours = []) {
       ),
   }));
 }
+
+// Completa horas escritas sem formato (9 → 09:00, 930 → 09:30, 1500 → 15:00).
+// Se o resultado não for uma hora válida, devolve o valor tal como veio.
+export function normalizeTimeInput(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const trimmed = value.trim();
+  let candidate = null;
+
+  if (/^\d{1,2}$/.test(trimmed)) {
+    candidate = `${trimmed.padStart(2, "0")}:00`;
+  } else if (/^\d{3,4}$/.test(trimmed)) {
+    const digits = trimmed.padStart(4, "0");
+
+    candidate = `${digits.slice(0, 2)}:${digits.slice(2)}`;
+  } else {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
+
+    if (match) {
+      candidate = `${match[1].padStart(2, "0")}:${match[2]}`;
+    }
+  }
+
+  return candidate && isValidOpeningHourTime(candidate) ? candidate : value;
+}
