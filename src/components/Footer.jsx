@@ -6,6 +6,7 @@ import {
   getBusinessAddressLines,
   getBusinessLocationUrl,
 } from "../utils/businessAddress";
+import { groupOpeningHoursByDay } from "../utils/openingHours";
 
 export default function Footer({ businessSettings }) {
   const currentYear = new Date().getFullYear();
@@ -15,6 +16,10 @@ export default function Footer({ businessSettings }) {
   const imageText = translations[language].images;
   const addressLines = getBusinessAddressLines(businessSettings, language);
   const locationUrl = getBusinessLocationUrl(businessSettings);
+  const openingDays = groupOpeningHoursByDay(businessSettings?.openingHours);
+  const hasOpeningHours = openingDays.some(
+    ({ intervals }) => intervals.length > 0
+  );
 
   const reservationEmail = businessSettings?.email
     ? `mailto:${businessSettings.email}?subject=${encodeURIComponent(
@@ -25,7 +30,13 @@ export default function Footer({ businessSettings }) {
   return (
     <footer className="site-footer" id="contactos">
       <div className="footer-main">
-        <div className="footer-container">
+        <div
+          className={
+            hasOpeningHours
+              ? "footer-container"
+              : "footer-container footer-container--without-hours"
+          }
+        >
           <div className="footer-brand">
             <Link href={`/${language}`} className="footer-logo">
               <Image
@@ -116,23 +127,29 @@ export default function Footer({ businessSettings }) {
             )}
           </div>
 
-          <div className="footer-column" id="reservas">
-            <h2>{text.reservationsTitle}</h2>
+          {hasOpeningHours && (
+            <div className="footer-column" id="reservas">
+              <h2>{text.hoursTitle}</h2>
 
-            <div className="footer-contact-item">
-              <span className="footer-label">{text.hoursLabel}</span>
+              <dl className="footer-hours">
+                {openingDays.map(({ dayOfWeek, intervals }) => (
+                  <div className="footer-hours-row" key={dayOfWeek}>
+                    <dt>{text.days[dayOfWeek - 1]}</dt>
 
-              <div>
-                {text.hours.map((line) => (
-                  <span key={line}>
-                    {line}
-                    <br />
-                  </span>
+                    <dd>
+                      {intervals.length > 0
+                        ? intervals.map(({ opensAt, closesAt }) => (
+                            <span key={`${opensAt}-${closesAt}`}>
+                              {opensAt}–{closesAt}
+                            </span>
+                          ))
+                        : text.closed}
+                    </dd>
+                  </div>
                 ))}
-              </div>
-            </div>
+              </dl>
 
-            {/* <p className="footer-reservation-text">
+              {/* <p className="footer-reservation-text">
               {text.reservationText}
             </p>
 
@@ -142,7 +159,8 @@ export default function Footer({ businessSettings }) {
             >
               {text.reservationButton}
             </a> */}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
