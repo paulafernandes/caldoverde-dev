@@ -1,6 +1,18 @@
 import { SITE_URL } from "../config/site";
 import { getAdministrativeAreaConfig } from "../data/administrativeAreas";
 import { getBusinessLocationUrl } from "../utils/businessAddress";
+import { groupOpeningHoursByDay } from "../utils/openingHours";
+
+// Nomes do schema.org pela ordem de DAYS_OF_WEEK (1 = segunda … 7 = domingo).
+const SCHEMA_ORG_DAYS = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 function optionalText(value) {
   return typeof value === "string" ? value.trim() || undefined : undefined;
@@ -42,6 +54,18 @@ export default function RestaurantSchema({
     optionalText(businessSettings.phone) ??
     optionalText(businessSettings.mobilePhone);
 
+  // Um intervalo que passa a meia-noite fica no dia em que abre.
+  const openingHoursSpecification = groupOpeningHoursByDay(
+    businessSettings.openingHours
+  ).flatMap(({ dayOfWeek, intervals }) =>
+    intervals.map(({ opensAt, closesAt }) => ({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: SCHEMA_ORG_DAYS[dayOfWeek - 1],
+      opens: opensAt,
+      closes: closesAt,
+    }))
+  );
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "Restaurant",
@@ -61,6 +85,10 @@ export default function RestaurantSchema({
     hasMap: getBusinessLocationUrl(businessSettings) ?? undefined,
     menu: `${url}#ementa`,
     servesCuisine: "Portuguese",
+    openingHoursSpecification:
+      openingHoursSpecification.length > 0
+        ? openingHoursSpecification
+        : undefined,
   };
 
   return (
