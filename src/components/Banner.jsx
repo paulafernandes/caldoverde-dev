@@ -65,7 +65,8 @@ export default function Banner() {
         loop
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
+        poster="/assets/video/slow_mo-poster.webp"
         aria-hidden="true"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
