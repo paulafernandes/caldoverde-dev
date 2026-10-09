@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 
 import {
   AdminLanguageProvider,
@@ -9,6 +10,24 @@ import {
 } from "../context/AdminLanguageContext";
 
 import { LanguageProvider, useLanguage } from "../context/LanguageContext";
+
+// Fontes alojadas pelo Next (sem pedidos ao Google no browser).
+// Só os pesos usados em globals.css e Admin.module.css; o itálico continua sintetizado.
+const cormorantGaramond = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal"],
+  display: "swap",
+  fallback: ["Georgia", "serif"],
+});
+
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal"],
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
+});
 
 function DocumentLanguage({ isAdminPage, isPublicLanguagePage }) {
   const { language: publicLanguage } = useLanguage();
@@ -46,6 +65,12 @@ export default function App({ Component, pageProps }) {
       }
     >
       <AdminLanguageProvider>
+        <style jsx global>{`
+          :root {
+            --font-cormorant: ${cormorantGaramond.style.fontFamily};
+            --font-jost: ${jost.style.fontFamily};
+          }
+        `}</style>
         <DocumentLanguage
           isAdminPage={isAdminPage}
           isPublicLanguagePage={isPublicLanguagePage}

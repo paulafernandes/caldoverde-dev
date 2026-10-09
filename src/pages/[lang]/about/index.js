@@ -103,7 +103,6 @@ export default function AboutPage({ lang, businessSettings }) {
 
         <meta name="twitter:image" content={ogImageUrl} />
 
-        <link rel="icon" href="/logo_cv.ico" />
       </Head>
 
       <Header businessSettings={businessSettings} />

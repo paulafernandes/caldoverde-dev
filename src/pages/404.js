@@ -14,7 +14,6 @@ export default function NotFoundPage() {
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <link rel="icon" href="/logo_cv.ico" />
       </Head>
 
       <main id="main-content" className="not-found-page" tabIndex={-1}>
