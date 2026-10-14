@@ -4,6 +4,10 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import translations from "../../../data/translations";
 import { SITE_URL } from "../../../config/site";
+import {
+  getAlternateLinks,
+  getPageLanguages,
+} from "../../../utils/pageAlternates";
 import Image from "next/image";
 import { getPublicBusinessSettings } from "../../../server/businessSettingsService";
 
@@ -13,11 +17,9 @@ export default function AboutPage({ lang, businessSettings }) {
   const canonicalUrl = `${SITE_URL}/${lang}/about`;
   const pageSuffix = "/about";
 
-  const availableLanguages = businessSettings.languages.filter(
-    ({ language }) =>
-      Object.hasOwn(translations, language) &&
-      translations[language]?.aboutPage?.seo &&
-      translations[language]?.aboutPage?.imageAlt
+  const availableLanguages = getPageLanguages(
+    businessSettings.languages,
+    pageSuffix
   );
 
   const currentLocale = availableLanguages.find(
@@ -38,25 +40,18 @@ export default function AboutPage({ lang, businessSettings }) {
 
         <link rel="canonical" href={canonicalUrl} />
 
-        {availableLanguages.map(({ language }) => (
+        {getAlternateLinks({
+          languages: businessSettings.languages,
+          defaultLanguage: businessSettings.defaultLanguage,
+          pageSuffix,
+        }).map(({ hrefLang, href }) => (
           <link
-            key={`alternate-${language}`}
+            key={`alternate-${hrefLang}`}
             rel="alternate"
-            hrefLang={language}
-            href={`${SITE_URL}/${language}${pageSuffix}`}
+            hrefLang={hrefLang}
+            href={href}
           />
         ))}
-
-        {availableLanguages.some(
-          ({ language }) => language === businessSettings.defaultLanguage
-        ) && (
-          <link
-            key="alternate-default"
-            rel="alternate"
-            hrefLang="x-default"
-            href={`${SITE_URL}/${businessSettings.defaultLanguage}${pageSuffix}`}
-          />
-        )}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         <meta property="og:type" content="website" />

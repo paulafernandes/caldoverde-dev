@@ -7,6 +7,10 @@ import Menu from "../../components/Menu";
 import Footer from "../../components/Footer";
 import translations from "../../data/translations";
 import { SITE_URL } from "../../config/site";
+import {
+  getAlternateLinks,
+  getPageLanguages,
+} from "../../utils/pageAlternates";
 import RestaurantSchema from "../../components/RestaurantSchema";
 import { getPublicMenuCategories } from "../../server/menuService";
 import { getPublicBusinessSettings } from "../../server/businessSettingsService";
@@ -20,9 +24,9 @@ export default function LanguageHome({
   const canonicalUrl = `${SITE_URL}/${lang}`;
   const pageSuffix = "";
 
-  const availableLanguages = businessSettings.languages.filter(
-    ({ language }) =>
-      Object.hasOwn(translations, language) && translations[language]?.seo
+  const availableLanguages = getPageLanguages(
+    businessSettings.languages,
+    pageSuffix
   );
 
   const currentLocale = availableLanguages.find(
@@ -43,25 +47,18 @@ export default function LanguageHome({
 
         <link rel="canonical" href={canonicalUrl} />
 
-        {availableLanguages.map(({ language }) => (
+        {getAlternateLinks({
+          languages: businessSettings.languages,
+          defaultLanguage: businessSettings.defaultLanguage,
+          pageSuffix,
+        }).map(({ hrefLang, href }) => (
           <link
-            key={`alternate-${language}`}
+            key={`alternate-${hrefLang}`}
             rel="alternate"
-            hrefLang={language}
-            href={`${SITE_URL}/${language}${pageSuffix}`}
+            hrefLang={hrefLang}
+            href={href}
           />
         ))}
-
-        {availableLanguages.some(
-          ({ language }) => language === businessSettings.defaultLanguage
-        ) && (
-          <link
-            key="alternate-default"
-            rel="alternate"
-            hrefLang="x-default"
-            href={`${SITE_URL}/${businessSettings.defaultLanguage}${pageSuffix}`}
-          />
-        )}
 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 

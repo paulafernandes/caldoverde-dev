@@ -1,5 +1,9 @@
-import { SITE_URL } from "../config/site";
-import translations from "../data/translations";
+import {
+  PUBLIC_PAGES,
+  getAlternateLinks,
+  getPageLanguages,
+  getPageUrl,
+} from "../utils/pageAlternates";
 import { getPublicBusinessSettings } from "../server/businessSettingsService";
 
 function escapeXml(value) {
@@ -11,38 +15,37 @@ function escapeXml(value) {
     .replace(/'/g, "&apos;");
 }
 
-function generateSitemap(languages) {
+function generateSitemap(languages, defaultLanguage) {
   const urls = languages
-    .flatMap(({ language }) => {
-      if (!Object.hasOwn(translations, language)) {
-        return [];
-      }
+    .flatMap(({ language }) =>
+      Object.keys(PUBLIC_PAGES)
+        .filter((pageSuffix) =>
+          getPageLanguages(languages, pageSuffix).some(
+            (pageLanguage) => pageLanguage.language === language
+          )
+        )
+        .map((pageSuffix) => {
+          const alternates = getAlternateLinks({
+            languages,
+            defaultLanguage,
+            pageSuffix,
+          })
+            .map(
+              ({ hrefLang, href }) =>
+                `    <xhtml:link rel="alternate" hreflang="${escapeXml(hrefLang)}" href="${escapeXml(href)}"/>`
+            )
+            .join("\n");
 
-      const pages = [];
-
-      if (translations[language]?.seo) {
-        pages.push("");
-      }
-
-      if (
-        translations[language]?.aboutPage?.seo &&
-        translations[language]?.aboutPage?.imageAlt
-      ) {
-        pages.push("/about");
-      }
-
-      return pages.map((path) => {
-        const url = `${SITE_URL}/${encodeURIComponent(language)}${path}`;
-
-        return `  <url>
-    <loc>${escapeXml(url)}</loc>
+          return `  <url>
+    <loc>${escapeXml(getPageUrl(language, pageSuffix))}</loc>
+${alternates}
   </url>`;
-      });
-    })
+        })
+    )
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls}
 </urlset>`;
 }
@@ -65,7 +68,7 @@ export async function getServerSideProps({ res }) {
   }
 
   res.setHeader("Content-Type", "application/xml; charset=utf-8");
-  res.end(generateSitemap(languages));
+  res.end(generateSitemap(languages, defaultLanguage));
 
   return {
     props: {},
