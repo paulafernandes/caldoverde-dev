@@ -73,6 +73,7 @@ const translations = {
       reservationSubject: "Pedido de reserva",
       rightsReserved: "Todos os direitos reservados.",
       privacyPolicy: "Política de privacidade",
+      legalNotice: "Aviso legal",
     },
     seo: {
       title: "Caldo Verde | Restaurante português em Mairena del Aljarafe",
@@ -125,6 +126,15 @@ const translations = {
         description:
           "Política de privacidade do Caldo Verde, restaurante português em Mairena del Aljarafe.",
       },
+    },
+    legalNoticePage: {
+      seo: {
+        title: "Aviso legal | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Aviso legal do Caldo Verde, restaurante português em Mairena del Aljarafe.",
+      },
+    },
+    legalPage: {
       lastUpdatedLabel: "Última atualização",
       inPreparation: "Texto em preparação.",
     },
@@ -204,6 +214,7 @@ const translations = {
       reservationSubject: "Solicitud de reserva",
       rightsReserved: "Todos los derechos reservados.",
       privacyPolicy: "Política de privacidad",
+      legalNotice: "Aviso legal",
     },
     seo: {
       title: "Caldo Verde | Restaurante portugués en Mairena del Aljarafe",
@@ -256,6 +267,15 @@ const translations = {
         description:
           "Política de privacidad de Caldo Verde, restaurante portugués en Mairena del Aljarafe.",
       },
+    },
+    legalNoticePage: {
+      seo: {
+        title: "Aviso legal | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Aviso legal de Caldo Verde, restaurante portugués en Mairena del Aljarafe.",
+      },
+    },
+    legalPage: {
       lastUpdatedLabel: "Última actualización",
       inPreparation: "Texto en preparación.",
     },
@@ -335,6 +355,7 @@ const translations = {
       reservationSubject: "Reservation request",
       rightsReserved: "All rights reserved.",
       privacyPolicy: "Privacy policy",
+      legalNotice: "Legal notice",
     },
     seo: {
       title: "Caldo Verde | Portuguese restaurant in Mairena del Aljarafe",
@@ -387,6 +408,15 @@ const translations = {
         description:
           "Privacy policy of Caldo Verde, a Portuguese restaurant in Mairena del Aljarafe.",
       },
+    },
+    legalNoticePage: {
+      seo: {
+        title: "Legal notice | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Legal notice of Caldo Verde, a Portuguese restaurant in Mairena del Aljarafe.",
+      },
+    },
+    legalPage: {
       lastUpdatedLabel: "Last updated",
       inPreparation: "Text in preparation.",
     },
