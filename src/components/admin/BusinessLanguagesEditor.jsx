@@ -38,6 +38,31 @@ async function requestLanguageUpdate({ language, locale }, isEnabled) {
   };
 }
 
+async function requestLanguageMove(language, direction) {
+  const response = await adminFetch("/api/admin/business/languages/order", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ language, direction }),
+  });
+
+  if (response.status === 401) {
+    return { status: "expired" };
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.ok && data.result) {
+    return { status: "moved", result: data.result };
+  }
+
+  return {
+    status: "failed",
+    errorKey: getAdminApiErrorKey(data.error, "settings.languages.orderFailed"),
+  };
+}
+
 export default function BusinessLanguagesEditor({
   initialLanguages,
   defaultLanguage,
@@ -53,6 +78,7 @@ export default function BusinessLanguagesEditor({
   const [isSaving, setIsSaving] = useState(false);
 
   const checkboxRefs = useRef({});
+  const orderButtonRefs = useRef({});
   const cancelButtonRef = useRef(null);
 
   useEffect(() => {
@@ -119,6 +145,82 @@ export default function BusinessLanguagesEditor({
     setPendingLanguage(language);
   }
 
+  // O botão focado fica desativado durante o pedido e perde o foco.
+  // No extremo da lista, o botão da mesma direção continua desativado.
+  function focusOrderButton(code, direction, index, total) {
+    const isAtEdge = direction === "up" ? index === 0 : index === total - 1;
+    const targetDirection = isAtEdge
+      ? direction === "up"
+        ? "down"
+        : "up"
+      : direction;
+
+    window.requestAnimationFrame(() =>
+      orderButtonRefs.current[`${code}-${targetDirection}`]?.focus()
+    );
+  }
+
+  async function moveLanguage(language, direction) {
+    if (isSaving || isSessionExpired) {
+      return;
+    }
+
+    const code = language.language;
+    const index = languages.findIndex((entry) => entry.language === code);
+    // Vizinho na lista completa, incluindo desativados, como no serviço.
+    const neighborIndex = direction === "up" ? index - 1 : index + 1;
+    const neighbor = languages[neighborIndex];
+
+    if (index === -1 || !neighbor) {
+      return;
+    }
+
+    setFormError("");
+    setStatusMessage(null);
+    setIsSaving(true);
+
+    let focusIndex = index;
+
+    try {
+      const response = await requestLanguageMove(code, direction);
+
+      if (response.status === "expired") {
+        return;
+      }
+
+      if (response.status !== "moved") {
+        setFormError(response.errorKey);
+        return;
+      }
+
+      // Só troca no ecrã se a BD trocou com o mesmo vizinho.
+      const { moved, position } = response.result;
+
+      if (!moved || position !== neighbor.position) {
+        setFormError("settings.languages.orderOutOfSync");
+        return;
+      }
+
+      const nextLanguages = [...languages];
+      nextLanguages[index] = { ...neighbor, position: language.position };
+      nextLanguages[neighborIndex] = { ...language, position };
+
+      setLanguages(nextLanguages);
+      setStatusMessage({
+        key: "settings.languages.moved",
+        language: getLabel(language),
+        position: neighborIndex + 1,
+        total: nextLanguages.length,
+      });
+      focusIndex = neighborIndex;
+    } catch {
+      setFormError("settings.languages.orderFailed");
+    } finally {
+      setIsSaving(false);
+      focusOrderButton(code, direction, focusIndex, languages.length);
+    }
+  }
+
   function handleCancel() {
     const code = pendingLanguage.language;
 
@@ -155,8 +257,7 @@ export default function BusinessLanguagesEditor({
         }
         role="status"
       >
-        {statusMessage &&
-          t(statusMessage.key, { language: statusMessage.language })}
+        {statusMessage && t(statusMessage.key, statusMessage)}
       </p>
 
       <table className={styles.openingHoursTable}>
@@ -166,6 +267,7 @@ export default function BusinessLanguagesEditor({
 
         <thead>
           <tr>
+            <th scope="col">{t("settings.languages.columnOrder")}</th>
             <th scope="col">{t("settings.languages.columnEnabled")}</th>
             <th scope="col">{t("settings.languages.columnLanguage")}</th>
             <th scope="col">{t("settings.languages.columnStatus")}</th>
@@ -173,7 +275,7 @@ export default function BusinessLanguagesEditor({
         </thead>
 
         <tbody>
-          {languages.map((language) => {
+          {languages.map((language, index) => {
             const { code, label, flag } = getBusinessLanguageOption(language);
             const isDefault = code === defaultLanguage;
             const hasSiteTexts = siteLanguages.includes(code);
@@ -197,6 +299,43 @@ export default function BusinessLanguagesEditor({
                 key={code}
                 className={isPending ? styles.openingHoursActiveRow : undefined}
               >
+                <td>
+                  <div className={styles.orderControls}>
+                    {["up", "down"].map((direction) => {
+                      const buttonLabel = t(
+                        direction === "up"
+                          ? "settings.languages.moveUp"
+                          : "settings.languages.moveDown",
+                        { language: label }
+                      );
+                      const isAtEdge =
+                        direction === "up"
+                          ? index === 0
+                          : index === languages.length - 1;
+
+                      return (
+                        <button
+                          key={direction}
+                          ref={(element) => {
+                            orderButtonRefs.current[`${code}-${direction}`] =
+                              element;
+                          }}
+                          type="button"
+                          className={styles.orderButton}
+                          title={buttonLabel}
+                          aria-label={buttonLabel}
+                          disabled={isAtEdge || isSaving}
+                          onClick={() => moveLanguage(language, direction)}
+                        >
+                          <span aria-hidden="true">
+                            {direction === "up" ? "↑" : "↓"}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </td>
+
                 <td className={styles.openingHoursCheckboxCell}>
                   <input
                     ref={(element) => {
