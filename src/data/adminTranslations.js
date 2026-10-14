@@ -421,6 +421,8 @@ export const adminTranslations = {
       businessLanguageUpdateFailed: "Não foi possível alterar o idioma.",
       languageWithoutSiteTranslations:
         "Este idioma não tem os textos do site traduzidos, por isso não pode ser ativado.",
+      invalidDefaultLanguage:
+        "O idioma escolhido já não está ativo, por isso não pode ser o predefinido. Recarregue a página.",
     },
     settings: {
       pageTitle: "Configurações do negócio | Administração",
@@ -595,7 +597,7 @@ export const adminTranslations = {
         statusEnabled: "Ativo",
         statusDisabled: "Inativo",
         defaultCannotBeDisabled:
-          "O idioma predefinido não pode ser desativado.",
+          "O idioma predefinido não pode ser desativado. Para o desativar, escolha primeiro outro idioma predefinido (tem de estar ativo).",
         noSiteTexts: "Sem textos do site traduzidos: não pode ser ativado.",
         disableQuestion: "Desativar {language}?",
         disableDescription:
@@ -612,6 +614,14 @@ export const adminTranslations = {
         orderFailed: "Não foi possível alterar a ordem dos idiomas.",
         orderOutOfSync:
           "A ordem guardada é diferente da mostrada. Recarregue a página.",
+        defaultLabel: "Idioma predefinido",
+        defaultQuestion: "Tornar {language} o idioma predefinido?",
+        defaultDescription:
+          "A raiz / do site passa a redirecionar (307, temporário) para /{code}; o x-default dos hreflang e do sitemap passa a ser {language}; os idiomas inativos passam a redirecionar para /{code}; e {language} passa a ser o primeiro idioma de recurso da ementa e dos textos legais. Nada é apagado: pode voltar a mudá-lo.",
+        keepDefault: "Manter o atual",
+        confirmDefault: "Tornar predefinido",
+        defaultChanged: "{language} é agora o idioma predefinido.",
+        defaultSaveFailed: "Não foi possível mudar o idioma predefinido.",
       },
     },
   },
@@ -1023,6 +1033,8 @@ export const adminTranslations = {
       businessLanguageUpdateFailed: "No se ha podido cambiar el idioma.",
       languageWithoutSiteTranslations:
         "Este idioma no tiene traducidos los textos del sitio, por lo que no se puede activar.",
+      invalidDefaultLanguage:
+        "El idioma elegido ya no está activo, por lo que no puede ser el predeterminado. Recarga la página.",
     },
     settings: {
       pageTitle: "Configuración del negocio | Administración",
@@ -1198,7 +1210,7 @@ export const adminTranslations = {
         statusEnabled: "Activo",
         statusDisabled: "Inactivo",
         defaultCannotBeDisabled:
-          "El idioma predeterminado no se puede desactivar.",
+          "El idioma predeterminado no se puede desactivar. Para desactivarlo, elige primero otro idioma predeterminado (tiene que estar activo).",
         noSiteTexts: "Sin textos del sitio traducidos: no se puede activar.",
         disableQuestion: "¿Desactivar {language}?",
         disableDescription:
@@ -1215,6 +1227,14 @@ export const adminTranslations = {
         orderFailed: "No se ha podido cambiar el orden de los idiomas.",
         orderOutOfSync:
           "El orden guardado es distinto del mostrado. Recarga la página.",
+        defaultLabel: "Idioma predeterminado",
+        defaultQuestion: "¿Hacer de {language} el idioma predeterminado?",
+        defaultDescription:
+          "La raíz / del sitio pasa a redirigir (307, temporal) a /{code}; el x-default de los hreflang y del sitemap pasa a ser {language}; los idiomas inactivos pasan a redirigir a /{code}; y {language} pasa a ser el primer idioma de respaldo de la carta y de los textos legales. No se borra nada: puedes volver a cambiarlo.",
+        keepDefault: "Mantener el actual",
+        confirmDefault: "Hacer predeterminado",
+        defaultChanged: "{language} es ahora el idioma predeterminado.",
+        defaultSaveFailed: "No se ha podido cambiar el idioma predeterminado.",
       },
     },
   },
@@ -1621,6 +1641,8 @@ export const adminTranslations = {
       businessLanguageUpdateFailed: "The language could not be changed.",
       languageWithoutSiteTranslations:
         "This language has no translated site texts, so it cannot be enabled.",
+      invalidDefaultLanguage:
+        "The selected language is no longer enabled, so it cannot be the default. Reload the page.",
     },
     settings: {
       pageTitle: "Business settings | Administration",
@@ -1789,7 +1811,8 @@ export const adminTranslations = {
         statusDefault: "Default",
         statusEnabled: "Enabled",
         statusDisabled: "Disabled",
-        defaultCannotBeDisabled: "The default language cannot be disabled.",
+        defaultCannotBeDisabled:
+          "The default language cannot be disabled. To disable it, first choose another default language (it must be enabled).",
         noSiteTexts: "No translated site texts: it cannot be enabled.",
         disableQuestion: "Disable {language}?",
         disableDescription:
@@ -1806,6 +1829,14 @@ export const adminTranslations = {
         orderFailed: "The language order could not be changed.",
         orderOutOfSync:
           "The saved order differs from the one shown. Reload the page.",
+        defaultLabel: "Default language",
+        defaultQuestion: "Make {language} the default language?",
+        defaultDescription:
+          "The site root / will redirect (307, temporary) to /{code}; the x-default of the hreflang links and the sitemap will be {language}; disabled languages will redirect to /{code}; and {language} becomes the first fallback language for the menu and the legal texts. Nothing is deleted: you can change it again.",
+        keepDefault: "Keep current",
+        confirmDefault: "Make default",
+        defaultChanged: "{language} is now the default language.",
+        defaultSaveFailed: "The default language could not be changed.",
       },
     },
   },

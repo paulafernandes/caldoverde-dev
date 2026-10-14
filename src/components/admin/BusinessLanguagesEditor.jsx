@@ -7,6 +7,8 @@ import { getBusinessLanguageOption } from "../../utils/businessLanguages";
 import styles from "../../styles/Admin.module.css";
 
 const CONFIRMATION_ID = "business-languages-confirmation";
+const DEFAULT_CONFIRMATION_ID = "business-default-language-confirmation";
+const DEFAULT_SELECT_ID = "business-default-language";
 
 // O PATCH exige o locale: reenvia o atual, só muda o estado.
 async function requestLanguageUpdate({ language, locale }, isEnabled) {
@@ -63,15 +65,55 @@ async function requestLanguageMove(language, direction) {
   };
 }
 
+async function requestDefaultLanguageUpdate(language) {
+  const response = await adminFetch("/api/admin/business/default-language", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ language }),
+  });
+
+  if (response.status === 401) {
+    return { status: "expired" };
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.ok && data.settings) {
+    return {
+      status: "saved",
+      languages: data.settings.languages ?? [],
+      defaultLanguage: data.settings.defaultLanguage,
+    };
+  }
+
+  return {
+    status: "failed",
+    errorKey: getAdminApiErrorKey(
+      data.error,
+      "settings.languages.defaultSaveFailed"
+    ),
+  };
+}
+
 export default function BusinessLanguagesEditor({
   initialLanguages,
-  defaultLanguage,
+  initialDefaultLanguage,
   siteLanguages,
   isSessionExpired,
 }) {
   const { t } = useAdminLanguage();
 
   const [languages, setLanguages] = useState(initialLanguages ?? []);
+  const [defaultLanguage, setDefaultLanguage] = useState(
+    initialDefaultLanguage
+  );
+  const [selectedDefaultLanguage, setSelectedDefaultLanguage] = useState(
+    initialDefaultLanguage
+  );
+  const [isDefaultConfirmationOpen, setIsDefaultConfirmationOpen] =
+    useState(false);
   const [pendingLanguage, setPendingLanguage] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [formError, setFormError] = useState("");
@@ -80,12 +122,14 @@ export default function BusinessLanguagesEditor({
   const checkboxRefs = useRef({});
   const orderButtonRefs = useRef({});
   const cancelButtonRef = useRef(null);
+  const defaultSelectRef = useRef(null);
 
+  // Só há uma confirmação aberta de cada vez: o ref serve às duas.
   useEffect(() => {
-    if (pendingLanguage) {
+    if (pendingLanguage || isDefaultConfirmationOpen) {
       cancelButtonRef.current?.focus();
     }
-  }, [pendingLanguage]);
+  }, [pendingLanguage, isDefaultConfirmationOpen]);
 
   function getLabel(language) {
     return getBusinessLanguageOption(language).label;
@@ -142,6 +186,7 @@ export default function BusinessLanguagesEditor({
     // Desativar muda logo o site público: pede confirmação primeiro.
     setFormError("");
     setStatusMessage(null);
+    setIsDefaultConfirmationOpen(false);
     setPendingLanguage(language);
   }
 
@@ -227,6 +272,89 @@ export default function BusinessLanguagesEditor({
     setPendingLanguage(null);
     setFormError("");
     focusCheckbox(code);
+  }
+
+  function focusDefaultSelect() {
+    window.requestAnimationFrame(() => defaultSelectRef.current?.focus());
+  }
+
+  // Só idiomas ativos e com textos do site podem ser predefinidos.
+  const defaultOptions = languages.filter(
+    ({ language, isEnabled }) => isEnabled && siteLanguages.includes(language)
+  );
+
+  // Se o idioma escolhido deixou de ser opção, volta ao predefinido.
+  const selectedDefault = defaultOptions.some(
+    ({ language }) => language === selectedDefaultLanguage
+  )
+    ? selectedDefaultLanguage
+    : defaultLanguage;
+
+  const selectedDefaultLabel = getLabel(
+    languages.find(({ language }) => language === selectedDefault) ?? {
+      language: selectedDefault,
+      locale: "",
+    }
+  );
+
+  function handleDefaultSelectChange(language) {
+    setSelectedDefaultLanguage(language);
+    setIsDefaultConfirmationOpen(false);
+    setFormError("");
+    setStatusMessage(null);
+  }
+
+  function handleDefaultSaveClick() {
+    if (isSaving || isSessionExpired || selectedDefault === defaultLanguage) {
+      return;
+    }
+
+    // Mudar o predefinido muda logo o site público: pede confirmação primeiro.
+    setFormError("");
+    setStatusMessage(null);
+    setPendingLanguage(null);
+    setIsDefaultConfirmationOpen(true);
+  }
+
+  function handleDefaultCancel() {
+    setIsDefaultConfirmationOpen(false);
+    setSelectedDefaultLanguage(defaultLanguage);
+    setFormError("");
+    focusDefaultSelect();
+  }
+
+  async function saveDefaultLanguage() {
+    setFormError("");
+    setStatusMessage(null);
+    setIsSaving(true);
+
+    try {
+      const result = await requestDefaultLanguageUpdate(selectedDefault);
+
+      // A reautenticação aparece na página; a confirmação pendente mantém-se.
+      if (result.status === "expired") {
+        return;
+      }
+
+      if (result.status !== "saved") {
+        setFormError(result.errorKey);
+        return;
+      }
+
+      setLanguages(result.languages);
+      setDefaultLanguage(result.defaultLanguage);
+      setSelectedDefaultLanguage(result.defaultLanguage);
+      setIsDefaultConfirmationOpen(false);
+      setStatusMessage({
+        key: "settings.languages.defaultChanged",
+        language: selectedDefaultLabel,
+      });
+      focusDefaultSelect();
+    } catch {
+      setFormError("settings.languages.defaultSaveFailed");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   const defaultLanguageLabel = getLabel(
@@ -380,6 +508,90 @@ export default function BusinessLanguagesEditor({
         </tbody>
       </table>
 
+      <div className={styles.field}>
+        <label htmlFor={DEFAULT_SELECT_ID}>
+          {t("settings.languages.defaultLabel")}
+        </label>
+        <select
+          ref={defaultSelectRef}
+          id={DEFAULT_SELECT_ID}
+          value={selectedDefault}
+          disabled={isSaving}
+          aria-controls={
+            isDefaultConfirmationOpen ? DEFAULT_CONFIRMATION_ID : undefined
+          }
+          onChange={(event) => handleDefaultSelectChange(event.target.value)}
+        >
+          {defaultOptions.map((language) => {
+            const { code, label } = getBusinessLanguageOption(language);
+
+            return (
+              <option key={code} value={code}>
+                {label} ({code})
+              </option>
+            );
+          })}
+        </select>
+      </div>
+
+      <div className={styles.userFormActions}>
+        <button
+          type="button"
+          className={styles.button}
+          disabled={
+            selectedDefault === defaultLanguage || isSaving || isSessionExpired
+          }
+          onClick={handleDefaultSaveClick}
+        >
+          {t("settings.save")}
+        </button>
+      </div>
+
+      {isDefaultConfirmationOpen && (
+        <div
+          id={DEFAULT_CONFIRMATION_ID}
+          className={styles.deleteConfirmation}
+          role="alert"
+        >
+          <strong>
+            {t("settings.languages.defaultQuestion", {
+              language: selectedDefaultLabel,
+            })}
+          </strong>
+          <p>
+            {t("settings.languages.defaultDescription", {
+              code: selectedDefault,
+              language: selectedDefaultLabel,
+            })}
+          </p>
+
+          {formError && <p>{t(formError)}</p>}
+
+          <div className={styles.deleteConfirmationActions}>
+            <button
+              ref={cancelButtonRef}
+              type="button"
+              className={styles.cancelButton}
+              disabled={isSaving}
+              onClick={handleDefaultCancel}
+            >
+              {t("settings.languages.keepDefault")}
+            </button>
+
+            <button
+              type="button"
+              className={styles.confirmDeleteButton}
+              disabled={isSaving || isSessionExpired}
+              onClick={saveDefaultLanguage}
+            >
+              {isSaving
+                ? t("settings.saving")
+                : t("settings.languages.confirmDefault")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {pendingLanguage && (
         <div
           id={CONFIRMATION_ID}
@@ -425,7 +637,7 @@ export default function BusinessLanguagesEditor({
         </div>
       )}
 
-      {formError && !pendingLanguage && (
+      {formError && !pendingLanguage && !isDefaultConfirmationOpen && (
         <p className={styles.error} role="alert">
           {t(formError)}
         </p>

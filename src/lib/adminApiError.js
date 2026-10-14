@@ -51,6 +51,7 @@ const ADMIN_API_ERROR_KEYS = {
   BUSINESS_LANGUAGE_UPDATE_FAILED: "apiErrors.businessLanguageUpdateFailed",
   LANGUAGE_WITHOUT_SITE_TRANSLATIONS:
     "apiErrors.languageWithoutSiteTranslations",
+  INVALID_DEFAULT_LANGUAGE: "apiErrors.invalidDefaultLanguage",
 };
 
 export function getAdminApiErrorKey(code, fallbackKey) {

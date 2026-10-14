@@ -1812,7 +1812,7 @@ export default function AdminSettings({
         </section>
         <BusinessLanguagesEditor
           initialLanguages={businessSettings.languages}
-          defaultLanguage={businessSettings.defaultLanguage}
+          initialDefaultLanguage={businessSettings.defaultLanguage}
           siteLanguages={siteLanguages}
           isSessionExpired={isSessionExpired}
         />
