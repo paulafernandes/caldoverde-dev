@@ -1,6 +1,7 @@
 import { updateBusinessDefaultLanguage } from "../../../../server/businessSettingsService";
 import { updateBusinessDefaultLanguageSchema } from "../../../../server/businessSettingsValidation";
 import { getAdminSession } from "../../../../server/getAdminSession";
+import { isPublicSiteLanguage } from "../../../../utils/pageAlternates";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -42,6 +43,12 @@ export default async function handler(request, response) {
     return response.status(400).json({
       error: "INVALID_DEFAULT_LANGUAGE_DATA",
       details: formatValidationErrors(validation.error),
+    });
+  }
+
+  if (!isPublicSiteLanguage(validation.data.language)) {
+    return response.status(409).json({
+      error: "LANGUAGE_WITHOUT_SITE_TRANSLATIONS",
     });
   }
 

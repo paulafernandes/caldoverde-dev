@@ -1,6 +1,7 @@
 import { createBusinessLanguage } from "../../../../../server/businessSettingsService";
 import { createBusinessLanguageSchema } from "../../../../../server/businessSettingsValidation";
 import { getAdminSession } from "../../../../../server/getAdminSession";
+import { isPublicSiteLanguage } from "../../../../../utils/pageAlternates";
 
 function formatValidationErrors(error) {
   return error.issues.map((issue) => ({
@@ -40,6 +41,15 @@ export default async function handler(request, response) {
     return response.status(400).json({
       error: "INVALID_BUSINESS_LANGUAGE_DATA",
       details: formatValidationErrors(validation.error),
+    });
+  }
+
+  if (
+    validation.data.isEnabled &&
+    !isPublicSiteLanguage(validation.data.language)
+  ) {
+    return response.status(409).json({
+      error: "LANGUAGE_WITHOUT_SITE_TRANSLATIONS",
     });
   }
 
