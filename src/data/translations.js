@@ -119,6 +119,15 @@ const translations = {
         portrait: "Alexandre com a avó Prazeres",
       },
     },
+    privacyPage: {
+      seo: {
+        title: "Política de privacidade | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Política de privacidade do Caldo Verde, restaurante português em Mairena del Aljarafe.",
+      },
+      lastUpdatedLabel: "Última atualização",
+      inPreparation: "Texto em preparação.",
+    },
   },
 
   es: {
@@ -241,6 +250,15 @@ const translations = {
         portrait: "Retrato de Alexandre con la abuela Prazeres",
       },
     },
+    privacyPage: {
+      seo: {
+        title: "Política de privacidad | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Política de privacidad de Caldo Verde, restaurante portugués en Mairena del Aljarafe.",
+      },
+      lastUpdatedLabel: "Última actualización",
+      inPreparation: "Texto en preparación.",
+    },
   },
 
   en: {
@@ -362,6 +380,15 @@ const translations = {
         memories: "Old photograph of Alexandre with Grandmother Prazeres",
         portrait: "Portrait of Alexandre with Grandmother Prazeres",
       },
+    },
+    privacyPage: {
+      seo: {
+        title: "Privacy policy | Caldo Verde, Mairena del Aljarafe",
+        description:
+          "Privacy policy of Caldo Verde, a Portuguese restaurant in Mairena del Aljarafe.",
+      },
+      lastUpdatedLabel: "Last updated",
+      inPreparation: "Text in preparation.",
     },
   },
 };

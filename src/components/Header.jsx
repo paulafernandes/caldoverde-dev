@@ -7,6 +7,9 @@ import Image from "next/image";
 import { getBusinessAddressLines } from "../utils/businessAddress";
 import { getBusinessLanguageOption } from "../utils/businessLanguages";
 
+// Páginas públicas em /[lang]/<caminho> que se mantêm ao trocar de idioma.
+const LANGUAGE_PRESERVED_PATHS = ["about", "privacy"];
+
 export default function Header({ businessSettings }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -86,10 +89,13 @@ export default function Header({ businessSettings }) {
 
     const currentHash = window.location.hash;
 
-    const destination =
-      router.pathname === "/[lang]/about"
-        ? `/${languageCode}/about${currentHash}`
-        : `/${languageCode}${currentHash}`;
+    const preservedPath = LANGUAGE_PRESERVED_PATHS.find(
+      (path) => router.pathname === `/[lang]/${path}`
+    );
+
+    const destination = preservedPath
+      ? `/${languageCode}/${preservedPath}${currentHash}`
+      : `/${languageCode}${currentHash}`;
 
     router.push(destination, undefined, {
       scroll: false,
