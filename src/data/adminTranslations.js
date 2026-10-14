@@ -415,6 +415,12 @@ export const adminTranslations = {
       userActivateFailed: "Não foi possível reativar o utilizador.",
       userDeactivateFailed: "Não foi possível desativar o utilizador.",
       cannotDeactivateSelf: "Não podes desativar a tua própria conta.",
+      invalidBusinessLanguageData: "Os dados do idioma são inválidos.",
+      businessLanguageUpdateNotAllowed:
+        "Não foi possível alterar este idioma. Pode ter sido removido ou ser o idioma predefinido, que não pode ser desativado. Recarregue a página.",
+      businessLanguageUpdateFailed: "Não foi possível alterar o idioma.",
+      languageWithoutSiteTranslations:
+        "Este idioma não tem os textos do site traduzidos, por isso não pode ser ativado.",
     },
     settings: {
       pageTitle: "Configurações do negócio | Administração",
@@ -575,6 +581,30 @@ export const adminTranslations = {
         keepEditing: "Continuar a editar",
         discardAndOpen: "Descartar e abrir {day}",
         discardChanges: "Descartar alterações",
+      },
+      languages: {
+        title: "Idiomas do site",
+        description:
+          "Os idiomas ativos aparecem no seletor de idiomas do site e no sitemap. As alterações aplicam-se logo no site público.",
+        caption: "Idiomas do site",
+        columnEnabled: "Ativo",
+        columnLanguage: "Idioma",
+        columnStatus: "Estado",
+        enabledLabel: "Ativo: {language}",
+        statusDefault: "Predefinido",
+        statusEnabled: "Ativo",
+        statusDisabled: "Inativo",
+        defaultCannotBeDisabled:
+          "O idioma predefinido não pode ser desativado.",
+        noSiteTexts: "Sem textos do site traduzidos: não pode ser ativado.",
+        disableQuestion: "Desativar {language}?",
+        disableDescription:
+          "Deixa de aparecer no seletor de idiomas e no sitemap, e os endereços que começam por /{code} passam a redirecionar para {defaultLanguage}. Os textos da ementa que só existam neste idioma deixam de ser mostrados nos outros. Nada é apagado: pode voltar a ativá-lo.",
+        keepEnabled: "Manter ativo",
+        confirmDisable: "Desativar",
+        enabled: "{language} ativado.",
+        disabled: "{language} desativado.",
+        saveFailed: "Não foi possível alterar o idioma.",
       },
     },
   },
@@ -980,6 +1010,12 @@ export const adminTranslations = {
       userActivateFailed: "No se pudo reactivar el usuario.",
       userDeactivateFailed: "No se pudo desactivar el usuario.",
       cannotDeactivateSelf: "No puedes desactivar tu propia cuenta.",
+      invalidBusinessLanguageData: "Los datos del idioma no son válidos.",
+      businessLanguageUpdateNotAllowed:
+        "No se ha podido cambiar este idioma. Puede que se haya eliminado o que sea el idioma predeterminado, que no se puede desactivar. Recarga la página.",
+      businessLanguageUpdateFailed: "No se ha podido cambiar el idioma.",
+      languageWithoutSiteTranslations:
+        "Este idioma no tiene traducidos los textos del sitio, por lo que no se puede activar.",
     },
     settings: {
       pageTitle: "Configuración del negocio | Administración",
@@ -1141,6 +1177,30 @@ export const adminTranslations = {
         keepEditing: "Seguir editando",
         discardAndOpen: "Descartar y abrir {day}",
         discardChanges: "Descartar cambios",
+      },
+      languages: {
+        title: "Idiomas del sitio",
+        description:
+          "Los idiomas activos aparecen en el selector de idiomas del sitio y en el sitemap. Los cambios se aplican de inmediato en el sitio público.",
+        caption: "Idiomas del sitio",
+        columnEnabled: "Activo",
+        columnLanguage: "Idioma",
+        columnStatus: "Estado",
+        enabledLabel: "Activo: {language}",
+        statusDefault: "Predeterminado",
+        statusEnabled: "Activo",
+        statusDisabled: "Inactivo",
+        defaultCannotBeDisabled:
+          "El idioma predeterminado no se puede desactivar.",
+        noSiteTexts: "Sin textos del sitio traducidos: no se puede activar.",
+        disableQuestion: "¿Desactivar {language}?",
+        disableDescription:
+          "Deja de aparecer en el selector de idiomas y en el sitemap, y las direcciones que empiezan por /{code} pasan a redirigir a {defaultLanguage}. Los textos de la carta que solo existan en este idioma dejan de mostrarse en los demás. No se borra nada: puedes volver a activarlo.",
+        keepEnabled: "Mantener activo",
+        confirmDisable: "Desactivar",
+        enabled: "{language} activado.",
+        disabled: "{language} desactivado.",
+        saveFailed: "No se ha podido cambiar el idioma.",
       },
     },
   },
@@ -1541,6 +1601,12 @@ export const adminTranslations = {
       userActivateFailed: "The user could not be reactivated.",
       userDeactivateFailed: "The user could not be deactivated.",
       cannotDeactivateSelf: "You cannot deactivate your own account.",
+      invalidBusinessLanguageData: "The language data is invalid.",
+      businessLanguageUpdateNotAllowed:
+        "This language could not be changed. It may have been removed, or it is the default language, which cannot be disabled. Reload the page.",
+      businessLanguageUpdateFailed: "The language could not be changed.",
+      languageWithoutSiteTranslations:
+        "This language has no translated site texts, so it cannot be enabled.",
     },
     settings: {
       pageTitle: "Business settings | Administration",
@@ -1696,6 +1762,29 @@ export const adminTranslations = {
         keepEditing: "Keep editing",
         discardAndOpen: "Discard and open {day}",
         discardChanges: "Discard changes",
+      },
+      languages: {
+        title: "Site languages",
+        description:
+          "Enabled languages appear in the site's language switcher and in the sitemap. Changes take effect on the public site immediately.",
+        caption: "Site languages",
+        columnEnabled: "Enabled",
+        columnLanguage: "Language",
+        columnStatus: "Status",
+        enabledLabel: "Enabled: {language}",
+        statusDefault: "Default",
+        statusEnabled: "Enabled",
+        statusDisabled: "Disabled",
+        defaultCannotBeDisabled: "The default language cannot be disabled.",
+        noSiteTexts: "No translated site texts: it cannot be enabled.",
+        disableQuestion: "Disable {language}?",
+        disableDescription:
+          "It will no longer appear in the language switcher or the sitemap, and addresses starting with /{code} will redirect to {defaultLanguage}. Menu texts that only exist in this language will no longer be shown in the other languages. Nothing is deleted: you can enable it again.",
+        keepEnabled: "Keep enabled",
+        confirmDisable: "Disable",
+        enabled: "{language} enabled.",
+        disabled: "{language} disabled.",
+        saveFailed: "The language could not be changed.",
       },
     },
   },
