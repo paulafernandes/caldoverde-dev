@@ -170,7 +170,7 @@ export default function Footer({ businessSettings }) {
             © {currentYear} Restaurante Caldo Verde. {text.rightsReserved}
           </p>
 
-          <Link href="/politica-de-privacidade">{text.privacyPolicy}</Link>
+          <Link href={`/${language}/privacy`}>{text.privacyPolicy}</Link>
         </div>
       </div>
     </footer>
