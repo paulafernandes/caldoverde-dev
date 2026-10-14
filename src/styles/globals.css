@@ -1328,6 +1328,13 @@ img {
   color: var(--color-accent);
 }
 
+.footer-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+}
+
 /* Ajuda os links do cabeçalho a não ficarem escondidos */
 
 #contactos,

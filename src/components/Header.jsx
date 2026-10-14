@@ -8,7 +8,7 @@ import { getBusinessAddressLines } from "../utils/businessAddress";
 import { getBusinessLanguageOption } from "../utils/businessLanguages";
 
 // Páginas públicas em /[lang]/<caminho> que se mantêm ao trocar de idioma.
-const LANGUAGE_PRESERVED_PATHS = ["about", "privacy"];
+const LANGUAGE_PRESERVED_PATHS = ["about", "privacy", "legal-notice"];
 
 export default function Header({ businessSettings }) {
   const router = useRouter();
