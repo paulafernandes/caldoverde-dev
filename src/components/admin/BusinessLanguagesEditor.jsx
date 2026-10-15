@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { adminFetch } from "../../lib/adminFetch";
@@ -8,7 +8,9 @@ import styles from "../../styles/Admin.module.css";
 
 const CONFIRMATION_ID = "business-languages-confirmation";
 const DEFAULT_CONFIRMATION_ID = "business-default-language-confirmation";
-const DEFAULT_SELECT_ID = "business-default-language";
+const FINISH_BLOCKED_NOTE_ID = "business-languages-finish-blocked";
+const DEFAULT_RADIO_NAME = "business-default-language";
+const COLUMN_COUNT = 4;
 
 // O PATCH exige o locale: reenvia o atual, só muda o estado.
 async function requestLanguageUpdate({ language, locale }, isEnabled) {
@@ -109,34 +111,73 @@ export default function BusinessLanguagesEditor({
   const [defaultLanguage, setDefaultLanguage] = useState(
     initialDefaultLanguage
   );
-  const [selectedDefaultLanguage, setSelectedDefaultLanguage] = useState(
-    initialDefaultLanguage
-  );
-  const [isDefaultConfirmationOpen, setIsDefaultConfirmationOpen] =
-    useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [candidateDefault, setCandidateDefault] = useState(null);
+  const [activatedLanguage, setActivatedLanguage] = useState(null);
   const [pendingLanguage, setPendingLanguage] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const checkboxRefs = useRef({});
+  const radioRefs = useRef({});
   const orderButtonRefs = useRef({});
   const cancelButtonRef = useRef(null);
-  const defaultSelectRef = useRef(null);
+  const editButtonRef = useRef(null);
+  const finishButtonRef = useRef(null);
+  const tableRef = useRef(null);
 
-  // Só há uma confirmação aberta de cada vez: o ref serve às duas.
+  // Só na confirmação de desativar: na do predefinido o foco fica no radio,
+  // para as setas continuarem a mudar de idioma.
   useEffect(() => {
-    if (pendingLanguage || isDefaultConfirmationOpen) {
+    if (pendingLanguage) {
       cancelButtonRef.current?.focus();
     }
-  }, [pendingLanguage, isDefaultConfirmationOpen]);
+  }, [pendingLanguage]);
 
   function getLabel(language) {
     return getBusinessLanguageOption(language).label;
   }
 
+  function getLabelByCode(code) {
+    return getLabel(
+      languages.find(({ language }) => language === code) ?? {
+        language: code,
+        locale: "",
+      }
+    );
+  }
+
   function focusCheckbox(code) {
     window.requestAnimationFrame(() => checkboxRefs.current[code]?.focus());
+  }
+
+  function focusRadio(code) {
+    window.requestAnimationFrame(() => radioRefs.current[code]?.focus());
+  }
+
+  function handleEdit() {
+    setFormError("");
+    setStatusMessage({ key: "settings.languages.editingStarted" });
+    setIsEditing(true);
+
+    window.requestAnimationFrame(() =>
+      tableRef.current
+        ?.querySelector("button:not(:disabled), input:not(:disabled)")
+        ?.focus()
+    );
+  }
+
+  function handleFinishEditing() {
+    if (isSaving || pendingLanguage || candidateDefault) {
+      return;
+    }
+
+    setFormError("");
+    setStatusMessage(null);
+    setActivatedLanguage(null);
+    setIsEditing(false);
+    window.requestAnimationFrame(() => editButtonRef.current?.focus());
   }
 
   async function saveLanguage(language, isEnabled) {
@@ -177,6 +218,9 @@ export default function BusinessLanguagesEditor({
       return;
     }
 
+    setCandidateDefault(null);
+    setActivatedLanguage(null);
+
     if (isEnabled) {
       setPendingLanguage(null);
       saveLanguage(language, true);
@@ -186,7 +230,6 @@ export default function BusinessLanguagesEditor({
     // Desativar muda logo o site público: pede confirmação primeiro.
     setFormError("");
     setStatusMessage(null);
-    setIsDefaultConfirmationOpen(false);
     setPendingLanguage(language);
   }
 
@@ -274,62 +317,67 @@ export default function BusinessLanguagesEditor({
     focusCheckbox(code);
   }
 
-  function focusDefaultSelect() {
-    window.requestAnimationFrame(() => defaultSelectRef.current?.focus());
-  }
-
-  // Só idiomas ativos e com textos do site podem ser predefinidos.
-  const defaultOptions = languages.filter(
-    ({ language, isEnabled }) => isEnabled && siteLanguages.includes(language)
-  );
-
-  // Se o idioma escolhido deixou de ser opção, volta ao predefinido.
-  const selectedDefault = defaultOptions.some(
-    ({ language }) => language === selectedDefaultLanguage
-  )
-    ? selectedDefaultLanguage
-    : defaultLanguage;
-
-  const selectedDefaultLabel = getLabel(
-    languages.find(({ language }) => language === selectedDefault) ?? {
-      language: selectedDefault,
-      locale: "",
-    }
-  );
-
-  function handleDefaultSelectChange(language) {
-    setSelectedDefaultLanguage(language);
-    setIsDefaultConfirmationOpen(false);
-    setFormError("");
-    setStatusMessage(null);
-  }
-
-  function handleDefaultSaveClick() {
-    if (isSaving || isSessionExpired || selectedDefault === defaultLanguage) {
+  // Escolher um radio só abre (ou atualiza) a confirmação; nada é gravado.
+  function handleDefaultRadioChange(code) {
+    if (isSaving) {
       return;
     }
 
-    // Mudar o predefinido muda logo o site público: pede confirmação primeiro.
+    setPendingLanguage(null);
     setFormError("");
     setStatusMessage(null);
-    setPendingLanguage(null);
-    setIsDefaultConfirmationOpen(true);
+    setActivatedLanguage(null);
+    setCandidateDefault(code === defaultLanguage ? null : code);
   }
 
   function handleDefaultCancel() {
-    setIsDefaultConfirmationOpen(false);
-    setSelectedDefaultLanguage(defaultLanguage);
+    setCandidateDefault(null);
+    setActivatedLanguage(null);
     setFormError("");
-    focusDefaultSelect();
+    focusRadio(defaultLanguage);
   }
 
+  // Inativo: primeiro ativa, depois muda o predefinido, para que cada estado
+  // intermédio seja válido no servidor. Calculado do estado atual, por isso
+  // repetir depois de uma falha no 2.º pedido só faz esse pedido.
   async function saveDefaultLanguage() {
+    if (isSaving || isSessionExpired || !candidateDefault) {
+      return;
+    }
+
+    const candidate = languages.find(
+      ({ language }) => language === candidateDefault
+    );
+
+    if (!candidate) {
+      return;
+    }
+
+    const label = getLabel(candidate);
+    const needsActivation = !candidate.isEnabled;
+
     setFormError("");
     setStatusMessage(null);
     setIsSaving(true);
 
     try {
-      const result = await requestDefaultLanguageUpdate(selectedDefault);
+      if (needsActivation) {
+        const activation = await requestLanguageUpdate(candidate, true);
+
+        if (activation.status === "expired") {
+          return;
+        }
+
+        if (activation.status !== "saved") {
+          setFormError(activation.errorKey);
+          return;
+        }
+
+        setLanguages(activation.languages);
+        setActivatedLanguage(candidate.language);
+      }
+
+      const result = await requestDefaultLanguageUpdate(candidate.language);
 
       // A reautenticação aparece na página; a confirmação pendente mantém-se.
       if (result.status === "expired") {
@@ -341,15 +389,20 @@ export default function BusinessLanguagesEditor({
         return;
       }
 
+      const wasActivated =
+        needsActivation || activatedLanguage === candidate.language;
+
       setLanguages(result.languages);
       setDefaultLanguage(result.defaultLanguage);
-      setSelectedDefaultLanguage(result.defaultLanguage);
-      setIsDefaultConfirmationOpen(false);
+      setCandidateDefault(null);
+      setActivatedLanguage(null);
       setStatusMessage({
-        key: "settings.languages.defaultChanged",
-        language: selectedDefaultLabel,
+        key: wasActivated
+          ? "settings.languages.defaultChangedActivated"
+          : "settings.languages.defaultChanged",
+        language: label,
       });
-      focusDefaultSelect();
+      focusRadio(result.defaultLanguage);
     } catch {
       setFormError("settings.languages.defaultSaveFailed");
     } finally {
@@ -357,12 +410,128 @@ export default function BusinessLanguagesEditor({
     }
   }
 
-  const defaultLanguageLabel = getLabel(
-    languages.find(({ language }) => language === defaultLanguage) ?? {
-      language: defaultLanguage,
-      locale: "",
-    }
+  const defaultLanguageLabel = getLabelByCode(defaultLanguage);
+  const candidateLanguage = languages.find(
+    ({ language }) => language === candidateDefault
   );
+  const candidateLabel = candidateLanguage ? getLabel(candidateLanguage) : "";
+  const candidateNeedsActivation = Boolean(
+    candidateLanguage && !candidateLanguage.isEnabled
+  );
+  const isConfirmationOpen = Boolean(pendingLanguage || candidateLanguage);
+
+  function renderDefaultConfirmation() {
+    const params = {
+      code: candidateDefault,
+      language: candidateLabel,
+      previousLanguage: defaultLanguageLabel,
+      defaultLanguage: defaultLanguageLabel,
+    };
+
+    return (
+      <div
+        id={DEFAULT_CONFIRMATION_ID}
+        className={styles.deleteConfirmation}
+        role="alert"
+      >
+        <strong>
+          {t(
+            candidateNeedsActivation
+              ? "settings.languages.defaultActivateQuestion"
+              : "settings.languages.defaultQuestion",
+            params
+          )}
+        </strong>
+        <p>
+          {t(
+            candidateNeedsActivation
+              ? "settings.languages.defaultActivateDescription"
+              : "settings.languages.defaultDescription",
+            params
+          )}
+        </p>
+
+        {formError && activatedLanguage === candidateDefault && (
+          <p>{t("settings.languages.defaultActivatedButNotDefault", params)}</p>
+        )}
+        {formError && <p>{t(formError)}</p>}
+
+        <div className={styles.deleteConfirmationActions}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            disabled={isSaving}
+            onClick={handleDefaultCancel}
+          >
+            {t("settings.languages.keepDefault")}
+          </button>
+
+          <button
+            type="button"
+            className={styles.confirmDeleteButton}
+            disabled={isSaving || isSessionExpired}
+            onClick={saveDefaultLanguage}
+          >
+            {isSaving
+              ? t("settings.saving")
+              : t(
+                  candidateNeedsActivation
+                    ? "settings.languages.confirmActivateDefault"
+                    : "settings.languages.confirmDefault"
+                )}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderDisableConfirmation() {
+    return (
+      <div
+        id={CONFIRMATION_ID}
+        className={styles.deleteConfirmation}
+        role="alert"
+      >
+        <strong>
+          {t("settings.languages.disableQuestion", {
+            language: getLabel(pendingLanguage),
+          })}
+        </strong>
+        <p>
+          {t("settings.languages.disableDescription", {
+            code: pendingLanguage.language,
+            language: getLabel(pendingLanguage),
+            defaultLanguage: defaultLanguageLabel,
+          })}
+        </p>
+
+        {formError && <p>{t(formError)}</p>}
+
+        <div className={styles.deleteConfirmationActions}>
+          <button
+            ref={cancelButtonRef}
+            type="button"
+            className={styles.cancelButton}
+            disabled={isSaving}
+            onClick={handleCancel}
+          >
+            {t("settings.languages.keepEnabled")}
+          </button>
+
+          <button
+            type="button"
+            className={styles.confirmDeleteButton}
+            disabled={isSaving || isSessionExpired}
+            onClick={() => saveLanguage(pendingLanguage, false)}
+          >
+            {isSaving
+              ? t("settings.saving")
+              : t("settings.languages.confirmDisable")}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section
@@ -371,11 +540,41 @@ export default function BusinessLanguagesEditor({
     >
       <div className={styles.settingsCardHeader}>
         <h2 id="business-languages-title">{t("settings.languages.title")}</h2>
+
+        {isEditing ? (
+          <button
+            ref={finishButtonRef}
+            type="button"
+            className={styles.editButton}
+            disabled={isSaving || isConfirmationOpen}
+            aria-describedby={
+              isConfirmationOpen ? FINISH_BLOCKED_NOTE_ID : undefined
+            }
+            onClick={handleFinishEditing}
+          >
+            {t("settings.languages.finishEditing")}
+          </button>
+        ) : (
+          <button
+            ref={editButtonRef}
+            type="button"
+            className={styles.editButton}
+            onClick={handleEdit}
+          >
+            {t("settings.edit")}
+          </button>
+        )}
       </div>
 
       <p className={styles.openingHoursNote}>
         {t("settings.languages.description")}
       </p>
+
+      {isEditing && isConfirmationOpen && (
+        <p id={FINISH_BLOCKED_NOTE_ID} className={styles.openingHoursNote}>
+          {t("settings.languages.finishEditingBlocked")}
+        </p>
+      )}
 
       <p
         className={
@@ -388,7 +587,7 @@ export default function BusinessLanguagesEditor({
         {statusMessage && t(statusMessage.key, statusMessage)}
       </p>
 
-      <table className={styles.openingHoursTable}>
+      <table ref={tableRef} className={styles.openingHoursTable}>
         <caption className={styles.openingHoursVisuallyHidden}>
           {t("settings.languages.caption")}
         </caption>
@@ -396,9 +595,9 @@ export default function BusinessLanguagesEditor({
         <thead>
           <tr>
             <th scope="col">{t("settings.languages.columnOrder")}</th>
-            <th scope="col">{t("settings.languages.columnEnabled")}</th>
             <th scope="col">{t("settings.languages.columnLanguage")}</th>
-            <th scope="col">{t("settings.languages.columnStatus")}</th>
+            <th scope="col">{t("settings.languages.columnEnabled")}</th>
+            <th scope="col">{t("settings.languages.columnDefault")}</th>
           </tr>
         </thead>
 
@@ -408,6 +607,7 @@ export default function BusinessLanguagesEditor({
             const isDefault = code === defaultLanguage;
             const hasSiteTexts = siteLanguages.includes(code);
             const isPending = pendingLanguage?.language === code;
+            const isCandidate = candidateLanguage?.language === code;
             const noteId = `business-language-${code}-note`;
 
             // Predefinido: nunca se desativa. Sem textos do site: não se ativa.
@@ -416,228 +616,157 @@ export default function BusinessLanguagesEditor({
 
             let note = "";
 
-            if (isDefault) {
-              note = t("settings.languages.defaultCannotBeDisabled");
-            } else if (!hasSiteTexts) {
+            if (!hasSiteTexts) {
               note = t("settings.languages.noSiteTexts");
+            } else if (isDefault && isEditing) {
+              note = t("settings.languages.defaultCannotBeDisabled");
             }
 
             return (
-              <tr
-                key={code}
-                className={isPending ? styles.openingHoursActiveRow : undefined}
-              >
-                <td>
-                  <div className={styles.orderControls}>
-                    {["up", "down"].map((direction) => {
-                      const buttonLabel = t(
-                        direction === "up"
-                          ? "settings.languages.moveUp"
-                          : "settings.languages.moveDown",
-                        { language: label }
-                      );
-                      const isAtEdge =
-                        direction === "up"
-                          ? index === 0
-                          : index === languages.length - 1;
+              <Fragment key={code}>
+                <tr
+                  className={
+                    isPending || isCandidate
+                      ? styles.openingHoursActiveRow
+                      : undefined
+                  }
+                >
+                  <td>
+                    <div className={styles.languageOrderCell}>
+                      <span>{index + 1}</span>
 
-                      return (
-                        <button
-                          key={direction}
+                      {isEditing && (
+                        <div className={styles.orderControls}>
+                          {["up", "down"].map((direction) => {
+                            const buttonLabel = t(
+                              direction === "up"
+                                ? "settings.languages.moveUp"
+                                : "settings.languages.moveDown",
+                              { language: label }
+                            );
+                            const isAtEdge =
+                              direction === "up"
+                                ? index === 0
+                                : index === languages.length - 1;
+
+                            return (
+                              <button
+                                key={direction}
+                                ref={(element) => {
+                                  orderButtonRefs.current[
+                                    `${code}-${direction}`
+                                  ] = element;
+                                }}
+                                type="button"
+                                className={styles.orderButton}
+                                title={buttonLabel}
+                                aria-label={buttonLabel}
+                                disabled={isAtEdge || isSaving}
+                                onClick={() =>
+                                  moveLanguage(language, direction)
+                                }
+                              >
+                                <span aria-hidden="true">
+                                  {direction === "up" ? "↑" : "↓"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+
+                  <th scope="row">
+                    <span aria-hidden="true">{flag}</span> {label}{" "}
+                    <span className={styles.openingHoursNote}>({code})</span>
+                    {note && (
+                      <span id={noteId} className={styles.openingHoursNote}>
+                        <br />
+                        {note}
+                      </span>
+                    )}
+                  </th>
+
+                  <td className={styles.openingHoursCheckboxCell}>
+                    {isEditing ? (
+                      <input
+                        ref={(element) => {
+                          checkboxRefs.current[code] = element;
+                        }}
+                        type="checkbox"
+                        checked={language.isEnabled && !isPending}
+                        disabled={isLocked || isSaving}
+                        aria-label={t("settings.languages.enabledLabel", {
+                          language: label,
+                        })}
+                        aria-describedby={
+                          note && (isDefault || !hasSiteTexts)
+                            ? noteId
+                            : undefined
+                        }
+                        aria-controls={isPending ? CONFIRMATION_ID : undefined}
+                        onChange={(event) =>
+                          handleEnabledChange(language, event.target.checked)
+                        }
+                      />
+                    ) : language.isEnabled ? (
+                      t("settings.languages.yes")
+                    ) : (
+                      t("settings.languages.no")
+                    )}
+                  </td>
+
+                  <td className={styles.openingHoursCheckboxCell}>
+                    <div className={styles.languageDefaultCell}>
+                      {isEditing && (
+                        <input
                           ref={(element) => {
-                            orderButtonRefs.current[`${code}-${direction}`] =
-                              element;
+                            radioRefs.current[code] = element;
                           }}
-                          type="button"
-                          className={styles.orderButton}
-                          title={buttonLabel}
-                          aria-label={buttonLabel}
-                          disabled={isAtEdge || isSaving}
-                          onClick={() => moveLanguage(language, direction)}
-                        >
-                          <span aria-hidden="true">
-                            {direction === "up" ? "↑" : "↓"}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </td>
+                          type="radio"
+                          name={DEFAULT_RADIO_NAME}
+                          value={code}
+                          checked={
+                            code === (candidateDefault ?? defaultLanguage)
+                          }
+                          disabled={!hasSiteTexts || isSaving}
+                          aria-label={t("settings.languages.makeDefaultLabel", {
+                            language: label,
+                          })}
+                          aria-describedby={!hasSiteTexts ? noteId : undefined}
+                          aria-controls={
+                            isCandidate ? DEFAULT_CONFIRMATION_ID : undefined
+                          }
+                          onChange={() => handleDefaultRadioChange(code)}
+                        />
+                      )}
 
-                <td className={styles.openingHoursCheckboxCell}>
-                  <input
-                    ref={(element) => {
-                      checkboxRefs.current[code] = element;
-                    }}
-                    type="checkbox"
-                    checked={language.isEnabled && !isPending}
-                    disabled={isLocked || isSaving}
-                    aria-label={t("settings.languages.enabledLabel", {
-                      language: label,
-                    })}
-                    aria-describedby={note ? noteId : undefined}
-                    aria-controls={isPending ? CONFIRMATION_ID : undefined}
-                    onChange={(event) =>
-                      handleEnabledChange(language, event.target.checked)
-                    }
-                  />
-                </td>
+                      {isDefault && (
+                        <span className={styles.statusVisible}>
+                          {t("settings.languages.statusDefault")}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                </tr>
 
-                <th scope="row">
-                  <span aria-hidden="true">{flag}</span> {label}{" "}
-                  <span className={styles.openingHoursNote}>({code})</span>
-                </th>
-
-                <td>
-                  {isDefault
-                    ? t("settings.languages.statusDefault")
-                    : language.isEnabled
-                      ? t("settings.languages.statusEnabled")
-                      : t("settings.languages.statusDisabled")}
-
-                  {note && (
-                    <span id={noteId} className={styles.openingHoursNote}>
-                      <br />
-                      {note}
-                    </span>
-                  )}
-                </td>
-              </tr>
+                {isEditing && (isPending || isCandidate) && (
+                  <tr>
+                    <td colSpan={COLUMN_COUNT}>
+                      {isPending
+                        ? renderDisableConfirmation()
+                        : renderDefaultConfirmation()}
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
             );
           })}
         </tbody>
       </table>
 
-      <div className={styles.field}>
-        <label htmlFor={DEFAULT_SELECT_ID}>
-          {t("settings.languages.defaultLabel")}
-        </label>
-        <select
-          ref={defaultSelectRef}
-          id={DEFAULT_SELECT_ID}
-          value={selectedDefault}
-          disabled={isSaving}
-          aria-controls={
-            isDefaultConfirmationOpen ? DEFAULT_CONFIRMATION_ID : undefined
-          }
-          onChange={(event) => handleDefaultSelectChange(event.target.value)}
-        >
-          {defaultOptions.map((language) => {
-            const { code, label } = getBusinessLanguageOption(language);
-
-            return (
-              <option key={code} value={code}>
-                {label} ({code})
-              </option>
-            );
-          })}
-        </select>
-      </div>
-
-      <div className={styles.userFormActions}>
-        <button
-          type="button"
-          className={styles.button}
-          disabled={
-            selectedDefault === defaultLanguage || isSaving || isSessionExpired
-          }
-          onClick={handleDefaultSaveClick}
-        >
-          {t("settings.save")}
-        </button>
-      </div>
-
-      {isDefaultConfirmationOpen && (
-        <div
-          id={DEFAULT_CONFIRMATION_ID}
-          className={styles.deleteConfirmation}
-          role="alert"
-        >
-          <strong>
-            {t("settings.languages.defaultQuestion", {
-              language: selectedDefaultLabel,
-            })}
-          </strong>
-          <p>
-            {t("settings.languages.defaultDescription", {
-              code: selectedDefault,
-              language: selectedDefaultLabel,
-            })}
-          </p>
-
-          {formError && <p>{t(formError)}</p>}
-
-          <div className={styles.deleteConfirmationActions}>
-            <button
-              ref={cancelButtonRef}
-              type="button"
-              className={styles.cancelButton}
-              disabled={isSaving}
-              onClick={handleDefaultCancel}
-            >
-              {t("settings.languages.keepDefault")}
-            </button>
-
-            <button
-              type="button"
-              className={styles.confirmDeleteButton}
-              disabled={isSaving || isSessionExpired}
-              onClick={saveDefaultLanguage}
-            >
-              {isSaving
-                ? t("settings.saving")
-                : t("settings.languages.confirmDefault")}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {pendingLanguage && (
-        <div
-          id={CONFIRMATION_ID}
-          className={styles.deleteConfirmation}
-          role="alert"
-        >
-          <strong>
-            {t("settings.languages.disableQuestion", {
-              language: getLabel(pendingLanguage),
-            })}
-          </strong>
-          <p>
-            {t("settings.languages.disableDescription", {
-              code: pendingLanguage.language,
-              defaultLanguage: defaultLanguageLabel,
-            })}
-          </p>
-
-          {formError && <p>{t(formError)}</p>}
-
-          <div className={styles.deleteConfirmationActions}>
-            <button
-              ref={cancelButtonRef}
-              type="button"
-              className={styles.cancelButton}
-              disabled={isSaving}
-              onClick={handleCancel}
-            >
-              {t("settings.languages.keepEnabled")}
-            </button>
-
-            <button
-              type="button"
-              className={styles.confirmDeleteButton}
-              disabled={isSaving || isSessionExpired}
-              onClick={() => saveLanguage(pendingLanguage, false)}
-            >
-              {isSaving
-                ? t("settings.saving")
-                : t("settings.languages.confirmDisable")}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {formError && !pendingLanguage && !isDefaultConfirmationOpen && (
+      {formError && !isConfirmationOpen && (
         <p className={styles.error} role="alert">
           {t(formError)}
         </p>

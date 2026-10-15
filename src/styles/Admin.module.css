@@ -2111,6 +2111,25 @@ label.itemSubcategoryOption {
   background: #eef5f0;
 }
 
+.languageOrderCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.languageDefaultCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.languageDefaultCell input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #315c45;
+}
+
 .openingHoursEmpty {
   margin-top: 16px;
 }
