@@ -49,6 +49,8 @@ const ADMIN_API_ERROR_KEYS = {
   BUSINESS_LANGUAGE_UPDATE_NOT_ALLOWED:
     "apiErrors.businessLanguageUpdateNotAllowed",
   BUSINESS_LANGUAGE_UPDATE_FAILED: "apiErrors.businessLanguageUpdateFailed",
+  BUSINESS_LANGUAGE_ALREADY_EXISTS: "apiErrors.businessLanguageAlreadyExists",
+  BUSINESS_LANGUAGE_CREATE_FAILED: "apiErrors.businessLanguageCreateFailed",
   LANGUAGE_WITHOUT_SITE_TRANSLATIONS:
     "apiErrors.languageWithoutSiteTranslations",
   INVALID_DEFAULT_LANGUAGE: "apiErrors.invalidDefaultLanguage",

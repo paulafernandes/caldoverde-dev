@@ -3,14 +3,49 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useAdminLanguage } from "../../context/AdminLanguageContext";
 import { adminFetch } from "../../lib/adminFetch";
 import { getAdminApiErrorKey } from "../../lib/adminApiError";
-import { getBusinessLanguageOption } from "../../utils/businessLanguages";
+import {
+  BUSINESS_LANGUAGE_CATALOG,
+  getBusinessLanguageOption,
+} from "../../utils/businessLanguages";
 import styles from "../../styles/Admin.module.css";
 
 const CONFIRMATION_ID = "business-languages-confirmation";
 const DEFAULT_CONFIRMATION_ID = "business-default-language-confirmation";
 const FINISH_BLOCKED_NOTE_ID = "business-languages-finish-blocked";
 const DEFAULT_RADIO_NAME = "business-default-language";
+const ADD_FORM_ID = "business-language-add-form";
+const ADD_TITLE_ID = "business-language-add-title";
+const ADD_SELECT_ID = "business-language-new";
+const ADD_NOTE_ID = "business-language-add-note";
+const ADD_NO_TEXTS_ID = "business-language-add-no-texts";
 const COLUMN_COUNT = 4;
+
+// Cria sempre desativado: só se ativa depois, se o site tiver textos.
+async function requestLanguageCreate({ language, locale }) {
+  const response = await adminFetch("/api/admin/business/languages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ language, locale, isEnabled: false }),
+  });
+
+  // A reautenticação aparece na página; o formulário mantém-se.
+  if (response.status === 401) {
+    return { status: "expired" };
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (response.ok && data.settings) {
+    return { status: "created", languages: data.settings.languages ?? [] };
+  }
+
+  return {
+    status: "failed",
+    errorKey: getAdminApiErrorKey(data.error, "settings.languages.addFailed"),
+  };
+}
 
 // O PATCH exige o locale: reenvia o atual, só muda o estado.
 async function requestLanguageUpdate({ language, locale }, isEnabled) {
@@ -118,8 +153,13 @@ export default function BusinessLanguagesEditor({
   const [statusMessage, setStatusMessage] = useState(null);
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [newLanguageCode, setNewLanguageCode] = useState("");
+  const [addError, setAddError] = useState("");
 
   const checkboxRefs = useRef({});
+  const addButtonRef = useRef(null);
+  const addSelectRef = useRef(null);
   const radioRefs = useRef({});
   const orderButtonRefs = useRef({});
   const cancelButtonRef = useRef(null);
@@ -161,10 +201,13 @@ export default function BusinessLanguagesEditor({
     setStatusMessage({ key: "settings.languages.editingStarted" });
     setIsEditing(true);
 
+    // Com o formulário aberto a tabela está bloqueada: foco em "Concluir".
     window.requestAnimationFrame(() =>
-      tableRef.current
-        ?.querySelector("button:not(:disabled), input:not(:disabled)")
-        ?.focus()
+      (
+        tableRef.current?.querySelector(
+          "button:not(:disabled), input:not(:disabled)"
+        ) ?? finishButtonRef.current
+      )?.focus()
     );
   }
 
@@ -178,6 +221,63 @@ export default function BusinessLanguagesEditor({
     setActivatedLanguage(null);
     setIsEditing(false);
     window.requestAnimationFrame(() => editButtonRef.current?.focus());
+  }
+
+  function handleAddOpen() {
+    setAddError("");
+    setNewLanguageCode("");
+    setStatusMessage(null);
+    setIsAdding(true);
+    window.requestAnimationFrame(() => addSelectRef.current?.focus());
+  }
+
+  function handleAddCancel() {
+    setIsAdding(false);
+    setNewLanguageCode("");
+    setAddError("");
+    window.requestAnimationFrame(() => addButtonRef.current?.focus());
+  }
+
+  async function handleAddSubmit(event) {
+    event.preventDefault();
+
+    const entry = BUSINESS_LANGUAGE_CATALOG.find(
+      ({ language }) => language === newLanguageCode
+    );
+
+    if (isSaving || isSessionExpired || !entry) {
+      return;
+    }
+
+    setAddError("");
+    setStatusMessage(null);
+    setIsSaving(true);
+
+    try {
+      const result = await requestLanguageCreate(entry);
+
+      if (result.status === "expired") {
+        return;
+      }
+
+      if (result.status !== "created") {
+        setAddError(result.errorKey);
+        return;
+      }
+
+      setLanguages(result.languages);
+      setIsAdding(false);
+      setNewLanguageCode("");
+      setStatusMessage({
+        key: "settings.languages.added",
+        language: getLabel(entry),
+      });
+      window.requestAnimationFrame(() => addButtonRef.current?.focus());
+    } catch {
+      setAddError("settings.languages.addFailed");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   async function saveLanguage(language, isEnabled) {
@@ -420,6 +520,119 @@ export default function BusinessLanguagesEditor({
   );
   const isConfirmationOpen = Boolean(pendingLanguage || candidateLanguage);
 
+  const existingCodes = new Set(languages.map(({ language }) => language));
+  const availableLanguages = BUSINESS_LANGUAGE_CATALOG.filter(
+    ({ language }) => !existingCodes.has(language)
+  )
+    .map((entry) => ({ ...entry, ...getBusinessLanguageOption(entry) }))
+    .sort((first, second) => first.label.localeCompare(second.label));
+  const selectedNewLanguage = availableLanguages.find(
+    ({ code }) => code === newLanguageCode
+  );
+  const selectedHasSiteTexts = Boolean(
+    selectedNewLanguage && siteLanguages.includes(selectedNewLanguage.code)
+  );
+
+  function renderAddForm() {
+    return (
+      <form
+        id={ADD_FORM_ID}
+        className={styles.languageAddForm}
+        aria-labelledby={ADD_TITLE_ID}
+        onSubmit={handleAddSubmit}
+      >
+        <h3 id={ADD_TITLE_ID}>{t("settings.languages.addTitle")}</h3>
+
+        {availableLanguages.length === 0 ? (
+          <p className={styles.openingHoursNote}>
+            {t("settings.languages.noLanguagesAvailable")}
+          </p>
+        ) : (
+          <>
+            <div className={styles.field}>
+              <label htmlFor={ADD_SELECT_ID}>
+                {t("settings.languages.addSelectLabel")}
+              </label>
+              <select
+                ref={addSelectRef}
+                id={ADD_SELECT_ID}
+                value={newLanguageCode}
+                disabled={isSaving}
+                aria-describedby={
+                  selectedNewLanguage && !selectedHasSiteTexts
+                    ? `${ADD_NOTE_ID} ${ADD_NO_TEXTS_ID}`
+                    : ADD_NOTE_ID
+                }
+                onChange={(event) => {
+                  setNewLanguageCode(event.target.value);
+                  setAddError("");
+                }}
+              >
+                <option value="">
+                  {t("settings.languages.addSelectPlaceholder")}
+                </option>
+                {availableLanguages.map(({ code, label }) => (
+                  <option key={code} value={code}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedNewLanguage && (
+              <p className={styles.languageAddPreview}>
+                <span aria-hidden="true">{selectedNewLanguage.flag}</span>{" "}
+                {selectedNewLanguage.label}{" "}
+                <span className={styles.openingHoursNote}>
+                  ({selectedNewLanguage.code})
+                </span>
+              </p>
+            )}
+
+            {selectedNewLanguage && !selectedHasSiteTexts && (
+              <p id={ADD_NO_TEXTS_ID} className={styles.openingHoursNote}>
+                {t("settings.languages.noSiteTexts")}
+              </p>
+            )}
+
+            <p id={ADD_NOTE_ID} className={styles.openingHoursNote}>
+              {t("settings.languages.addCreatedNote")}
+            </p>
+          </>
+        )}
+
+        {addError && (
+          <p className={styles.error} role="alert">
+            {t(addError)}
+          </p>
+        )}
+
+        <div className={styles.userFormActions}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            disabled={isSaving}
+            onClick={handleAddCancel}
+          >
+            {t("settings.cancel")}
+          </button>
+
+          {availableLanguages.length > 0 && (
+            <button
+              type="submit"
+              className={styles.saveButton}
+              disabled={isSaving || isSessionExpired || !selectedNewLanguage}
+            >
+              {isSaving
+                ? t("settings.saving")
+                : t("settings.languages.addConfirm")}
+            </button>
+          )}
+        </div>
+      </form>
+    );
+  }
+
   function renderDefaultConfirmation() {
     const params = {
       code: candidateDefault,
@@ -541,29 +754,46 @@ export default function BusinessLanguagesEditor({
       <div className={styles.settingsCardHeader}>
         <h2 id="business-languages-title">{t("settings.languages.title")}</h2>
 
-        {isEditing ? (
+        <div className={styles.settingsCardHeaderActions}>
           <button
-            ref={finishButtonRef}
+            ref={addButtonRef}
             type="button"
             className={styles.editButton}
-            disabled={isSaving || isConfirmationOpen}
+            disabled={isSaving || isConfirmationOpen || isAdding}
+            aria-expanded={isAdding}
+            aria-controls={isAdding ? ADD_FORM_ID : undefined}
             aria-describedby={
               isConfirmationOpen ? FINISH_BLOCKED_NOTE_ID : undefined
             }
-            onClick={handleFinishEditing}
+            onClick={handleAddOpen}
           >
-            {t("settings.languages.finishEditing")}
+            {t("settings.languages.addLanguage")}
           </button>
-        ) : (
-          <button
-            ref={editButtonRef}
-            type="button"
-            className={styles.editButton}
-            onClick={handleEdit}
-          >
-            {t("settings.edit")}
-          </button>
-        )}
+
+          {isEditing ? (
+            <button
+              ref={finishButtonRef}
+              type="button"
+              className={styles.editButton}
+              disabled={isSaving || isConfirmationOpen}
+              aria-describedby={
+                isConfirmationOpen ? FINISH_BLOCKED_NOTE_ID : undefined
+              }
+              onClick={handleFinishEditing}
+            >
+              {t("settings.languages.finishEditing")}
+            </button>
+          ) : (
+            <button
+              ref={editButtonRef}
+              type="button"
+              className={styles.editButton}
+              onClick={handleEdit}
+            >
+              {t("settings.edit")}
+            </button>
+          )}
+        </div>
       </div>
 
       <p className={styles.openingHoursNote}>
@@ -586,6 +816,8 @@ export default function BusinessLanguagesEditor({
       >
         {statusMessage && t(statusMessage.key, statusMessage)}
       </p>
+
+      {isAdding && renderAddForm()}
 
       <table ref={tableRef} className={styles.openingHoursTable}>
         <caption className={styles.openingHoursVisuallyHidden}>
@@ -661,7 +893,7 @@ export default function BusinessLanguagesEditor({
                                 className={styles.orderButton}
                                 title={buttonLabel}
                                 aria-label={buttonLabel}
-                                disabled={isAtEdge || isSaving}
+                                disabled={isAtEdge || isSaving || isAdding}
                                 onClick={() =>
                                   moveLanguage(language, direction)
                                 }
@@ -696,7 +928,7 @@ export default function BusinessLanguagesEditor({
                         }}
                         type="checkbox"
                         checked={language.isEnabled && !isPending}
-                        disabled={isLocked || isSaving}
+                        disabled={isLocked || isSaving || isAdding}
                         aria-label={t("settings.languages.enabledLabel", {
                           language: label,
                         })}
@@ -730,7 +962,7 @@ export default function BusinessLanguagesEditor({
                           checked={
                             code === (candidateDefault ?? defaultLanguage)
                           }
-                          disabled={!hasSiteTexts || isSaving}
+                          disabled={!hasSiteTexts || isSaving || isAdding}
                           aria-label={t("settings.languages.makeDefaultLabel", {
                             language: label,
                           })}

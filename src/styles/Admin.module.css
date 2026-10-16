@@ -2130,6 +2130,43 @@ label.itemSubcategoryOption {
   accent-color: #315c45;
 }
 
+.settingsCardHeaderActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.languageAddForm {
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid #d7ddd8;
+  border-radius: 8px;
+}
+
+.languageAddForm h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.languageAddForm .field label {
+  margin-top: 12px;
+}
+
+.languageAddPreview {
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+
+.languageAddForm .userFormActions {
+  margin-top: 16px;
+}
+
+/* Sem idioma escolhido o botão está desativado, não à espera. */
+.languageAddForm .saveButton:disabled {
+  cursor: not-allowed;
+}
+
 .openingHoursEmpty {
   margin-top: 16px;
 }

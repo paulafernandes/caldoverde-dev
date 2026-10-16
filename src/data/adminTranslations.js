@@ -419,6 +419,9 @@ export const adminTranslations = {
       businessLanguageUpdateNotAllowed:
         "Não foi possível alterar este idioma. Recarregue a página e tente de novo.",
       businessLanguageUpdateFailed: "Não foi possível alterar o idioma.",
+      businessLanguageAlreadyExists:
+        "Este idioma já existe. Recarregue a página para ver a lista atualizada.",
+      businessLanguageCreateFailed: "Não foi possível acrescentar o idioma.",
       languageWithoutSiteTranslations:
         "O site ainda não está traduzido neste idioma, por isso não pode ser ativado.",
       invalidDefaultLanguage:
@@ -637,6 +640,17 @@ export const adminTranslations = {
         defaultActivatedButNotDefault:
           "{language} foi ativado, mas ainda não é o idioma predefinido (continua a ser {defaultLanguage}). Pode tentar de novo.",
         defaultSaveFailed: "Não foi possível mudar o idioma predefinido.",
+        addLanguage: "Novo idioma",
+        addTitle: "Acrescentar idioma",
+        addSelectLabel: "Idioma a acrescentar",
+        addSelectPlaceholder: "Escolha um idioma",
+        addCreatedNote:
+          "O idioma fica desativado e no fim da lista. Pode ativá-lo depois, se o site já estiver traduzido nesse idioma.",
+        addConfirm: "Acrescentar",
+        added: "{language} acrescentado, ainda desativado.",
+        addFailed: "Não foi possível acrescentar o idioma.",
+        noLanguagesAvailable:
+          "Todos os idiomas da lista já foram acrescentados.",
       },
     },
   },
@@ -1046,6 +1060,9 @@ export const adminTranslations = {
       businessLanguageUpdateNotAllowed:
         "No se ha podido cambiar este idioma. Recarga la página y vuelve a intentarlo.",
       businessLanguageUpdateFailed: "No se ha podido cambiar el idioma.",
+      businessLanguageAlreadyExists:
+        "Este idioma ya existe. Recarga la página para ver la lista actualizada.",
+      businessLanguageCreateFailed: "No se ha podido añadir el idioma.",
       languageWithoutSiteTranslations:
         "El sitio todavía no está traducido a este idioma, por eso no se puede activar.",
       invalidDefaultLanguage:
@@ -1265,6 +1282,17 @@ export const adminTranslations = {
         defaultActivatedButNotDefault:
           "{language} se ha activado, pero todavía no es el idioma predeterminado (sigue siendo {defaultLanguage}). Puedes volver a intentarlo.",
         defaultSaveFailed: "No se ha podido cambiar el idioma predeterminado.",
+        addLanguage: "Nuevo idioma",
+        addTitle: "Añadir idioma",
+        addSelectLabel: "Idioma que quieres añadir",
+        addSelectPlaceholder: "Elige un idioma",
+        addCreatedNote:
+          "El idioma se queda desactivado y al final de la lista. Puedes activarlo después, si el sitio ya está traducido a ese idioma.",
+        addConfirm: "Añadir",
+        added: "{language} añadido, todavía desactivado.",
+        addFailed: "No se ha podido añadir el idioma.",
+        noLanguagesAvailable:
+          "Ya se han añadido todos los idiomas de la lista.",
       },
     },
   },
@@ -1669,6 +1697,9 @@ export const adminTranslations = {
       businessLanguageUpdateNotAllowed:
         "This language could not be changed. Reload the page and try again.",
       businessLanguageUpdateFailed: "The language could not be changed.",
+      businessLanguageAlreadyExists:
+        "This language already exists. Reload the page to see the updated list.",
+      businessLanguageCreateFailed: "The language could not be added.",
       languageWithoutSiteTranslations:
         "The site has not been translated into this language yet, so it cannot be enabled.",
       invalidDefaultLanguage:
@@ -1880,6 +1911,17 @@ export const adminTranslations = {
         defaultActivatedButNotDefault:
           "{language} was enabled, but it is not the default language yet (the default is still {defaultLanguage}). You can try again.",
         defaultSaveFailed: "The default language could not be changed.",
+        addLanguage: "New language",
+        addTitle: "Add language",
+        addSelectLabel: "Language to add",
+        addSelectPlaceholder: "Choose a language",
+        addCreatedNote:
+          "The language is added disabled, at the end of the list. You can enable it later if the site is already translated into it.",
+        addConfirm: "Add",
+        added: "{language} added, still disabled.",
+        addFailed: "The language could not be added.",
+        noLanguagesAvailable:
+          "All the languages in the list have already been added.",
       },
     },
   },

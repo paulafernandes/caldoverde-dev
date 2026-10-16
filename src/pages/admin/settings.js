@@ -30,6 +30,7 @@ import {
 } from "../../utils/phoneValidation";
 import { ADMIN_LANGUAGE_OPTIONS } from "../../data/adminTranslations";
 import { isPublicSiteLanguage } from "../../utils/pageAlternates";
+import { BUSINESS_LANGUAGE_CATALOG } from "../../utils/businessLanguages";
 import styles from "../../styles/Admin.module.css";
 
 function getDefaultCountryCode(language) {
@@ -1840,9 +1841,13 @@ export async function getServerSideProps({ req }) {
   const businessSettings = await getBusinessSettings();
 
   // Calculado aqui para não levar translations.js para o bundle do admin.
-  const siteLanguages = businessSettings.languages
-    .map(({ language }) => language)
-    .filter(isPublicSiteLanguage);
+  // Inclui o catálogo, para um idioma acabado de acrescentar ter já a nota certa.
+  const siteLanguages = [
+    ...new Set([
+      ...businessSettings.languages.map(({ language }) => language),
+      ...BUSINESS_LANGUAGE_CATALOG.map(({ language }) => language),
+    ]),
+  ].filter(isPublicSiteLanguage);
 
   return {
     props: {
