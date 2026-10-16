@@ -317,8 +317,10 @@ export const updateBusinessDefaultLanguageSchema = z.strictObject({
   language: z
     .string()
     .trim()
-    .min(1, "LANGUAGE_REQUIRED")
-    .max(20, "INVALID_LANGUAGE"),
+    .min(2, "INVALID_LANGUAGE")
+    .max(20, "INVALID_LANGUAGE")
+    .regex(/^[a-zA-Z0-9-]+$/, "INVALID_LANGUAGE")
+    .transform((value) => value.toLowerCase()),
 });
 
 export const createBusinessLanguageSchema = z.strictObject({

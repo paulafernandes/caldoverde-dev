@@ -9,6 +9,15 @@ export const PUBLIC_PAGES = {
     Boolean(text?.aboutPage?.seo && text?.aboutPage?.imageAlt),
 };
 
+// Idioma com textos do site para a página inicial (a mesma condição que /[lang]
+// exige). No admin, usar só no servidor: importa translations.js.
+export function isPublicSiteLanguage(language) {
+  return (
+    Object.hasOwn(translations, language) &&
+    PUBLIC_PAGES[""](translations[language])
+  );
+}
+
 // Única regra de construção do URL público de uma página num idioma.
 export function getPageUrl(language, pageSuffix) {
   return `${SITE_URL}/${encodeURIComponent(language)}${pageSuffix}`;

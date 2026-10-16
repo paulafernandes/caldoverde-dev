@@ -10,6 +10,7 @@ import AdministrativeAreaSelect from "../../components/admin/AdministrativeAreaS
 import { getAdministrativeAreaConfig } from "../../data/administrativeAreas";
 import AdminReauthentication from "../../components/admin/AdminReauthentication";
 import OpeningHoursEditor from "../../components/admin/OpeningHoursEditor";
+import BusinessLanguagesEditor from "../../components/admin/BusinessLanguagesEditor";
 import {
   getPostalCodeExample,
   isValidPostalCode,
@@ -28,6 +29,8 @@ import {
   toE164PhoneNumber,
 } from "../../utils/phoneValidation";
 import { ADMIN_LANGUAGE_OPTIONS } from "../../data/adminTranslations";
+import { isPublicSiteLanguage } from "../../utils/pageAlternates";
+import { BUSINESS_LANGUAGE_CATALOG } from "../../utils/businessLanguages";
 import styles from "../../styles/Admin.module.css";
 
 function getDefaultCountryCode(language) {
@@ -37,7 +40,11 @@ function getDefaultCountryCode(language) {
   );
 }
 
-export default function AdminSettings({ admin, businessSettings }) {
+export default function AdminSettings({
+  admin,
+  businessSettings,
+  siteLanguages,
+}) {
   const { language, t } = useAdminLanguage();
 
   const initialCountryCodeRef = useRef(businessSettings.countryCode ?? "");
@@ -1804,6 +1811,12 @@ export default function AdminSettings({ admin, businessSettings }) {
             </>
           )}
         </section>
+        <BusinessLanguagesEditor
+          initialLanguages={businessSettings.languages}
+          initialDefaultLanguage={businessSettings.defaultLanguage}
+          siteLanguages={siteLanguages}
+          isSessionExpired={isSessionExpired}
+        />
         <OpeningHoursEditor
           initialOpeningHours={businessSettings.openingHours}
           isSessionExpired={isSessionExpired}
@@ -1827,6 +1840,15 @@ export async function getServerSideProps({ req }) {
 
   const businessSettings = await getBusinessSettings();
 
+  // Calculado aqui para não levar translations.js para o bundle do admin.
+  // Inclui o catálogo, para um idioma acabado de acrescentar ter já a nota certa.
+  const siteLanguages = [
+    ...new Set([
+      ...businessSettings.languages.map(({ language }) => language),
+      ...BUSINESS_LANGUAGE_CATALOG.map(({ language }) => language),
+    ]),
+  ].filter(isPublicSiteLanguage);
+
   return {
     props: {
       admin: {
@@ -1834,6 +1856,7 @@ export async function getServerSideProps({ req }) {
         email: session.user.email,
       },
       businessSettings,
+      siteLanguages,
     },
   };
 }

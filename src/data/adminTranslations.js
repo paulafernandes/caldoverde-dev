@@ -415,6 +415,17 @@ export const adminTranslations = {
       userActivateFailed: "Não foi possível reativar o utilizador.",
       userDeactivateFailed: "Não foi possível desativar o utilizador.",
       cannotDeactivateSelf: "Não podes desativar a tua própria conta.",
+      invalidBusinessLanguageData: "Os dados do idioma são inválidos.",
+      businessLanguageUpdateNotAllowed:
+        "Não foi possível alterar este idioma. Recarregue a página e tente de novo.",
+      businessLanguageUpdateFailed: "Não foi possível alterar o idioma.",
+      businessLanguageAlreadyExists:
+        "Este idioma já existe. Recarregue a página para ver a lista atualizada.",
+      businessLanguageCreateFailed: "Não foi possível acrescentar o idioma.",
+      languageWithoutSiteTranslations:
+        "O site ainda não está traduzido neste idioma, por isso não pode ser ativado.",
+      invalidDefaultLanguage:
+        "O idioma escolhido já não está ativo, por isso não pode ser o predefinido. Recarregue a página.",
     },
     settings: {
       pageTitle: "Configurações do negócio | Administração",
@@ -575,6 +586,71 @@ export const adminTranslations = {
         keepEditing: "Continuar a editar",
         discardAndOpen: "Descartar e abrir {day}",
         discardChanges: "Descartar alterações",
+      },
+      languages: {
+        title: "Idiomas do site",
+        description:
+          "Os idiomas ativos aparecem no seletor de idiomas do site. As alterações aplicam-se logo no site público.",
+        caption: "Idiomas do site",
+        finishEditing: "Concluir edição",
+        finishEditingBlocked:
+          "Responda primeiro ao aviso aberto para concluir a edição.",
+        editingStarted:
+          "Modo de edição: cada alteração aplica-se logo no site.",
+        columnOrder: "Ordem",
+        columnLanguage: "Idioma",
+        columnEnabled: "Ativo",
+        columnDefault: "Predefinido",
+        yes: "Sim",
+        no: "Não",
+        enabledLabel: "Ativo: {language}",
+        makeDefaultLabel: "Tornar {language} o idioma predefinido",
+        statusDefault: "Predefinido",
+        defaultCannotBeDisabled:
+          "É o idioma predefinido, por isso não pode ser desativado. Para o desativar, escolha primeiro outro idioma como predefinido.",
+        noSiteTexts:
+          "O site ainda não está traduzido neste idioma, por isso não pode ser ativado nem escolhido como predefinido.",
+        disableQuestion: "Desativar {language}?",
+        disableDescription:
+          "{language} deixa de aparecer no seletor de idiomas do site, e quem tentar abri-lo é levado para {defaultLanguage}. Nada é apagado: pode voltar a ativar quando quiser.",
+        keepEnabled: "Manter ativo",
+        confirmDisable: "Desativar",
+        enabled: "{language} ativado.",
+        disabled: "{language} desativado.",
+        saveFailed: "Não foi possível alterar o idioma.",
+        moveUp: "Subir {language}",
+        moveDown: "Descer {language}",
+        moved: "{language} movido para a posição {position} de {total}.",
+        orderFailed: "Não foi possível alterar a ordem dos idiomas.",
+        orderOutOfSync:
+          "A ordem dos idiomas não está atualizada. Recarregue a página.",
+        defaultQuestion: "Tornar {language} o idioma predefinido?",
+        defaultDescription:
+          "Quem abrir o site sem escolher idioma passa a vê-lo em {language}. Nada é apagado e pode voltar a mudar quando quiser.",
+        defaultActivateQuestion:
+          "Ativar {language} e torná-lo o idioma predefinido?",
+        defaultActivateDescription:
+          "{language} está desativado, por isso vai ser ativado primeiro. Nada é apagado e pode voltar a mudar quando quiser.",
+        keepDefault: "Manter o atual",
+        confirmDefault: "Tornar predefinido",
+        confirmActivateDefault: "Ativar e tornar predefinido",
+        defaultChanged: "{language} é agora o idioma predefinido.",
+        defaultChangedActivated:
+          "{language} foi ativado e é agora o idioma predefinido.",
+        defaultActivatedButNotDefault:
+          "{language} foi ativado, mas ainda não é o idioma predefinido (continua a ser {defaultLanguage}). Pode tentar de novo.",
+        defaultSaveFailed: "Não foi possível mudar o idioma predefinido.",
+        addLanguage: "Novo idioma",
+        addTitle: "Acrescentar idioma",
+        addSelectLabel: "Idioma a acrescentar",
+        addSelectPlaceholder: "Escolha um idioma",
+        addCreatedNote:
+          "O idioma fica desativado e no fim da lista. Pode ativá-lo depois, se o site já estiver traduzido nesse idioma.",
+        addConfirm: "Acrescentar",
+        added: "{language} acrescentado, ainda desativado.",
+        addFailed: "Não foi possível acrescentar o idioma.",
+        noLanguagesAvailable:
+          "Todos os idiomas da lista já foram acrescentados.",
       },
     },
   },
@@ -980,6 +1056,17 @@ export const adminTranslations = {
       userActivateFailed: "No se pudo reactivar el usuario.",
       userDeactivateFailed: "No se pudo desactivar el usuario.",
       cannotDeactivateSelf: "No puedes desactivar tu propia cuenta.",
+      invalidBusinessLanguageData: "Los datos del idioma no son válidos.",
+      businessLanguageUpdateNotAllowed:
+        "No se ha podido cambiar este idioma. Recarga la página y vuelve a intentarlo.",
+      businessLanguageUpdateFailed: "No se ha podido cambiar el idioma.",
+      businessLanguageAlreadyExists:
+        "Este idioma ya existe. Recarga la página para ver la lista actualizada.",
+      businessLanguageCreateFailed: "No se ha podido añadir el idioma.",
+      languageWithoutSiteTranslations:
+        "El sitio todavía no está traducido a este idioma, por eso no se puede activar.",
+      invalidDefaultLanguage:
+        "El idioma elegido ya no está activo, por lo que no puede ser el predeterminado. Recarga la página.",
     },
     settings: {
       pageTitle: "Configuración del negocio | Administración",
@@ -1141,6 +1228,71 @@ export const adminTranslations = {
         keepEditing: "Seguir editando",
         discardAndOpen: "Descartar y abrir {day}",
         discardChanges: "Descartar cambios",
+      },
+      languages: {
+        title: "Idiomas del sitio",
+        description:
+          "Los idiomas activos aparecen en el selector de idiomas del sitio. Los cambios se aplican de inmediato en el sitio público.",
+        caption: "Idiomas del sitio",
+        finishEditing: "Terminar edición",
+        finishEditingBlocked:
+          "Responde primero al aviso abierto para terminar la edición.",
+        editingStarted:
+          "Modo de edición: cada cambio se aplica de inmediato en el sitio.",
+        columnOrder: "Orden",
+        columnLanguage: "Idioma",
+        columnEnabled: "Activo",
+        columnDefault: "Predeterminado",
+        yes: "Sí",
+        no: "No",
+        enabledLabel: "Activo: {language}",
+        makeDefaultLabel: "Hacer de {language} el idioma predeterminado",
+        statusDefault: "Predeterminado",
+        defaultCannotBeDisabled:
+          "Es el idioma predeterminado, por eso no se puede desactivar. Para desactivarlo, elige primero otro idioma como predeterminado.",
+        noSiteTexts:
+          "El sitio todavía no está traducido a este idioma, por eso no se puede activar ni elegir como predeterminado.",
+        disableQuestion: "¿Desactivar {language}?",
+        disableDescription:
+          "{language} deja de aparecer en el selector de idiomas del sitio, y quien intente abrirlo pasa a verlo en {defaultLanguage}. No se borra nada: puedes volver a activarlo cuando quieras.",
+        keepEnabled: "Mantener activo",
+        confirmDisable: "Desactivar",
+        enabled: "{language} activado.",
+        disabled: "{language} desactivado.",
+        saveFailed: "No se ha podido cambiar el idioma.",
+        moveUp: "Subir {language}",
+        moveDown: "Bajar {language}",
+        moved: "{language} movido a la posición {position} de {total}.",
+        orderFailed: "No se ha podido cambiar el orden de los idiomas.",
+        orderOutOfSync:
+          "El orden de los idiomas no está actualizado. Recarga la página.",
+        defaultQuestion: "¿Hacer de {language} el idioma predeterminado?",
+        defaultDescription:
+          "Quien abra el sitio sin elegir idioma pasa a verlo en {language}. No se borra nada y puedes volver a cambiarlo cuando quieras.",
+        defaultActivateQuestion:
+          "¿Activar {language} y hacerlo el idioma predeterminado?",
+        defaultActivateDescription:
+          "{language} está desactivado, por eso se activará primero. No se borra nada y puedes volver a cambiarlo cuando quieras.",
+        keepDefault: "Mantener el actual",
+        confirmDefault: "Hacer predeterminado",
+        confirmActivateDefault: "Activar y hacer predeterminado",
+        defaultChanged: "{language} es ahora el idioma predeterminado.",
+        defaultChangedActivated:
+          "{language} se ha activado y es ahora el idioma predeterminado.",
+        defaultActivatedButNotDefault:
+          "{language} se ha activado, pero todavía no es el idioma predeterminado (sigue siendo {defaultLanguage}). Puedes volver a intentarlo.",
+        defaultSaveFailed: "No se ha podido cambiar el idioma predeterminado.",
+        addLanguage: "Nuevo idioma",
+        addTitle: "Añadir idioma",
+        addSelectLabel: "Idioma que quieres añadir",
+        addSelectPlaceholder: "Elige un idioma",
+        addCreatedNote:
+          "El idioma se queda desactivado y al final de la lista. Puedes activarlo después, si el sitio ya está traducido a ese idioma.",
+        addConfirm: "Añadir",
+        added: "{language} añadido, todavía desactivado.",
+        addFailed: "No se ha podido añadir el idioma.",
+        noLanguagesAvailable:
+          "Ya se han añadido todos los idiomas de la lista.",
       },
     },
   },
@@ -1541,6 +1693,17 @@ export const adminTranslations = {
       userActivateFailed: "The user could not be reactivated.",
       userDeactivateFailed: "The user could not be deactivated.",
       cannotDeactivateSelf: "You cannot deactivate your own account.",
+      invalidBusinessLanguageData: "The language data is invalid.",
+      businessLanguageUpdateNotAllowed:
+        "This language could not be changed. Reload the page and try again.",
+      businessLanguageUpdateFailed: "The language could not be changed.",
+      businessLanguageAlreadyExists:
+        "This language already exists. Reload the page to see the updated list.",
+      businessLanguageCreateFailed: "The language could not be added.",
+      languageWithoutSiteTranslations:
+        "The site has not been translated into this language yet, so it cannot be enabled.",
+      invalidDefaultLanguage:
+        "The selected language is no longer enabled, so it cannot be the default. Reload the page.",
     },
     settings: {
       pageTitle: "Business settings | Administration",
@@ -1696,6 +1859,69 @@ export const adminTranslations = {
         keepEditing: "Keep editing",
         discardAndOpen: "Discard and open {day}",
         discardChanges: "Discard changes",
+      },
+      languages: {
+        title: "Site languages",
+        description:
+          "Enabled languages appear in the site's language switcher. Changes take effect on the public site immediately.",
+        caption: "Site languages",
+        finishEditing: "Finish editing",
+        finishEditingBlocked: "Answer the open prompt first to finish editing.",
+        editingStarted:
+          "Editing mode: each change takes effect on the site immediately.",
+        columnOrder: "Order",
+        columnLanguage: "Language",
+        columnEnabled: "Enabled",
+        columnDefault: "Default",
+        yes: "Yes",
+        no: "No",
+        enabledLabel: "Enabled: {language}",
+        makeDefaultLabel: "Make {language} the default language",
+        statusDefault: "Default",
+        defaultCannotBeDisabled:
+          "This is the default language, so it cannot be disabled. To disable it, first choose another language as the default.",
+        noSiteTexts:
+          "The site has not been translated into this language yet, so it cannot be enabled or chosen as the default.",
+        disableQuestion: "Disable {language}?",
+        disableDescription:
+          "{language} will no longer appear in the site's language switcher, and anyone who tries to open it will be taken to {defaultLanguage}. Nothing is deleted: you can enable it again at any time.",
+        keepEnabled: "Keep enabled",
+        confirmDisable: "Disable",
+        enabled: "{language} enabled.",
+        disabled: "{language} disabled.",
+        saveFailed: "The language could not be changed.",
+        moveUp: "Move {language} up",
+        moveDown: "Move {language} down",
+        moved: "{language} moved to position {position} of {total}.",
+        orderFailed: "The language order could not be changed.",
+        orderOutOfSync: "The language order is out of date. Reload the page.",
+        defaultQuestion: "Make {language} the default language?",
+        defaultDescription:
+          "Anyone who opens the site without choosing a language will see it in {language}. Nothing is deleted and you can change it again at any time.",
+        defaultActivateQuestion:
+          "Enable {language} and make it the default language?",
+        defaultActivateDescription:
+          "{language} is disabled, so it will be enabled first. Nothing is deleted and you can change it again at any time.",
+        keepDefault: "Keep current",
+        confirmDefault: "Make default",
+        confirmActivateDefault: "Enable and make default",
+        defaultChanged: "{language} is now the default language.",
+        defaultChangedActivated:
+          "{language} was enabled and is now the default language.",
+        defaultActivatedButNotDefault:
+          "{language} was enabled, but it is not the default language yet (the default is still {defaultLanguage}). You can try again.",
+        defaultSaveFailed: "The default language could not be changed.",
+        addLanguage: "New language",
+        addTitle: "Add language",
+        addSelectLabel: "Language to add",
+        addSelectPlaceholder: "Choose a language",
+        addCreatedNote:
+          "The language is added disabled, at the end of the list. You can enable it later if the site is already translated into it.",
+        addConfirm: "Add",
+        added: "{language} added, still disabled.",
+        addFailed: "The language could not be added.",
+        noLanguagesAvailable:
+          "All the languages in the list have already been added.",
       },
     },
   },
