@@ -947,6 +947,7 @@ export default function AdminSettings({
         locationUrl: data.settings.locationUrl ?? "",
       });
 
+      setSavedSettings(data.settings);
       setPhoneCountryCode(savedPhone.countryCode);
       setMobilePhoneCountryCode(savedMobilePhone.countryCode);
       initialCountryCodeRef.current = data.settings.countryCode;
