@@ -24,6 +24,7 @@ import {
 } from "../../utils/taxIdValidation";
 import PhoneInput from "../../components/admin/PhoneInput";
 import {
+  formatPhoneNumberForDisplay,
   isValidPhoneForCountry,
   parseStoredPhoneNumber,
   toE164PhoneNumber,
@@ -1775,7 +1776,8 @@ export default function AdminSettings({
                       {t("settings.phone")}
                     </dt>
                     <dd className={styles.settingsReadValue}>
-                      {savedSettings.phone || t("settings.notDefined")}
+                      {formatPhoneNumberForDisplay(savedSettings.phone) ||
+                        t("settings.notDefined")}
                     </dd>
                   </div>
 
@@ -1784,7 +1786,8 @@ export default function AdminSettings({
                       {t("settings.mobilePhone")}
                     </dt>
                     <dd className={styles.settingsReadValue}>
-                      {savedSettings.mobilePhone || t("settings.notDefined")}
+                      {formatPhoneNumberForDisplay(savedSettings.mobilePhone) ||
+                        t("settings.notDefined")}
                     </dd>
                   </div>
 

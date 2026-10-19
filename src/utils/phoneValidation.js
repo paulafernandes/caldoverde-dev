@@ -59,6 +59,20 @@ export function parseStoredPhoneNumber(value, fallbackCountryCode) {
   };
 }
 
+export function formatPhoneNumberForDisplay(value) {
+  const storedValue = value?.trim();
+
+  if (!storedValue) {
+    return "";
+  }
+
+  const phoneNumber = storedValue.startsWith("+")
+    ? parsePhoneNumberFromString(storedValue)
+    : undefined;
+
+  return phoneNumber?.formatInternational() || storedValue;
+}
+
 export function isValidE164PhoneNumber(value) {
   const normalizedValue = value?.trim();
 
