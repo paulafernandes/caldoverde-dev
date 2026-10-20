@@ -67,7 +67,7 @@ export default function Footer({ businessSettings }) {
                 <span className="footer-label">{text.phoneLabel}</span>
 
                 <a href={`tel:${businessSettings.phone}`}>
-                  {businessSettings.phone}
+                  {businessSettings.phoneDisplay || businessSettings.phone}
                 </a>
               </div>
             )}
@@ -77,7 +77,8 @@ export default function Footer({ businessSettings }) {
                 <span className="footer-label">{text.mobilePhoneLabel}</span>
 
                 <a href={`tel:${businessSettings.mobilePhone}`}>
-                  {businessSettings.mobilePhone}
+                  {businessSettings.mobilePhoneDisplay ||
+                    businessSettings.mobilePhone}
                 </a>
               </div>
             )}
