@@ -1,4 +1,5 @@
 import prisma from "./prisma";
+import { formatPhoneNumberForDisplay } from "../utils/phoneValidation";
 
 const BUSINESS_SETTINGS_ID = "business";
 
@@ -15,7 +16,7 @@ function mapTranslations(translations) {
 }
 
 export async function getPublicBusinessSettings() {
-  return prisma.businessSettings.findUnique({
+  const settings = await prisma.businessSettings.findUnique({
     where: {
       id: BUSINESS_SETTINGS_ID,
     },
@@ -54,6 +55,18 @@ export async function getPublicBusinessSettings() {
       },
     },
   });
+
+  if (!settings) {
+    return null;
+  }
+
+  // Formatado no servidor para a libphonenumber-js não ir para o browser.
+  return {
+    ...settings,
+    phoneDisplay: formatPhoneNumberForDisplay(settings.phone) || null,
+    mobilePhoneDisplay:
+      formatPhoneNumberForDisplay(settings.mobilePhone) || null,
+  };
 }
 
 export async function getBusinessSettings() {
